@@ -1,4 +1,5 @@
 import svgPaths from "../imports/svg-am5n4v6ik1";
+import svgPathsMobile from "../imports/svg-g24702ey1g";
 import imgPustakaSetiaTracing2 from "figma:asset/a236558e0f6a9a9f56ec11523f0449430ba96187.png";
 import img210056973109789661 from "figma:asset/54108510d10b2729401ffa3ce32f1faab0dc973b.png";
 import imgWhatsAppImage20251127At53719Pm1 from "figma:asset/9820bb74109b82eae5e859e0502f9a825ad017da.png";
@@ -83,7 +84,7 @@ const books: Book[] = [
 
 function Ellipse() {
   return (
-    <div className="relative size-[126.349px]">
+    <div className="relative lg:size-[126.349px] size-[62.71px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 127 127">
         <g>
           <mask height="127" id="mask0_1_9085" maskUnits="userSpaceOnUse" style={{ maskType: "alpha" }} width="127" x="0" y="0">
@@ -112,8 +113,8 @@ function Ellipse() {
 
 function StreamlinePlumpAiTechnologySpark() {
   return (
-    <div className="absolute left-[921px] overflow-clip size-[55px] top-[702px]">
-      <div className="absolute inset-[3.64%_3.64%_5.45%_5.45%]">
+    <div className="absolute lg:left-[921px] lg:size-[55px] lg:top-[702px] left-[123.76px] size-[28.45px] top-[602.57px] overflow-clip">
+      <div className="absolute inset-[3.64%_3.64%_5.45%_5.45%] lg:inset-[3.64%_3.64%_5.45%_5.45%]">
         <div className="absolute inset-[-3%]">
           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 53 53">
             <g>
@@ -130,7 +131,7 @@ function StreamlinePlumpAiTechnologySpark() {
 
 function StashTargetLight() {
   return (
-    <div className="absolute left-[725px] size-[69px] top-[238px]">
+    <div className="absolute lg:left-[725px] lg:size-[69px] lg:top-[238px] left-[31.29px] size-[28.45px] top-[382.29px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 69 69">
         <g>
           <path d={svgPaths.p399d1600} fill="white" />
@@ -143,7 +144,7 @@ function StashTargetLight() {
 
 function ArcticonsRewards() {
   return (
-    <div className="absolute left-[1352px] size-[57px] top-[321px]">
+    <div className="absolute lg:left-[1352px] lg:size-[57px] lg:top-[321px] left-[342.82px] size-[28.45px] top-[419.23px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 57 57">
         <g>
           <path d={svgPaths.p2dacb980} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
@@ -155,7 +156,7 @@ function ArcticonsRewards() {
 
 function Group24() {
   return (
-    <div className="absolute h-[48.354px] left-[1192px] top-[230px] w-[46.599px]">
+    <div className="absolute lg:h-[48.354px] lg:left-[1192px] lg:top-[230px] lg:w-[46.599px] h-[23.311px] left-[268.22px] top-[381.26px] w-[23.446px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 47 49">
         <g>
           <ellipse cx="2.84143" cy="2.58312" fill="white" rx="2.84143" ry="2.58312" />
@@ -182,7 +183,7 @@ function Group24() {
 
 function Group25() {
   return (
-    <div className="absolute h-[48.354px] left-[1080px] top-[620px] w-[46.599px]">
+    <div className="absolute lg:h-[48.354px] lg:left-[1080px] lg:top-[620px] lg:w-[46.599px] h-[23.303px] left-[211.85px] top-[569.25px] w-[23.45px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 47 49">
         <g>
           <ellipse cx="2.84143" cy="2.58312" fill="white" rx="2.84143" ry="2.58312" />
@@ -209,280 +210,375 @@ function Group25() {
 
 export default function HomePage({ onBookClick }: HomePageProps) {
   return (
-    <div className="bg-neutral-50 relative w-full min-h-screen">
-      {/* Hero Section - Jelajahi Koleksi */}
-      <div className="relative pt-[23px] pb-[60px]">
-        {/* Decorative Background Elements - allowed to use absolute */}
-        <div className="absolute flex h-[508.47px] items-center justify-center left-[789.76px] top-[330.65px] w-[549.369px]" style={{ "--transform-inner-width": "441.09375", "--transform-inner-height": "360.9375" } as React.CSSProperties}>
-          <div className="flex-none rotate-[23.846deg] scale-y-[-100%]">
-            <div className="h-[360.958px] relative w-[441.096px]">
-              <div className="absolute inset-[-34.64%_-28.34%]">
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 692 612">
-                  <path d={svgPaths.p18f428c0} stroke="#BAEF02" strokeLinecap="round" strokeWidth="250" />
-                </svg>
+    <div className="bg-neutral-50 relative w-full min-h-screen overflow-x-hidden">
+      {/* DESKTOP VERSION - Hidden on mobile */}
+      <div className="hidden lg:block">
+        {/* Hero Section - Jelajahi Koleksi */}
+        <div className="relative pt-[23px] pb-[60px]">
+          {/* Decorative Background Elements */}
+          <div className="absolute flex h-[508.47px] items-center justify-center left-[789.76px] top-[330.65px] w-[549.369px]" style={{ "--transform-inner-width": "441.09375", "--transform-inner-height": "360.9375" } as React.CSSProperties}>
+            <div className="flex-none rotate-[23.846deg] scale-y-[-100%]">
+              <div className="h-[360.958px] relative w-[441.096px]">
+                <div className="absolute inset-[-34.64%_-28.34%]">
+                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 692 612">
+                    <path d={svgPaths.p18f428c0} stroke="#BAEF02" strokeLinecap="round" strokeWidth="250" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="absolute flex h-[557.254px] items-center justify-center left-[916.69px] top-[337px] w-[531.392px]" style={{ "--transform-inner-width": "591.515625", "--transform-inner-height": "179.015625" } as React.CSSProperties}>
-          <div className="flex-none rotate-[312.459deg] scale-y-[-100%]">
-            <div className="h-[179.025px] relative w-[591.521px]">
-              <div className="absolute inset-[-69.82%_-21.19%_-69.83%_-21.13%]">
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 842 430">
-                  <path d={svgPaths.p29353a80} stroke="#4039E8" strokeLinecap="round" strokeWidth="250" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="absolute flex items-center justify-center left-[1289.79px] size-[176.016px] top-[454.38px]" style={{ "--transform-inner-width": "126.34375", "--transform-inner-height": "126.34375" } as React.CSSProperties}>
-          <div className="flex-none rotate-[324.914deg]">
-            <Ellipse />
-          </div>
-        </div>
-
-        {/* Book Stack Image - allowed to use absolute */}
-        <div className="absolute h-[652px] left-[550px] top-[161px] w-[743px]">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <img alt="" className="absolute h-full left-[-12.42%] max-w-none top-0 w-[131.68%]" src={img210056973109789661} />
-          </div>
-        </div>
-
-        {/* Content Container - using margin/padding */}
-        <div className="relative pl-[100px] pt-[177px]">
-          {/* Hero Text */}
-          <p className="font-['Poppins:SemiBold',sans-serif] leading-[normal] not-italic text-[#221f30] text-[52px] w-[520px]">
-            Jelajahi koleksi buku terbaik kami untuk Anda
-          </p>
           
-          {/* Description */}
-          <p className="font-['Poppins:Regular',sans-serif] leading-[normal] mt-[80px] not-italic text-[#2f2f2f] text-[20px] w-[500px]">
-            Pustaka Setia menghadirkan berbagai koleksi buku untuk memberikan ilmu yang mendalam dan bacaan bermakna. Temukan inspirasi baru melalui pilihan buku terbaik kami.
+          <div className="absolute flex h-[557.254px] items-center justify-center left-[916.69px] top-[337px] w-[531.392px]" style={{ "--transform-inner-width": "591.515625", "--transform-inner-height": "179.015625" } as React.CSSProperties}>
+            <div className="flex-none rotate-[312.459deg] scale-y-[-100%]">
+              <div className="h-[179.025px] relative w-[591.521px]">
+                <div className="absolute inset-[-69.82%_-21.19%_-69.83%_-21.13%]">
+                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 842 430">
+                    <path d={svgPaths.p29353a80} stroke="#4039E8" strokeLinecap="round" strokeWidth="250" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="absolute flex items-center justify-center left-[1289.79px] size-[176.016px] top-[454.38px]" style={{ "--transform-inner-width": "126.34375", "--transform-inner-height": "126.34375" } as React.CSSProperties}>
+            <div className="flex-none rotate-[324.914deg]">
+              <Ellipse />
+            </div>
+          </div>
+
+          {/* Book Stack Image */}
+          <div className="absolute h-[652px] left-[550px] top-[161px] w-[743px]">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <img alt="" className="absolute h-full left-[-12.42%] max-w-none top-0 w-[131.68%]" src={img210056973109789661} />
+            </div>
+          </div>
+
+          {/* Content Container */}
+          <div className="relative pl-[100px] pt-[177px]">
+            {/* Hero Text */}
+            <p className="font-['Poppins:SemiBold',sans-serif] leading-[normal] not-italic text-[#221f30] text-[52px] w-[520px]">
+              Jelajahi koleksi buku terbaik kami untuk Anda
+            </p>
+            
+            {/* Description */}
+            <p className="font-['Poppins:Regular',sans-serif] leading-[normal] mt-[80px] not-italic text-[#2f2f2f] text-[20px] w-[500px]">
+              Pustaka Setia menghadirkan berbagai koleksi buku untuk memberikan ilmu yang mendalam dan bacaan bermakna. Temukan inspirasi baru melalui pilihan buku terbaik kami.
+            </p>
+
+            {/* CTA Button */}
+            <div className="mt-[80px] h-[60px] w-[250px] relative">
+              <div className="absolute bg-[#ffcc00] inset-0 rounded-[100px]" />
+              <p className="absolute font-['Poppins:SemiBold',sans-serif] leading-[normal] left-1/2 not-italic text-[#2f2f2f] text-[20px] text-center text-nowrap top-[calc(50%-15px)] translate-x-[-50%] whitespace-pre">
+                Jelajahi Sekarang
+              </p>
+            </div>
+          </div>
+
+          {/* Decorative Icons */}
+          <div className="absolute contents left-[906px] top-[688px]">
+            <div className="absolute bg-[#ffcc00] left-[906px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[688px]" />
+            <StreamlinePlumpAiTechnologySpark />
+          </div>
+
+          <div className="absolute contents left-[720px] top-[233px]">
+            <div className="absolute bg-[#5a71fe] left-[720px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[233px]" />
+            <StashTargetLight />
+          </div>
+
+          <div className="absolute contents left-[1340px] top-[309px]">
+            <div className="absolute bg-[#ff91ab] left-[1340px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[309px]" />
+            <ArcticonsRewards />
+          </div>
+
+          <Group24 />
+          <Group25 />
+
+          <div className="absolute flex items-center justify-center left-[740px] size-[176.016px] top-[399px]" style={{ "--transform-inner-width": "126.34375", "--transform-inner-height": "126.34375" } as React.CSSProperties}>
+            <div className="flex-none rotate-[324.914deg]">
+              <Ellipse />
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="flex justify-center mt-[23px]">
+          <div className="bg-[#d9d9d9] h-[250px] rounded-[25px] w-[1336px] relative">
+            <div className="flex justify-center gap-[149px] pt-[115px]">
+              <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
+                Total Kategori
+              </p>
+              <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
+                Total buku available
+              </p>
+              <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
+                Total buku yang terjual
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Books Grid Container */}
+        <div className="flex flex-col items-center gap-[60px] mt-[50px]">
+          <div className="grid grid-cols-4 gap-x-[40px] gap-y-[60px] justify-center max-w-[1000px]">
+            {books.map((book) => (
+              <button
+                key={book.id}
+                onClick={() => onBookClick(book)}
+                className="flex flex-col items-start gap-[10px] w-[220px]"
+              >
+                <div className="h-[320px] relative rounded-[12px] w-[220px]">
+                  <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={book.image} />
+                </div>
+                <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
+                  {book.author}
+                </p>
+                <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
+                  {book.title}
+                </p>
+                <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
+                  {book.price}
+                </p>
+              </button>
+            ))}
+          </div>
+
+          {/* View More */}
+          <div className="flex justify-center">
+            <p className="[text-underline-position:from-font] decoration-solid font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[20px] text-black underline cursor-pointer">
+              View More
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom Spacing */}
+        <div className="h-[100px]" />
+      </div>
+
+      {/* MOBILE VERSION - Shown only on mobile */}
+      <div className="lg:hidden relative w-full h-[2200px]">
+        {/* Hero Text */}
+        <p className="absolute font-['Poppins:SemiBold',sans-serif] leading-[normal] left-1/2 not-italic text-[#221f30] text-[24px] text-center top-[92px] -translate-x-1/2 w-[223px]">
+          Jelajahi koleksi buku terbaik kami untuk Anda
+        </p>
+
+        {/* Description */}
+        <p className="absolute font-['Poppins:Regular',sans-serif] leading-[normal] left-1/2 not-italic text-[#2f2f2f] text-[12px] text-center top-[220px] -translate-x-1/2 w-[340px]">
+          Pustaka Setia menghadirkan berbagai koleksi buku untuk memberikan ilmu yang mendalam dan bacaan bermakna. Temukan inspirasi baru melalui pilihan buku terbaik kami.
+        </p>
+
+        {/* CTA Button */}
+        <button className="absolute bg-[#ffcc00] box-border flex flex-col gap-[10px] h-[36px] items-center justify-center left-1/2 px-[27px] py-[15px] rounded-[100px] top-[312px] -translate-x-1/2 w-[152px]">
+          <p className="font-['Poppins:SemiBold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#2f2f2f] text-[12px] text-center text-nowrap whitespace-pre">
+            Jelajahi Sekarang
           </p>
+        </button>
 
-          {/* CTA Button */}
-          <div className="mt-[80px] h-[60px] w-[250px] relative">
-            <div className="absolute bg-[#ffcc00] inset-0 rounded-[100px]" />
-            <p className="absolute font-['Poppins:SemiBold',sans-serif] leading-[normal] left-1/2 not-italic text-[#2f2f2f] text-[20px] text-center text-nowrap top-[calc(50%-15px)] translate-x-[-50%] whitespace-pre">
-              Jelajahi Sekarang
-            </p>
+        {/* Hero Section with decorative elements and Book Stack Image */}
+        <div className="absolute left-0 top-[348px] w-full">
+          {/* Decorative curves - Yellow */}
+          <div className="absolute flex h-[245.101px] items-center justify-center left-[65.8px] top-[81.78px] w-[276.453px]" style={{ "--transform-inner-width": "220.453125", "--transform-inner-height": "175.25" } as React.CSSProperties}>
+            <div className="flex-none rotate-[22.948deg] scale-y-[-100%] skew-x-[1.821deg]">
+              <div className="h-[175.268px] relative w-[220.468px]">
+                <div className="absolute inset-[-25.68%_-20.41%]">
+                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 311 266">
+                    <path d={svgPathsMobile.p6e27d00} stroke="#BAEF02" strokeLinecap="round" strokeWidth="90" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative curves - Blue */}
+          <div className="absolute flex h-[268.617px] items-center justify-center left-[129.67px] top-[84.84px] w-[267.407px]" style={{ "--transform-inner-width": "290.90625", "--transform-inner-height": "88.375" } as React.CSSProperties}>
+            <div className="flex-none rotate-[313.688deg] scale-y-[-100%] skew-x-[357.549deg]">
+              <div className="h-[88.381px] relative w-[290.912px]">
+                <div className="absolute inset-[-50.92%_-15.51%_-50.92%_-15.47%]">
+                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 382 179">
+                    <path d={svgPathsMobile.p2586edd0} stroke="#4039E8" strokeLinecap="round" strokeWidth="90" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Ellipse Right */}
+          <div className="absolute flex h-[84.846px] items-center justify-center left-[317.43px] top-[141.42px] w-[88.575px]" style={{ "--transform-inner-width": "62.703125", "--transform-inner-height": "61.78125" } as React.CSSProperties}>
+            <div className="flex-none rotate-[326.064deg] skew-x-[2.316deg]">
+              <Ellipse />
+            </div>
+          </div>
+
+          {/* Book Stack Image */}
+          <div className="absolute h-[326.381px] left-0 top-0 w-[360.039px]">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <img alt="" className="absolute h-full left-[-12.42%] max-w-none top-0 w-[131.68%]" src={img210056973109789661} />
+            </div>
+          </div>
+
+          {/* Decorative Icons */}
+          <div className="absolute contents left-[123.76px] top-[254.57px]">
+            <div className="absolute bg-[#ffcc00] left-[123.76px] h-[39.571px] rounded-[5px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] top-[254.57px] w-[42.675px]" />
+            <StreamlinePlumpAiTechnologySpark />
+          </div>
+
+          <div className="absolute contents left-[31.29px] top-[34.29px]">
+            <div className="absolute bg-[#5a71fe] left-[31.29px] h-[39.571px] rounded-[5px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] top-[34.29px] w-[42.675px]" />
+            <StashTargetLight />
+          </div>
+
+          <div className="absolute contents left-[342.82px] top-[71.23px]">
+            <div className="absolute bg-[#ff91ab] left-[342.82px] h-[39.571px] rounded-[5px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] top-[71.23px] w-[42.675px]" />
+            <ArcticonsRewards />
+          </div>
+
+          <Group24 />
+          <Group25 />
+
+          {/* Ellipse Left */}
+          <div className="absolute flex h-[84.846px] items-center justify-center left-[40.76px] top-[114.72px] w-[88.575px]" style={{ "--transform-inner-width": "62.703125", "--transform-inner-height": "61.78125" } as React.CSSProperties}>
+            <div className="flex-none rotate-[326.064deg] skew-x-[2.316deg]">
+              <Ellipse />
+            </div>
           </div>
         </div>
 
-        {/* Decorative Icons - allowed to use absolute */}
-        <div className="absolute contents left-[906px] top-[688px]">
-          <div className="absolute bg-[#ffcc00] left-[906px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[688px]" />
-          <StreamlinePlumpAiTechnologySpark />
-        </div>
+        {/* Stats Section */}
+        <div className="absolute bg-[#d9d9d9] h-[80px] left-1/2 rounded-[5px] top-[675px] -translate-x-1/2 w-[364px]" />
 
-        <div className="absolute contents left-[720px] top-[233px]">
-          <div className="absolute bg-[#5a71fe] left-[720px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[233px]" />
-          <StashTargetLight />
-        </div>
-
-        <div className="absolute contents left-[1340px] top-[309px]">
-          <div className="absolute bg-[#ff91ab] left-[1340px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[309px]" />
-          <ArcticonsRewards />
-        </div>
-
-        <Group24 />
-        <Group25 />
-
-        <div className="absolute flex items-center justify-center left-[740px] size-[176.016px] top-[399px]" style={{ "--transform-inner-width": "126.34375", "--transform-inner-height": "126.34375" } as React.CSSProperties}>
-          <div className="flex-none rotate-[324.914deg]">
-            <Ellipse />
+        {/* Book Cards - Using absolute positioning like Figma */}
+        {/* Book 1 */}
+        <button onClick={() => onBookClick(books[0])} className="absolute left-[25px] top-[770px]">
+          <div className="h-[237px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[0].image} />
           </div>
-        </div>
-      </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[242px] w-[162px]">
+            {books[0].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[253px] w-[162px] line-clamp-2">
+            {books[0].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[301px] whitespace-pre">
+            {books[0].price}
+          </p>
+        </button>
 
-      {/* Stats Section */}
-      <div className="flex justify-center mt-[23px]">
-        <div className="bg-[#d9d9d9] h-[250px] rounded-[25px] w-[1336px] relative">
-          <div className="flex justify-center gap-[149px] pt-[115px]">
-            <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
-              Total Kategori
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
-              Total buku available
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
-              Total buku yang terjual
-            </p>
+        {/* Book 2 */}
+        <button onClick={() => onBookClick(books[1])} className="absolute left-[203px] top-[770px]">
+          <div className="h-[237px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[1].image} />
           </div>
-        </div>
-      </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[242px] w-[162px]">
+            {books[1].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[253px] w-[160px] line-clamp-2">
+            {books[1].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[301px] whitespace-pre">
+            {books[1].price}
+          </p>
+        </button>
 
-      {/* Books Grid Container */}
-      <div className="flex flex-col items-center gap-[60px] mt-[50px]">
-        {/* Row 1 */}
-        <div className="flex gap-[40px] justify-center">
-          {/* Book 1 */}
-          <button
-            onClick={() => onBookClick(books[0])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[0].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[0].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[0].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[0].price}
-            </p>
-          </button>
+        {/* Book 3 */}
+        <button onClick={() => onBookClick(books[2])} className="absolute left-[25px] top-[1107px]">
+          <div className="h-[236px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[2].image} />
+          </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+            {books[2].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+            {books[2].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+            {books[2].price}
+          </p>
+        </button>
 
-          {/* Book 2 */}
-          <button
-            onClick={() => onBookClick(books[1])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[1].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[1].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[1].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[1].price}
-            </p>
-          </button>
+        {/* Book 4 */}
+        <button onClick={() => onBookClick(books[3])} className="absolute left-[203px] top-[1107px]">
+          <div className="h-[236px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[3].image} />
+          </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+            {books[3].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[160px] line-clamp-2">
+            {books[3].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+            {books[3].price}
+          </p>
+        </button>
 
-          {/* Book 3 */}
-          <button
-            onClick={() => onBookClick(books[2])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[2].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[2].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[2].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[2].price}
-            </p>
-          </button>
+        {/* Book 5 */}
+        <button onClick={() => onBookClick(books[4])} className="absolute left-[25px] top-[1443px]">
+          <div className="h-[236px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[4].image} />
+          </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+            {books[4].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+            {books[4].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+            {books[4].price}
+          </p>
+        </button>
 
-          {/* Book 4 */}
-          <button
-            onClick={() => onBookClick(books[3])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[3].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[3].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[3].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[3].price}
-            </p>
-          </button>
-        </div>
+        {/* Book 6 */}
+        <button onClick={() => onBookClick(books[5])} className="absolute left-[203px] top-[1443px]">
+          <div className="h-[236px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[5].image} />
+          </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+            {books[5].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+            {books[5].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+            {books[5].price}
+          </p>
+        </button>
 
-        {/* Row 2 */}
-        <div className="flex gap-[40px] justify-center">
-          {/* Book 5 */}
-          <button
-            onClick={() => onBookClick(books[4])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[4].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[4].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[4].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[4].price}
-            </p>
-          </button>
+        {/* Book 7 */}
+        <button onClick={() => onBookClick(books[6])} className="absolute left-[25px] top-[1779px]">
+          <div className="h-[236px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[6].image} />
+          </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+            {books[6].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+            {books[6].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+            {books[6].price}
+          </p>
+        </button>
 
-          {/* Book 6 */}
-          <button
-            onClick={() => onBookClick(books[5])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[5].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[5].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[5].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[5].price}
-            </p>
-          </button>
-
-          {/* Book 7 */}
-          <button
-            onClick={() => onBookClick(books[6])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[6].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[6].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[6].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[6].price}
-            </p>
-          </button>
-
-          {/* Book 8 */}
-          <button
-            onClick={() => onBookClick(books[7])}
-            className="flex flex-col items-start gap-[10px] w-[220px]"
-          >
-            <div className="h-[320px] relative rounded-[12px] w-[220px]">
-              <img alt="" className="absolute inset-0 object-cover pointer-events-none rounded-[12px] size-full" src={books[7].image} />
-            </div>
-            <p className="font-['Poppins:Regular',sans-serif] text-[14px] text-gray-500 w-full text-left truncate">
-              {books[7].author}
-            </p>
-            <p className="font-['Poppins:Medium',sans-serif] leading-[1.3] text-[#2f2f2f] text-[16px] w-full text-left line-clamp-2">
-              {books[7].title}
-            </p>
-            <p className="font-['Poppins:Bold',sans-serif] text-[20px] text-green-500 text-left">
-              {books[7].price}
-            </p>
-          </button>
-        </div>
+        {/* Book 8 */}
+        <button onClick={() => onBookClick(books[7])} className="absolute left-[203px] top-[1779px]">
+          <div className="h-[236px] rounded-[5px] w-[162px]">
+            <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[7].image} />
+          </div>
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+            {books[7].author}
+          </p>
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+            {books[7].title}
+          </p>
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+            {books[7].price}
+          </p>
+        </button>
 
         {/* View More */}
-        <div className="flex justify-center">
-          <p className="[text-underline-position:from-font] decoration-solid font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[20px] text-black underline cursor-pointer">
-            View More
-          </p>
-        </div>
+        <p className="[text-underline-position:from-font] absolute decoration-solid font-['Poppins:Medium',sans-serif] leading-[normal] left-[calc(50%-36px)] not-italic text-[14px] text-black text-nowrap top-[2115px] underline whitespace-pre cursor-pointer">
+          View More
+        </p>
       </div>
-
-
     </div>
   );
 }

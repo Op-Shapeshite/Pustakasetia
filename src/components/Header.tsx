@@ -98,74 +98,44 @@ export default function Header({ currentPage, onNavigate }: { currentPage: strin
   };
 
   return (
-    <header className={`w-full bg-neutral-50 sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 md:h-24">
-          {/* Logo */}
-          <button onClick={() => onNavigate("home")} className="flex-shrink-0">
-            <img 
-              src={imgPustakaSetiaTracing2} 
-              alt="Pustaka Setia" 
-              className="h-12 md:h-16 w-auto object-contain"
-            />
+    <>
+      {/* MOBILE NAVBAR - Figma Design */}
+      <header className="lg:hidden absolute top-0 left-0 right-0 z-50 h-[87px] bg-neutral-50">
+        {/* Logo */}
+        <button onClick={() => onNavigate("home")} className="absolute left-[25px] top-[25px] h-[37px] w-[40px]">
+          <img 
+            src={imgPustakaSetiaTracing2} 
+            alt="Pustaka Setia" 
+            className="size-full object-cover"
+          />
+        </button>
+
+        {/* Icons - Search & Cart */}
+        <div className="absolute flex gap-[16px] h-[23px] items-center left-[270px] top-[32px]">
+          <button className="size-[24px]">
+            <ProiconsSearch />
           </button>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8 xl:gap-12">
-            <button onClick={() => onNavigate("home")} className="flex flex-col gap-1 items-center">
-              <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Beranda</p>
-              {currentPage === "home" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
-            </button>
-            <button onClick={() => onNavigate("about")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
-              <div className="flex flex-col gap-1 items-center">
-                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Tentang Kami</p>
-                {currentPage === "about" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
-              </div>
-            </button>
-            <button onClick={() => onNavigate("products")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
-              <div className="flex flex-col gap-1 items-center">
-                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Produk</p>
-                {currentPage === "products" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
-              </div>
-            </button>
-            <button onClick={() => onNavigate("contact")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
-              <div className="flex flex-col gap-1 items-center">
-                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Kontak Kami</p>
-                {currentPage === "contact" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
-              </div>
-            </button>
-          </nav>
-
-          {/* Desktop Icons */}
-          <div className="hidden md:flex items-center gap-4">
-            <button className="hover:opacity-70 transition-opacity">
-              <ProiconsSearch />
-            </button>
-            <button onClick={() => onNavigate("cart")} className="hover:opacity-70 transition-opacity relative">
-              <SolarCart3Outline />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-            <button className="hover:opacity-70 transition-opacity">
-              <MdiUserOutline />
-            </button>
-          </div>
-
-          {/* Mobile menu button */}
-          <button 
-            className="lg:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="h-6 w-6 text-[#2f2f2f]" />
+          <button onClick={() => onNavigate("cart")} className="relative size-[24px]">
+            <SolarCart3Outline />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Hamburger Menu */}
+        <button 
+          className="absolute flex items-center justify-center h-[23px] left-[234px] top-[32px] w-[131px]"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <Menu className="h-[17.67px] w-[19px] text-[#2f2f2f]" />
+        </button>
+
+        {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden pb-4 border-t border-gray-200 mt-2 pt-4">
+          <div className="absolute top-[87px] left-0 right-0 bg-neutral-50 border-t border-gray-200 pb-4 pt-4 px-[25px]">
             <nav className="flex flex-col gap-4">
               <button onClick={() => { onNavigate("home"); setMobileMenuOpen(false); }} className="flex flex-col gap-1 text-left">
                 <p className="font-['Poppins',sans-serif] text-[#2f2f2f]">Beranda</p>
@@ -184,9 +154,55 @@ export default function Header({ currentPage, onNavigate }: { currentPage: strin
                 {currentPage === "contact" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
               </button>
             </nav>
-            <div className="flex items-center gap-4 mt-4 md:hidden">
-              <button><ProiconsSearch /></button>
-              <button onClick={() => { onNavigate("cart"); setMobileMenuOpen(false); }} className="relative">
+          </div>
+        )}
+      </header>
+
+      {/* DESKTOP NAVBAR - Original Design */}
+      <header className={`hidden lg:block w-full bg-neutral-50 sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-24">
+            {/* Logo */}
+            <button onClick={() => onNavigate("home")} className="flex-shrink-0">
+              <img 
+                src={imgPustakaSetiaTracing2} 
+                alt="Pustaka Setia" 
+                className="h-16 w-auto object-contain"
+              />
+            </button>
+
+            {/* Desktop Navigation */}
+            <nav className="flex items-center gap-8 xl:gap-12">
+              <button onClick={() => onNavigate("home")} className="flex flex-col gap-1 items-center">
+                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Beranda</p>
+                {currentPage === "home" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
+              </button>
+              <button onClick={() => onNavigate("about")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
+                <div className="flex flex-col gap-1 items-center">
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Tentang Kami</p>
+                  {currentPage === "about" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
+                </div>
+              </button>
+              <button onClick={() => onNavigate("products")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
+                <div className="flex flex-col gap-1 items-center">
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Produk</p>
+                  {currentPage === "products" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
+                </div>
+              </button>
+              <button onClick={() => onNavigate("contact")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
+                <div className="flex flex-col gap-1 items-center">
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Kontak Kami</p>
+                  {currentPage === "contact" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
+                </div>
+              </button>
+            </nav>
+
+            {/* Desktop Icons */}
+            <div className="flex items-center gap-4">
+              <button className="hover:opacity-70 transition-opacity">
+                <ProiconsSearch />
+              </button>
+              <button onClick={() => onNavigate("cart")} className="hover:opacity-70 transition-opacity relative">
                 <SolarCart3Outline />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -194,11 +210,13 @@ export default function Header({ currentPage, onNavigate }: { currentPage: strin
                   </span>
                 )}
               </button>
-              <button><MdiUserOutline /></button>
+              <button className="hover:opacity-70 transition-opacity">
+                <MdiUserOutline />
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   );
 }
