@@ -210,9 +210,9 @@ function Group25() {
 export default function HomePage({ onBookClick }: HomePageProps) {
   return (
     <div className="bg-neutral-50 relative w-full min-h-screen">
-      {/* Hero Section */}
-      <div className="absolute contents left-0 top-[23px]">
-        {/* Decorative Background Elements */}
+      {/* Hero Section - Jelajahi Koleksi */}
+      <div className="relative pt-[23px] pb-[60px]">
+        {/* Decorative Background Elements - allowed to use absolute */}
         <div className="absolute flex h-[508.47px] items-center justify-center left-[789.76px] top-[330.65px] w-[549.369px]" style={{ "--transform-inner-width": "441.09375", "--transform-inner-height": "360.9375" } as React.CSSProperties}>
           <div className="flex-none rotate-[23.846deg] scale-y-[-100%]">
             <div className="h-[360.958px] relative w-[441.096px]">
@@ -243,31 +243,35 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           </div>
         </div>
 
-        {/* Book Stack Image */}
+        {/* Book Stack Image - allowed to use absolute */}
         <div className="absolute h-[652px] left-[550px] top-[161px] w-[743px]">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <img alt="" className="absolute h-full left-[-12.42%] max-w-none top-0 w-[131.68%]" src={img210056973109789661} />
           </div>
         </div>
 
-        {/* Hero Text */}
-        <p className="absolute font-['Poppins:SemiBold',sans-serif] leading-[normal] left-[100px] not-italic text-[#221f30] text-[52px] top-[200px] w-[520px]">
-          Jelajahi koleksi buku terbaik kami untuk Anda
-        </p>
-        
-        <p className="absolute font-['Poppins:Regular',sans-serif] leading-[normal] left-[100px] not-italic text-[#2f2f2f] text-[20px] top-[480px] w-[500px]">
-          Pustaka Setia menghadirkan berbagai koleksi buku untuk memberikan ilmu yang mendalam dan bacaan bermakna. Temukan inspirasi baru melalui pilihan buku terbaik kami.
-        </p>
-
-        {/* CTA Button */}
-        <div className="absolute h-[60px] left-[100px] top-[620px] w-[250px]">
-          <div className="absolute bg-[#ffcc00] inset-0 rounded-[100px]" />
-          <p className="absolute font-['Poppins:SemiBold',sans-serif] leading-[normal] left-1/2 not-italic text-[#2f2f2f] text-[20px] text-center text-nowrap top-[calc(50%-15px)] translate-x-[-50%] whitespace-pre">
-            Jelajahi Sekarang
+        {/* Content Container - using margin/padding */}
+        <div className="relative pl-[100px] pt-[177px]">
+          {/* Hero Text */}
+          <p className="font-['Poppins:SemiBold',sans-serif] leading-[normal] not-italic text-[#221f30] text-[52px] w-[520px]">
+            Jelajahi koleksi buku terbaik kami untuk Anda
           </p>
+          
+          {/* Description */}
+          <p className="font-['Poppins:Regular',sans-serif] leading-[normal] mt-[80px] not-italic text-[#2f2f2f] text-[20px] w-[500px]">
+            Pustaka Setia menghadirkan berbagai koleksi buku untuk memberikan ilmu yang mendalam dan bacaan bermakna. Temukan inspirasi baru melalui pilihan buku terbaik kami.
+          </p>
+
+          {/* CTA Button */}
+          <div className="mt-[80px] h-[60px] w-[250px] relative">
+            <div className="absolute bg-[#ffcc00] inset-0 rounded-[100px]" />
+            <p className="absolute font-['Poppins:SemiBold',sans-serif] leading-[normal] left-1/2 not-italic text-[#2f2f2f] text-[20px] text-center text-nowrap top-[calc(50%-15px)] translate-x-[-50%] whitespace-pre">
+              Jelajahi Sekarang
+            </p>
+          </div>
         </div>
 
-        {/* Decorative Icons */}
+        {/* Decorative Icons - allowed to use absolute */}
         <div className="absolute contents left-[906px] top-[688px]">
           <div className="absolute bg-[#ffcc00] left-[906px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[688px]" />
           <StreamlinePlumpAiTechnologySpark />
@@ -294,19 +298,24 @@ export default function HomePage({ onBookClick }: HomePageProps) {
       </div>
 
       {/* Stats Section */}
-      <div className="absolute bg-[#d9d9d9] h-[250px] left-1/2 rounded-[25px] top-[811px] translate-x-[-50%] w-[1336px]" />
-      <p className="absolute font-['Poppins:Medium',sans-serif] leading-[normal] left-[467px] not-italic text-[14px] text-black text-nowrap top-[926px] whitespace-pre">
-        Total Kategori
-      </p>
-      <p className="absolute font-['Poppins:Medium',sans-serif] leading-[normal] left-[616px] not-italic text-[14px] text-black text-nowrap top-[926px] whitespace-pre">
-        Total buku available
-      </p>
-      <p className="absolute font-['Poppins:Medium',sans-serif] leading-[normal] left-[810px] not-italic text-[14px] text-black text-nowrap top-[926px] whitespace-pre">
-        Total buku yang terjual
-      </p>
+      <div className="flex justify-center mt-[23px]">
+        <div className="bg-[#d9d9d9] h-[250px] rounded-[25px] w-[1336px] relative">
+          <div className="flex justify-center gap-[149px] pt-[115px]">
+            <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
+              Total Kategori
+            </p>
+            <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
+              Total buku available
+            </p>
+            <p className="font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[14px] text-black text-nowrap whitespace-pre">
+              Total buku yang terjual
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Books Grid Container */}
-      <div className="absolute top-[1111px] left-0 right-0 flex flex-col items-center gap-[60px]">
+      <div className="flex flex-col items-center gap-[60px] mt-[50px]">
         {/* Row 1 */}
         <div className="flex gap-[40px] justify-center">
           {/* Book 1 */}
@@ -466,15 +475,14 @@ export default function HomePage({ onBookClick }: HomePageProps) {
         </div>
 
         {/* View More */}
-        <div className="flex justify-center ">
+        <div className="flex justify-center">
           <p className="[text-underline-position:from-font] decoration-solid font-['Poppins:Medium',sans-serif] leading-[normal] not-italic text-[20px] text-black underline cursor-pointer">
             View More
           </p>
         </div>
       </div>
 
-      {/* Spacer for absolute positioned elements above */}
-      <div className="h-[2100px]" />
+
     </div>
   );
 }

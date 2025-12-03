@@ -44,6 +44,8 @@ function MdiUserOutline() {
 export default function Header({ currentPage, onNavigate }: { currentPage: string; onNavigate: (page: "home" | "about" | "products" | "contact" | "cart") => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     updateCartCount();
@@ -57,12 +59,46 @@ export default function Header({ currentPage, onNavigate }: { currentPage: strin
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, []);
 
+  useEffect(() => {
+    let isScrolling = false;
+
+    const handleScroll = () => {
+      // Hide navbar when scrolling
+      if (!isScrolling) {
+        setIsVisible(false);
+        isScrolling = true;
+      }
+
+      // Clear previous timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      // Show navbar after scrolling stops
+      const timeout = setTimeout(() => {
+        setIsVisible(true);
+        isScrolling = false;
+      }, 150); // Show navbar 150ms after scrolling stops
+
+      setScrollTimeout(timeout);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [scrollTimeout]);
+
   const updateCartCount = () => {
     setCartCount(getCartItemCount());
   };
 
   return (
-    <header className="w-full bg-neutral-50 sticky top-0 z-50 border-b border-gray-200">
+    <header className={`w-full bg-neutral-50 sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 md:h-24">
           {/* Logo */}
