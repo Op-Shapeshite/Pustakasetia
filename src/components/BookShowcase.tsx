@@ -7,7 +7,6 @@ import imgWhatsAppImage20251127At53720Pm2 from "figma:asset/c6a1e32300a872f41a1b
 import imgWhatsAppImage20251127At53721Pm from "figma:asset/47a129306e65f371f2d18645e7588dc532b671d8.png";
 import imgWhatsAppImage20251127At53720Pm1 from "figma:asset/e139883d294c2d8c85f710519d588ed9ed48a272.png";
 import imgWhatsAppImage20251127At53722Pm1 from "figma:asset/95771006c07a7a77bd105b80c1522ae8499820f2.png";
-import BookDetailModal from "./BookDetailModal";
 
 interface Book {
   id: number;
@@ -101,15 +100,13 @@ function BookCard({ book, onClick }: { book: Book; onClick: () => void }) {
   );
 }
 
-export default function BookShowcase() {
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-
+export default function BookShowcase({ onBookClick }: { onBookClick: (book: Book) => void }) {
   return (
     <section className="w-full py-8 md:py-12 lg:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
           {books.map((book) => (
-            <BookCard key={book.id} book={book} onClick={() => setSelectedBook(book)} />
+            <BookCard key={book.id} book={book} onClick={() => onBookClick(book)} />
           ))}
         </div>
 
@@ -122,14 +119,6 @@ export default function BookShowcase() {
           </a>
         </div>
       </div>
-
-      {/* Book Detail Modal */}
-      {selectedBook && (
-        <BookDetailModal 
-          book={selectedBook} 
-          onClose={() => setSelectedBook(null)}
-        />
-      )}
     </section>
   );
 }

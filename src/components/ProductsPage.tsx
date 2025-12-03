@@ -8,7 +8,6 @@ import imgWhatsAppImage20251127At53720Pm2 from "figma:asset/c6a1e32300a872f41a1b
 import imgWhatsAppImage20251127At53721Pm from "figma:asset/47a129306e65f371f2d18645e7588dc532b671d8.png";
 import imgWhatsAppImage20251127At53720Pm1 from "figma:asset/e139883d294c2d8c85f710519d588ed9ed48a272.png";
 import imgWhatsAppImage20251127At53722Pm1 from "figma:asset/95771006c07a7a77bd105b80c1522ae8499820f2.png";
-import BookDetailModal from "./BookDetailModal";
 
 interface Book {
   id: number;
@@ -162,10 +161,9 @@ function BookCard({ book, onClick }: { book: Book; onClick: () => void }) {
   );
 }
 
-export default function ProductsPage() {
+export default function ProductsPage({ onBookClick }: { onBookClick: (book: Book) => void }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   const totalPages = Math.ceil(allBooks.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -216,7 +214,7 @@ export default function ProductsPage() {
         {/* Books Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10 mb-8 md:mb-12">
           {currentBooks.map((book) => (
-            <BookCard key={book.id} book={book} onClick={() => setSelectedBook(book)} />
+            <BookCard key={book.id} book={book} onClick={() => onBookClick(book)} />
           ))}
         </div>
 
@@ -253,14 +251,6 @@ export default function ProductsPage() {
           </button>
         </div>
       </div>
-
-      {/* Book Detail Modal */}
-      {selectedBook && (
-        <BookDetailModal 
-          book={selectedBook} 
-          onClose={() => setSelectedBook(null)}
-        />
-      )}
     </div>
   );
 }
