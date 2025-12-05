@@ -113,7 +113,7 @@ function Ellipse() {
 
 function StreamlinePlumpAiTechnologySpark() {
   return (
-    <div className="absolute lg:left-[921px] lg:size-[55px] lg:top-[702px] left-[123.76px] size-[28.45px] top-[602.57px] overflow-clip">
+    <div className="absolute lg:left-[928px] lg:size-[55px] lg:top-[710px] left-[130px] size-[28.45px] top-[260px] overflow-clip">
       <div className="absolute inset-[3.64%_3.64%_5.45%_5.45%] lg:inset-[3.64%_3.64%_5.45%_5.45%]">
         <div className="absolute inset-[-3%]">
           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 53 53">
@@ -131,7 +131,7 @@ function StreamlinePlumpAiTechnologySpark() {
 
 function StashTargetLight() {
   return (
-    <div className="absolute lg:left-[725px] lg:size-[69px] lg:top-[238px] left-[31.29px] size-[28.45px] top-[382.29px]">
+    <div className="absolute lg:left-[1251px] lg:size-[69px] lg:top-[247px] left-[37px] size-[28.45px] top-[40px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 69 69">
         <g>
           <path d={svgPaths.p399d1600} fill="white" />
@@ -144,7 +144,7 @@ function StashTargetLight() {
 
 function ArcticonsRewards() {
   return (
-    <div className="absolute lg:left-[1352px] lg:size-[57px] lg:top-[321px] left-[342.82px] size-[28.45px] top-[419.23px]">
+    <div className="absolute lg:left-[1373px] lg:size-[57px] lg:top-[337px] left-[349px] size-[28.45px] top-[77px]">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 57 57">
         <g>
           <path d={svgPaths.p2dacb980} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
@@ -275,18 +275,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           </div>
 
           {/* Decorative Icons */}
-          <div className="absolute contents left-[906px] top-[688px]">
-            <div className="absolute bg-[#ffcc00] left-[906px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[688px]" />
+          <div className="absolute bg-[#ffcc00] left-[123.76px] lg:left-[921px] h-[39.571px] lg:h-[70px] rounded-[5px] top-[254.57px] lg:top-[702px] w-[42.675px] lg:w-[70px] z-0" />
+          <div className="absolute bg-[#5a71fe] left-[31.29px] lg:left-[1250px] h-[39.571px] lg:h-[70px] rounded-[5px] top-[34.29px] lg:top-[247px] w-[42.675px] lg:w-[70px] z-0" />
+          <div className="absolute bg-[#ff91ab] left-[342.82px] lg:left-[1366px] h-[39.571px] lg:h-[70px] rounded-[5px] top-[71.23px] lg:top-[330px] w-[42.675px] lg:w-[70px] z-0" />
+          
+          <div className="absolute left-0 top-0 w-full h-full pointer-events-none z-10">
             <StreamlinePlumpAiTechnologySpark />
-          </div>
-
-          <div className="absolute contents left-[720px] top-[233px]">
-            <div className="absolute bg-[#5a71fe] left-[720px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[233px]" />
             <StashTargetLight />
-          </div>
-
-          <div className="absolute contents left-[1340px] top-[309px]">
-            <div className="absolute bg-[#ff91ab] left-[1340px] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] size-[80px] top-[309px]" />
             <ArcticonsRewards />
           </div>
 
@@ -416,18 +411,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           </div>
 
           {/* Decorative Icons */}
-          <div className="absolute contents left-[123.76px] top-[254.57px]">
-            <div className="absolute bg-[#ffcc00] left-[123.76px] h-[39.571px] rounded-[5px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] top-[254.57px] w-[42.675px]" />
+          <div className="absolute bg-[#ffcc00] left-[123.76px] h-[39.571px] lg:h-[70px] rounded-[5px] top-[254.57px] lg:top-[702px] w-[42.675px] lg:w-[70px] z-0" />
+          <div className="absolute bg-[#5a71fe] left-[31.29px] lg:left-[1250px] h-[39.571px] lg:h-[70px] rounded-[5px] top-[34.29px] lg:top-[247px] w-[42.675px] lg:w-[70px] z-0" />
+          <div className="absolute bg-[#ff91ab] left-[342.82px] h-[39.571px] lg:h-[70px] rounded-[5px] top-[71.23px] lg:top-[330px] w-[42.675px] lg:w-[70px] z-0" />
+          
+          <div className="absolute left-0 top-0 w-full h-full pointer-events-none z-10">
             <StreamlinePlumpAiTechnologySpark />
-          </div>
-
-          <div className="absolute contents left-[31.29px] top-[34.29px]">
-            <div className="absolute bg-[#5a71fe] left-[31.29px] h-[39.571px] rounded-[5px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] top-[34.29px] w-[42.675px]" />
             <StashTargetLight />
-          </div>
-
-          <div className="absolute contents left-[342.82px] top-[71.23px]">
-            <div className="absolute bg-[#ff91ab] left-[342.82px] h-[39.571px] rounded-[5px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] top-[71.23px] w-[42.675px]" />
             <ArcticonsRewards />
           </div>
 
@@ -451,13 +441,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[237px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[0].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[242px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[242px] w-[162px]">
             {books[0].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[253px] w-[162px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[253px] w-[162px] line-clamp-2">
             {books[0].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[301px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[301px] whitespace-pre">
             {books[0].price}
           </p>
         </button>
@@ -467,13 +457,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[237px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[1].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[242px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[242px] w-[162px]">
             {books[1].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[253px] w-[160px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[253px] w-[160px] line-clamp-2">
             {books[1].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[301px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[301px] whitespace-pre">
             {books[1].price}
           </p>
         </button>
@@ -483,13 +473,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[236px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[2].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[241px] w-[162px]">
             {books[2].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[252px] w-[162px] line-clamp-2">
             {books[2].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[300px] whitespace-pre">
             {books[2].price}
           </p>
         </button>
@@ -499,13 +489,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[236px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[3].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[241px] w-[162px]">
             {books[3].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[160px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[252px] w-[160px] line-clamp-2">
             {books[3].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[300px] whitespace-pre">
             {books[3].price}
           </p>
         </button>
@@ -515,13 +505,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[236px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[4].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[241px] w-[162px]">
             {books[4].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[252px] w-[162px] line-clamp-2">
             {books[4].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[300px] whitespace-pre">
             {books[4].price}
           </p>
         </button>
@@ -531,13 +521,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[236px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[5].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[241px] w-[162px]">
             {books[5].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[252px] w-[162px] line-clamp-2">
             {books[5].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[300px] whitespace-pre">
             {books[5].price}
           </p>
         </button>
@@ -547,13 +537,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[236px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[6].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[241px] w-[162px]">
             {books[6].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[252px] w-[162px] line-clamp-2">
             {books[6].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[300px] whitespace-pre">
             {books[6].price}
           </p>
         </button>
@@ -563,13 +553,13 @@ export default function HomePage({ onBookClick }: HomePageProps) {
           <div className="h-[236px] rounded-[5px] w-[162px]">
             <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[5px] size-full" src={books[7].image} />
           </div>
-          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-nowrap top-[241px] w-[162px]">
+          <p className="absolute font-['Poppins:Regular',sans-serif] h-[11px] left-0 overflow-ellipsis overflow-hidden text-[8px] text-gray-500 text-left text-nowrap top-[241px] w-[162px]">
             {books[7].author}
           </p>
-          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 overflow-ellipsis overflow-hidden text-[#2f2f2f] text-[12px] top-[252px] w-[162px] line-clamp-2">
+          <p className="absolute font-['Poppins:Medium',sans-serif] h-[48px] left-0 text-[#2f2f2f] text-[12px] text-left top-[252px] w-[162px] line-clamp-2">
             {books[7].title}
           </p>
-          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-nowrap top-[300px] whitespace-pre">
+          <p className="absolute font-['Poppins:Bold',sans-serif] leading-[normal] left-0 not-italic text-[14px] text-green-500 text-left text-nowrap top-[300px] whitespace-pre">
             {books[7].price}
           </p>
         </button>

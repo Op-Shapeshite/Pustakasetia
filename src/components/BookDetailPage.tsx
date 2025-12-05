@@ -66,10 +66,10 @@ export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
       <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-16 -mt-[100px] sm:-mt-[150px] md:-mt-[200px] relative z-10">
         <div className="max-w-[1400px] mx-auto">
           {/* Book Info Section - Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-[320px,1fr] xl:grid-cols-[380px,1fr] gap-6 lg:gap-8 xl:gap-12">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-12">
             {/* Left Column - Book Cover */}
-            <div className="flex justify-center lg:justify-start w-full">
-              <div className="w-[240px] sm:w-[286px] md:w-[318px] ">
+            <div className="flex justify-center lg:justify-start flex-shrink-0">
+              <div className="w-[240px] sm:w-[286px] md:w-[318px]">
                 <div className="aspect-[318/465] relative rounded-[12px] overflow-hidden shadow-[20px_20px_30px_0px_rgba(0,0,0,0.25)]">
                   <img 
                     src={book.image} 
@@ -81,66 +81,51 @@ export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
             </div>
 
             {/* Right Column - Book Details */}
-            <div className="flex flex-col justify-end pb-4 space-y-6 lg:space-y-8">
+            <div className="flex flex-col justify-end pb-4 space-y-6 lg:space-y-8 flex-1">
               {/* Title and Author */}
-              <div className="text-center lg:text-left">
-                <h1 className="font-['Poppins',sans-serif] font-bold text-[#2f2f2f] text-[28px] sm:text-[36px] md:text-[40px] lg:text-[48px] leading-tight mb-3">
+              <div className="text-center lg:text-left lg:mt-[40px]">
+                <h1 className="font-['Poppins',sans-serif] font-black text-[#2f2f2f] lg:text-white text-[28px] sm:text-[36px] md:text-[40px] lg:text-[48px] leading-tight mb-3">
                   {book.title}
                 </h1>
-                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] md:text-[20px] leading-normal">
+                <p className="font-['Poppins',sans-serif] font-bold text-[#2f2f2f] lg:text-white text-[16px] sm:text-[18px] md:text-[20px] leading-normal">
                   {book.author}
                 </p>
               </div>
 
               {/* Book Specifications Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 lg:gap-x-12 xl:gap-x-16 gap-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 lg:gap-x-12 xl:gap-x-16 gap-y-5 mt-[15px]">
                 {/* Row 1 Col 1 */}
                 <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal mb-1">
-                    Jumlah Halaman
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    : {book.pages || 198}
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
+                    Jumlah Halaman : {book.pages || 198}
                   </p>
                 </div>
 
                 {/* Row 1 Col 2 */}
                 <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal mb-1">
-                    Jenis Kertas
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    : {book.paperType || "HVS"}
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
+                    Jenis Kertas : {book.paperType || "HVS"}
                   </p>
                 </div>
 
                 {/* Row 2 Col 1 */}
                 <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal mb-1">
-                    Ukuran Buku
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    : {book.size || "16 x 24 cm"}
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
+                    Ukuran Buku : {book.size || "16 x 24 cm"}
                   </p>
                 </div>
 
                 {/* Row 2 Col 2 */}
                 <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal mb-1">
-                    ISBN
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    : {book.isbn || "978-979-076-799-1"}
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
+                    ISBN : {book.isbn || "978-979-076-799-1"}
                   </p>
                 </div>
 
                 {/* Row 3 - Full Width */}
                 <div className="sm:col-span-2">
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal mb-1">
-                    Edisi dan Cetakan
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    : {book.edition || "Ke-1. 2025"}
+                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
+                    Edisi dan Cetakan : {book.edition || "Ke-1. 2025"}
                   </p>
                 </div>
               </div>
