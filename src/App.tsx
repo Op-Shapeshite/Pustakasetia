@@ -7,6 +7,8 @@ import ProductsPage from "./components/ProductsPage";
 import ContactPage from "./components/ContactPage";
 import CartPage from "./components/CartPage";
 import BookDetailPage from "./components/BookDetailPage";
+import LoginPage from "./components/LoginPage";
+import DashboardPage from "./components/DashboardPage";
 
 interface Book {
   id: number;
@@ -23,9 +25,10 @@ interface Book {
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<"home" | "about" | "products" | "contact" | "cart" | "detail">("home");
+  const [currentPage, setCurrentPage] = useState<"home" | "about" | "products" | "contact" | "cart" | "detail" | "login" | "dashboard">("home");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [previousPage, setPreviousPage] = useState<"home" | "products">("home");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleBookClick = (book: Book, fromPage: "home" | "products") => {
     setSelectedBook(book);
@@ -40,9 +43,26 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  const handleBackFromLogin = () => {
+    setCurrentPage("home");
+    window.scrollTo(0, 0);
+  };
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setCurrentPage("dashboard");
+    window.scrollTo(0, 0);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentPage("home");
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="bg-neutral-50 min-h-screen w-full overflow-x-hidden">
-      <Header currentPage={currentPage} onNavigate={setCurrentPage} />
+      {currentPage !== "dashboard" && <Header currentPage={currentPage} onNavigate={setCurrentPage} />}
       {currentPage === "home" ? (
         <HomePage onBookClick={(book) => handleBookClick(book, "home")} />
       ) : currentPage === "about" ? (
@@ -53,10 +73,14 @@ export default function App() {
         <ContactPage />
       ) : currentPage === "cart" ? (
         <CartPage onBack={() => setCurrentPage("products")} />
+      ) : currentPage === "login" ? (
+        <LoginPage onBack={handleBackFromLogin} onLoginSuccess={handleLoginSuccess} />
+      ) : currentPage === "dashboard" ? (
+        <DashboardPage onLogout={handleLogout} onNavigate={setCurrentPage} />
       ) : currentPage === "detail" && selectedBook ? (
         <BookDetailPage book={selectedBook} onBack={handleBackFromDetail} />
       ) : null}
-      {currentPage !== "detail" && <Footer onNavigate={setCurrentPage} />}
+      {currentPage !== "detail" && currentPage !== "login" && currentPage !== "dashboard" && <Footer onNavigate={setCurrentPage} />}
     </div>
   );
 }

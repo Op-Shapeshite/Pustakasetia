@@ -41,7 +41,7 @@ function MdiUserOutline() {
   );
 }
 
-export default function Header({ currentPage, onNavigate }: { currentPage: string; onNavigate: (page: "home" | "about" | "products" | "contact" | "cart") => void }) {
+export default function Header({ currentPage, onNavigate }: { currentPage: string; onNavigate: (page: "home" | "about" | "products" | "contact" | "cart" | "login") => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -210,7 +210,7 @@ export default function Header({ currentPage, onNavigate }: { currentPage: strin
                   </span>
                 )}
               </button>
-              <button className="hover:opacity-70 transition-opacity">
+              <button onClick={() => onNavigate("login")} className="hover:opacity-70 transition-opacity">
                 <MdiUserOutline />
               </button>
             </div>
