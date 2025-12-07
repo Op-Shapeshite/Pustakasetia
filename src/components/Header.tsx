@@ -1,5 +1,4 @@
 import svgPaths from "../imports/svg-zx896x9umy";
-import imgPustakaSetiaTracing2 from "figma:asset/a236558e0f6a9a9f56ec11523f0449430ba96187.png";
 import { Search, ShoppingCart, User, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getCartItemCount } from "../utils/cartStorage";
@@ -104,9 +103,9 @@ export default function Header({ currentPage, onNavigate }: { currentPage: strin
         {/* Logo */}
         <button onClick={() => onNavigate("home")} className="absolute left-[25px] top-[25px] h-[37px] w-[40px]">
           <img 
-            src={imgPustakaSetiaTracing2} 
+            src="/img/logo.png" 
             alt="Pustaka Setia" 
-            className="size-full object-cover"
+            className="size-full object-contain"
           />
         </button>
 
@@ -165,7 +164,7 @@ export default function Header({ currentPage, onNavigate }: { currentPage: strin
             {/* Logo */}
             <button onClick={() => onNavigate("home")} className="flex-shrink-0">
               <img 
-                src={imgPustakaSetiaTracing2} 
+                src="/img/logo.png" 
                 alt="Pustaka Setia" 
                 className="h-16 w-auto object-contain"
               />

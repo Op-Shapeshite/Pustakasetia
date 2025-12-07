@@ -50,7 +50,7 @@ export default function Footer({ onNavigate }: { onNavigate?: (page: "home" | "a
           {/* Company Info */}
           <div className="space-y-4">
             <img 
-              src={imgPustakaSetiaTracing2} 
+              src='/img/logo.png' 
               alt="Pustaka Setia" 
               className="h-16 w-auto object-contain"
             />

@@ -9,30 +9,26 @@ import CartPage from "./components/CartPage";
 import BookDetailPage from "./components/BookDetailPage";
 import LoginPage from "./components/LoginPage";
 import DashboardPage from "./components/DashboardPage";
-
-interface Book {
-  id: number;
-  image: string;
-  title: string;
-  author: string;
-  price: string;
-  pages?: number;
-  size?: string;
-  edition?: string;
-  isbn?: string;
-  paperType?: string;
-  synopsis?: string;
-}
+import { Book, BookCategory } from "./types/book";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<"home" | "about" | "products" | "contact" | "cart" | "detail" | "login" | "dashboard">("home");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<BookCategory | 'all'>('all');
   const [previousPage, setPreviousPage] = useState<"home" | "products">("home");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const handleBookClick = (book: Book, fromPage: "home" | "products") => {
+  const handleNavigate = (page: string, category?: BookCategory) => {
+    setCurrentPage(page as any);
+    if (category) {
+      setSelectedCategory(category);
+    }
+    window.scrollTo(0, 0);
+  };
+
+  const handleBookClick = (book: Book, fromPage?: "home" | "products") => {
     setSelectedBook(book);
-    setPreviousPage(fromPage);
+    if (fromPage) setPreviousPage(fromPage);
     setCurrentPage("detail");
     window.scrollTo(0, 0);
   };
@@ -64,11 +60,18 @@ export default function App() {
     <div className="bg-neutral-50 min-h-screen w-full overflow-x-hidden">
       {currentPage !== "dashboard" && <Header currentPage={currentPage} onNavigate={setCurrentPage} />}
       {currentPage === "home" ? (
-        <HomePage onBookClick={(book) => handleBookClick(book, "home")} />
+        <HomePage 
+          onBookClick={(book) => handleBookClick(book, "home")} 
+          onNavigate={handleNavigate}
+        />
       ) : currentPage === "about" ? (
         <AboutPage />
       ) : currentPage === "products" ? (
-        <ProductsPage onBookClick={(book) => handleBookClick(book, "products")} />
+        <ProductsPage 
+          onBookClick={(book) => handleBookClick(book, "products")} 
+          onNavigate={handleNavigate}
+          initialCategory={selectedCategory}
+        />
       ) : currentPage === "contact" ? (
         <ContactPage />
       ) : currentPage === "cart" ? (
@@ -78,9 +81,8 @@ export default function App() {
       ) : currentPage === "dashboard" ? (
         <DashboardPage onLogout={handleLogout} onNavigate={setCurrentPage} />
       ) : currentPage === "detail" && selectedBook ? (
-        <BookDetailPage book={selectedBook} onBack={handleBackFromDetail} />
+        <BookDetailPage book={selectedBook as any} onBack={handleBackFromDetail} />
       ) : null}
-      {currentPage !== "detail" && currentPage !== "login" && currentPage !== "dashboard" && <Footer onNavigate={setCurrentPage} />}
     </div>
   );
 }

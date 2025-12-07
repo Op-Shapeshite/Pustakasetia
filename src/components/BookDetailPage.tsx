@@ -92,42 +92,62 @@ export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
                 </p>
               </div>
 
-              {/* Book Specifications Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 lg:gap-x-12 xl:gap-x-16 gap-y-5 mt-[15px]">
-                {/* Row 1 Col 1 */}
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    Jumlah Halaman : {book.pages || 198}
-                  </p>
-                </div>
-
-                {/* Row 1 Col 2 */}
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    Jenis Kertas : {book.paperType || "HVS"}
-                  </p>
-                </div>
-
-                {/* Row 2 Col 1 */}
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    Ukuran Buku : {book.size || "16 x 24 cm"}
-                  </p>
-                </div>
-
-                {/* Row 2 Col 2 */}
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    ISBN : {book.isbn || "978-979-076-799-1"}
-                  </p>
-                </div>
-
-                {/* Row 3 - Full Width */}
-                <div className="sm:col-span-2">
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-normal">
-                    Edisi dan Cetakan : {book.edition || "Ke-1. 2025"}
-                  </p>
-                </div>
+              {/* Book Specifications Table */}
+              <div className="bg-white rounded-lg shadow-md overflow-hidden border border-neutral-200">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-neutral-100 border-b border-neutral-200">
+                      <th className="font-['Poppins',sans-serif] font-semibold text-[#2f2f2f] text-[16px] sm:text-[18px] text-left px-4 py-3">
+                        Spesifikasi
+                      </th>
+                      <th className="font-['Poppins',sans-serif] font-semibold text-[#2f2f2f] text-[16px] sm:text-[18px] text-left px-4 py-3">
+                        Detail
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+                      <td className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        Jumlah Halaman
+                      </td>
+                      <td className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        {book.pages || 198} halaman
+                      </td>
+                    </tr>
+                    <tr className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+                      <td className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        Ukuran Buku
+                      </td>
+                      <td className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        {book.size || "16 x 24 cm"}
+                      </td>
+                    </tr>
+                    <tr className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+                      <td className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        Edisi dan Cetakan
+                      </td>
+                      <td className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        {book.edition || "Ke-1. 2025"}
+                      </td>
+                    </tr>
+                    <tr className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
+                      <td className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        ISBN
+                      </td>
+                      <td className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3 font-mono">
+                        {book.isbn || "978-979-076-799-1"}
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-neutral-50 transition-colors">
+                      <td className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        Jenis Kertas
+                      </td>
+                      <td className="font-['Poppins',sans-serif] text-[#2f2f2f] text-[14px] sm:text-[16px] px-4 py-3">
+                        {book.paperType || "HVS"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               {/* Action Buttons */}
