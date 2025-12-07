@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { bookService, Book } from '@/utils/adminData';
 import AddBookModal from './AddBookModal';
 import EditBookModal from './EditBookModal';
@@ -9,6 +9,8 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 
 export default function BookManagementPage() {
     const [books, setBooks] = useState<Book[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
@@ -18,14 +20,24 @@ export default function BookManagementPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const loadBooks = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await bookService.getAll({ limit: 100 });
+            setBooks(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load books');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         loadBooks();
-    }, []);
-
-    const loadBooks = () => {
-        setBooks(bookService.getAll());
-    };
+    }, [loadBooks]);
 
     // Filter books by search
     const filteredBooks = books.filter(book =>
@@ -49,11 +61,19 @@ export default function BookManagementPage() {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (selectedBook) {
-            bookService.delete(selectedBook.id);
-            loadBooks();
-            setSelectedBook(null);
+            try {
+                setIsDeleting(true);
+                await bookService.delete(selectedBook.id);
+                await loadBooks();
+                setSelectedBook(null);
+                setIsDeleteModalOpen(false);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to delete book');
+            } finally {
+                setIsDeleting(false);
+            }
         }
     };
 
@@ -61,8 +81,24 @@ export default function BookManagementPage() {
         return `Rp${price.toLocaleString('id-ID')}`;
     };
 
+    if (loading) {
+        return (
+            <div className="p-6 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-[#ffcc00]" />
+                <span className="ml-2 text-gray-500">Memuat data...</span>
+            </div>
+        );
+    }
+
     return (
         <div className="p-6">
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    {error}
+                    <button onClick={loadBooks} className="ml-2 underline">Coba lagi</button>
+                </div>
+            )}
+
             {/* Header Actions */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <h2 className="text-xl font-semibold text-[#2f2f2f]">Daftar Buku</h2>
@@ -113,7 +149,7 @@ export default function BookManagementPage() {
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
                                             <img
-                                                src={book.image}
+                                                src={book.image || '/img/book-cover-optimized.png'}
                                                 alt={book.title}
                                                 className="w-10 h-14 object-cover rounded"
                                             />
@@ -215,6 +251,7 @@ export default function BookManagementPage() {
                 onConfirm={confirmDelete}
                 title="Hapus Buku"
                 message={`Apakah Anda yakin ingin menghapus buku "${selectedBook?.title}"?`}
+                isLoading={isDeleting}
             />
         </div>
     );

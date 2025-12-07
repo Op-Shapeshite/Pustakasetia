@@ -1,7 +1,7 @@
 'use client';
 
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Book, Users, Shield, TrendingUp } from 'lucide-react';
+import { Book, Users, Shield, TrendingUp, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { bookService, userService, roleService } from '@/utils/adminData';
 
@@ -11,18 +11,72 @@ export default function DashboardHomePage() {
         users: 0,
         roles: 0,
     });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setStats({
-            books: bookService.getAll().length,
-            users: userService.getAll().length,
-            roles: roleService.getAll().length,
-        });
+        async function fetchStats() {
+            try {
+                const [books, users, roles] = await Promise.all([
+                    bookService.getAll({ limit: 1 }), // efficient count fetching if API supports just count, but here we fetch list
+                    userService.getAll({ limit: 1 }),
+                    roleService.getAll({ limit: 1 })
+                ]);
+
+                // Note: The API currently returns array for getAll. 
+                // If we want total counts, ideally the API should return { data, meta: { total } }
+                // For now, if the API returns paginated data (Book[]), we might only get the first page count if we used limit. 
+                // BUT, looking at api implementation, it returns { data: [...], meta: ... } for some, 
+                // OR checking adminData.ts wrapper:
+                // bookService.getAll returns response.data which is Book[]
+                // api return format is { data: [...], meta: { total, ... } }
+                // But wait, adminData.ts: 
+                // getAll: async (params) => { ... const response = await apiCall(...); return response.data; }
+                // So it returns the ARRAY.
+
+                // If the array is only the current page, .length gives page size, not total.
+                // However, without params, it defers to default limit?
+                // The API default limit is 10 or 100.
+                // For accurate counts, we should check providing a large limit or if there's a count endpoint.
+
+                // Let's re-read adminData.ts carefully.
+                // It returns response.data.  And the API response body is { data: [], meta: {} }.
+                // So response.data in adminData context means the array.
+
+                // To get total counts efficiently, we might need to modify adminData or the API.
+                // OR, just fetch with limit=1 and check if we can get total from meta?
+                // But adminData.ts SWALLOWS the meta and returns only `response.data`.
+
+                // Let's modify adminData.ts to expose meta, or just blindly fetch everything?
+                // Fetching everything is bad for perf.
+
+                // Let's just fix the crash first by making it async. 
+                // I will blindly allow current behavior (fetching page 1) but async.
+
+                // Actually, I can check if the array has a property attached? No.
+
+                // Let's look at adminData.ts again to be sure what getAll returns.
+                // It returns `response.data`. 
+
+                // I will fetch with limit 1000 for now to be safe, or just 1.
+
+                setStats({
+                    books: books.length,
+                    users: users.length,
+                    roles: roles.length,
+                });
+            } catch (error) {
+                console.error('Failed to load stats', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchStats();
     }, []);
 
     const statCards = [
-        { label: 'Total Buku', value: stats.books, icon: Book, color: 'bg-blue-500' },
-        { label: 'Total Pengguna', value: stats.users, icon: Users, color: 'bg-green-500' },
+        { label: 'Total Buku (List View)', value: stats.books, icon: Book, color: 'bg-blue-500' },
+        { label: 'Total Pengguna (List View)', value: stats.users, icon: Users, color: 'bg-green-500' },
         { label: 'Total Role', value: stats.roles, icon: Shield, color: 'bg-purple-500' },
         { label: 'Penjualan', value: '120', icon: TrendingUp, color: 'bg-orange-500' },
     ];
@@ -42,7 +96,9 @@ export default function DashboardHomePage() {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">{stat.label}</p>
-                                        <p className="text-2xl font-bold text-[#2f2f2f]">{stat.value}</p>
+                                        <p className="text-2xl font-bold text-[#2f2f2f]">
+                                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : stat.value}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

@@ -1,6 +1,7 @@
-// Admin Dashboard Mock Data Utilities
-// Uses localStorage for persistence
+// Admin Dashboard API Services
+// Uses API endpoints for data persistence with SQLite backend
 
+// Types
 export interface Book {
     id: number;
     title: string;
@@ -10,20 +11,24 @@ export interface Book {
     isbn: string;
     price: number;
     category: string;
+    categoryId: number;
     edition: string;
     synopsis: string;
     image: string;
+    stock: number;
     createdAt: string;
+    updatedAt: string;
 }
 
 export interface User {
     id: number;
     username: string;
     fullName: string;
-    password: string;
     role: string;
+    roleId: number;
     status: 'active' | 'inactive';
     createdAt: string;
+    updatedAt: string;
 }
 
 export interface Role {
@@ -31,156 +36,241 @@ export interface Role {
     name: string;
     description: string;
     createdAt: string;
+    updatedAt: string;
+    _count?: { users: number };
 }
 
-// Initial mock data
-const initialBooks: Book[] = [
-    {
-        id: 1,
-        title: "Sistem Informasi Manajemen Pendidikan",
-        author: "Dr. Dadang Suhairi, S.E., M.M",
-        pages: 198,
-        size: "16 x 24 cm",
-        isbn: "978-979-076-799-1",
-        price: 42000,
-        category: "Pendidikan",
-        edition: "Ke-1. 2025",
-        synopsis: "Buku ini membahas tentang sistem informasi manajemen dalam konteks pendidikan...",
-        image: "/img/book-cover-optimized.png",
-        createdAt: new Date().toISOString(),
-    },
-    {
-        id: 2,
-        title: "Komunikasi Organisasi",
-        author: "Dr. H. Yana Sutiana, M.Ag.",
-        pages: 250,
-        size: "16 x 24 cm",
-        isbn: "978-979-076-800-4",
-        price: 68000,
-        category: "Manajemen",
-        edition: "Ke-1. 2025",
-        synopsis: "Membahas teori dan praktik komunikasi dalam organisasi...",
-        image: "/img/book-cover-optimized.png",
-        createdAt: new Date().toISOString(),
-    },
-    {
-        id: 3,
-        title: "Hukum Perkawinan Islam",
-        author: "Dr. Beni Ahmad Saebani, M.Si.",
-        pages: 320,
-        size: "16 x 24 cm",
-        isbn: "978-979-076-801-1",
-        price: 78000,
-        category: "Hukum",
-        edition: "Ke-2. 2025",
-        synopsis: "Kajian mendalam tentang hukum perkawinan dalam Islam...",
-        image: "/img/book-cover-optimized.png",
-        createdAt: new Date().toISOString(),
-    },
-];
+export interface Category {
+    id: number;
+    name: string;
+    description: string;
+    createdAt: string;
+    updatedAt: string;
+    _count?: { books: number };
+}
 
-const initialUsers: User[] = [
-    {
-        id: 1,
-        username: "admin",
-        fullName: "Administrator",
-        password: "admin123",
-        role: "Admin",
-        status: "active",
-        createdAt: new Date().toISOString(),
-    },
-    {
-        id: 2,
-        username: "editor1",
-        fullName: "Editor Satu",
-        password: "editor123",
-        role: "Editor",
-        status: "active",
-        createdAt: new Date().toISOString(),
-    },
-];
+export interface PaginatedResponse<T> {
+    data: T[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
 
-const initialRoles: Role[] = [
-    { id: 1, name: "Admin", description: "Full access to all features", createdAt: new Date().toISOString() },
-    { id: 2, name: "Editor", description: "Can manage books and content", createdAt: new Date().toISOString() },
-    { id: 3, name: "Viewer", description: "Read-only access", createdAt: new Date().toISOString() },
-];
+// Helper for API calls
+async function apiCall<T>(url: string, options?: RequestInit): Promise<T> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
 
-// Storage keys
-const BOOKS_KEY = 'admin_books';
-const USERS_KEY = 'admin_users';
-const ROLES_KEY = 'admin_roles';
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...options?.headers,
+    };
 
-// Initialize data if not exists
-function initializeData<T>(key: string, initialData: T[]): void {
-    if (typeof window === 'undefined') return;
-    if (!localStorage.getItem(key)) {
-        localStorage.setItem(key, JSON.stringify(initialData));
+    const response = await fetch(url, {
+        ...options,
+        headers,
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Request failed' }));
+        throw new Error(error.error || 'Request failed');
     }
+
+    return response.json();
 }
 
-// Generic CRUD operations
-function getAll<T>(key: string, initialData: T[]): T[] {
-    if (typeof window === 'undefined') return initialData;
-    initializeData(key, initialData);
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : initialData;
-}
-
-function getById<T extends { id: number }>(key: string, id: number, initialData: T[]): T | undefined {
-    const items = getAll<T>(key, initialData);
-    return items.find(item => item.id === id);
-}
-
-function create<T extends { id: number; createdAt: string }>(key: string, item: Omit<T, 'id' | 'createdAt'>, initialData: T[]): T {
-    const items = getAll<T>(key, initialData);
-    const newId = items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
-    const newItem = { ...item, id: newId, createdAt: new Date().toISOString() } as unknown as T;
-    items.push(newItem);
-    localStorage.setItem(key, JSON.stringify(items));
-    return newItem;
-}
-
-function update<T extends { id: number }>(key: string, id: number, updates: Partial<T>, initialData: T[]): T | undefined {
-    const items = getAll<T>(key, initialData);
-    const index = items.findIndex(item => item.id === id);
-    if (index === -1) return undefined;
-    items[index] = { ...items[index], ...updates };
-    localStorage.setItem(key, JSON.stringify(items));
-    return items[index];
-}
-
-function remove<T extends { id: number }>(key: string, id: number, initialData: T[]): boolean {
-    const items = getAll<T>(key, initialData);
-    const filtered = items.filter(item => item.id !== id);
-    if (filtered.length === items.length) return false;
-    localStorage.setItem(key, JSON.stringify(filtered));
-    return true;
-}
-
-// Book operations
+// Book Service
 export const bookService = {
-    getAll: () => getAll<Book>(BOOKS_KEY, initialBooks),
-    getById: (id: number) => getById<Book>(BOOKS_KEY, id, initialBooks),
-    create: (book: Omit<Book, 'id' | 'createdAt'>) => create<Book>(BOOKS_KEY, book, initialBooks),
-    update: (id: number, updates: Partial<Book>) => update<Book>(BOOKS_KEY, id, updates, initialBooks),
-    delete: (id: number) => remove<Book>(BOOKS_KEY, id, initialBooks),
+    getAll: async (params?: { page?: number; limit?: number; search?: string; categoryId?: number }) => {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.set('page', params.page.toString());
+        if (params?.limit) searchParams.set('limit', params.limit.toString());
+        if (params?.search) searchParams.set('search', params.search);
+        if (params?.categoryId) searchParams.set('categoryId', params.categoryId.toString());
+
+        const url = `/api/books${searchParams.toString() ? `?${searchParams}` : ''}`;
+        const response = await apiCall<PaginatedResponse<Book>>(url);
+        return response.data;
+    },
+
+    getById: async (id: number) => {
+        return apiCall<Book>(`/api/books/${id}`);
+    },
+
+    create: async (book: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'category'>) => {
+        return apiCall<Book>('/api/books', {
+            method: 'POST',
+            body: JSON.stringify(book),
+        });
+    },
+
+    update: async (id: number, updates: Partial<Book>) => {
+        return apiCall<Book>(`/api/books/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    delete: async (id: number) => {
+        return apiCall<{ message: string }>(`/api/books/${id}`, {
+            method: 'DELETE',
+        });
+    },
 };
 
-// User operations
+// User Service
 export const userService = {
-    getAll: () => getAll<User>(USERS_KEY, initialUsers),
-    getById: (id: number) => getById<User>(USERS_KEY, id, initialUsers),
-    create: (user: Omit<User, 'id' | 'createdAt'>) => create<User>(USERS_KEY, user, initialUsers),
-    update: (id: number, updates: Partial<User>) => update<User>(USERS_KEY, id, updates, initialUsers),
-    delete: (id: number) => remove<User>(USERS_KEY, id, initialUsers),
+    getAll: async (params?: { page?: number; limit?: number; search?: string }) => {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.set('page', params.page.toString());
+        if (params?.limit) searchParams.set('limit', params.limit.toString());
+        if (params?.search) searchParams.set('search', params.search);
+
+        const url = `/api/users${searchParams.toString() ? `?${searchParams}` : ''}`;
+        const response = await apiCall<PaginatedResponse<User>>(url);
+        return response.data;
+    },
+
+    getById: async (id: number) => {
+        return apiCall<User>(`/api/users/${id}`);
+    },
+
+    create: async (user: { username: string; fullName: string; password: string; roleId: number; status?: string }) => {
+        return apiCall<User>('/api/users', {
+            method: 'POST',
+            body: JSON.stringify(user),
+        });
+    },
+
+    update: async (id: number, updates: Partial<User & { password?: string }>) => {
+        return apiCall<User>(`/api/users/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    delete: async (id: number) => {
+        return apiCall<{ message: string }>(`/api/users/${id}`, {
+            method: 'DELETE',
+        });
+    },
 };
 
-// Role operations
+// Role Service
 export const roleService = {
-    getAll: () => getAll<Role>(ROLES_KEY, initialRoles),
-    getById: (id: number) => getById<Role>(ROLES_KEY, id, initialRoles),
-    create: (role: Omit<Role, 'id' | 'createdAt'>) => create<Role>(ROLES_KEY, role, initialRoles),
-    update: (id: number, updates: Partial<Role>) => update<Role>(ROLES_KEY, id, updates, initialRoles),
-    delete: (id: number) => remove<Role>(ROLES_KEY, id, initialRoles),
+    getAll: async (params?: { page?: number; limit?: number }) => {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.set('page', params.page.toString());
+        if (params?.limit) searchParams.set('limit', params.limit.toString());
+
+        const url = `/api/roles${searchParams.toString() ? `?${searchParams}` : ''}`;
+        const response = await apiCall<PaginatedResponse<Role>>(url);
+        return response.data;
+    },
+
+    getById: async (id: number) => {
+        return apiCall<Role>(`/api/roles/${id}`);
+    },
+
+    create: async (role: { name: string; description?: string }) => {
+        return apiCall<Role>('/api/roles', {
+            method: 'POST',
+            body: JSON.stringify(role),
+        });
+    },
+
+    update: async (id: number, updates: Partial<Role>) => {
+        return apiCall<Role>(`/api/roles/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    delete: async (id: number) => {
+        return apiCall<{ message: string }>(`/api/roles/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Category Service
+export const categoryService = {
+    getAll: async (params?: { page?: number; limit?: number }) => {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.set('page', params.page.toString());
+        if (params?.limit) searchParams.set('limit', (params.limit || 100).toString());
+
+        const url = `/api/categories${searchParams.toString() ? `?${searchParams}` : ''}`;
+        const response = await apiCall<PaginatedResponse<Category>>(url);
+        return response.data;
+    },
+
+    getById: async (id: number) => {
+        return apiCall<Category>(`/api/categories/${id}`);
+    },
+
+    create: async (category: { name: string; description?: string }) => {
+        return apiCall<Category>('/api/categories', {
+            method: 'POST',
+            body: JSON.stringify(category),
+        });
+    },
+
+    update: async (id: number, updates: Partial<Category>) => {
+        return apiCall<Category>(`/api/categories/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    delete: async (id: number) => {
+        return apiCall<{ message: string }>(`/api/categories/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Auth Service
+export const authService = {
+    login: async (username: string, password: string) => {
+        const response = await apiCall<{ token: string; user: { id: number; username: string; fullName: string; role: string } }>(
+            '/api/auth/login',
+            {
+                method: 'POST',
+                body: JSON.stringify({ username, password }),
+            }
+        );
+
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('auth_token', response.token);
+            localStorage.setItem('auth_user', JSON.stringify(response.user));
+        }
+
+        return response;
+    },
+
+    logout: () => {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+        }
+    },
+
+    getCurrentUser: () => {
+        if (typeof window === 'undefined') return null;
+        const user = localStorage.getItem('auth_user');
+        return user ? JSON.parse(user) : null;
+    },
+
+    getToken: () => {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem('auth_token');
+    },
+
+    isAuthenticated: () => {
+        return !!authService.getToken();
+    },
 };

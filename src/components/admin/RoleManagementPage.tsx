@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { roleService, Role } from '@/utils/adminData';
 import AddRoleModal from './AddRoleModal';
 import EditRoleModal from './EditRoleModal';
@@ -9,6 +9,8 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 
 export default function RoleManagementPage() {
     const [roles, setRoles] = useState<Role[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
@@ -18,19 +20,29 @@ export default function RoleManagementPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const loadRoles = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await roleService.getAll({ limit: 100 });
+            setRoles(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load roles');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         loadRoles();
-    }, []);
-
-    const loadRoles = () => {
-        setRoles(roleService.getAll());
-    };
+    }, [loadRoles]);
 
     // Filter roles by search
     const filteredRoles = roles.filter(role =>
         role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        role.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (role.description || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     // Pagination
@@ -48,16 +60,40 @@ export default function RoleManagementPage() {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (selectedRole) {
-            roleService.delete(selectedRole.id);
-            loadRoles();
-            setSelectedRole(null);
+            try {
+                setIsDeleting(true);
+                await roleService.delete(selectedRole.id);
+                await loadRoles();
+                setSelectedRole(null);
+                setIsDeleteModalOpen(false);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to delete role');
+            } finally {
+                setIsDeleting(false);
+            }
         }
     };
 
+    if (loading) {
+        return (
+            <div className="p-6 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-[#ffcc00]" />
+                <span className="ml-2 text-gray-500">Memuat data...</span>
+            </div>
+        );
+    }
+
     return (
         <div className="p-6">
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    {error}
+                    <button onClick={loadRoles} className="ml-2 underline">Coba lagi</button>
+                </div>
+            )}
+
             {/* Header Actions */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <h2 className="text-xl font-semibold text-[#2f2f2f]">Daftar Role</h2>
@@ -192,6 +228,7 @@ export default function RoleManagementPage() {
                 onConfirm={confirmDelete}
                 title="Hapus Role"
                 message={`Apakah Anda yakin ingin menghapus role "${selectedRole?.name}"?`}
+                isLoading={isDeleting}
             />
         </div>
     );

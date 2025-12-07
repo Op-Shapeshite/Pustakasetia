@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { userService, User, roleService } from '@/utils/adminData';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { userService, User } from '@/utils/adminData';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
@@ -18,14 +20,24 @@ export default function UserManagementPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const loadUsers = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await userService.getAll({ limit: 100 });
+            setUsers(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load users');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         loadUsers();
-    }, []);
-
-    const loadUsers = () => {
-        setUsers(userService.getAll());
-    };
+    }, [loadUsers]);
 
     // Filter users by search
     const filteredUsers = users.filter(user =>
@@ -48,16 +60,40 @@ export default function UserManagementPage() {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (selectedUser) {
-            userService.delete(selectedUser.id);
-            loadUsers();
-            setSelectedUser(null);
+            try {
+                setIsDeleting(true);
+                await userService.delete(selectedUser.id);
+                await loadUsers();
+                setSelectedUser(null);
+                setIsDeleteModalOpen(false);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to delete user');
+            } finally {
+                setIsDeleting(false);
+            }
         }
     };
 
+    if (loading) {
+        return (
+            <div className="p-6 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-[#ffcc00]" />
+                <span className="ml-2 text-gray-500">Memuat data...</span>
+            </div>
+        );
+    }
+
     return (
         <div className="p-6">
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    {error}
+                    <button onClick={loadUsers} className="ml-2 underline">Coba lagi</button>
+                </div>
+            )}
+
             {/* Header Actions */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <h2 className="text-xl font-semibold text-[#2f2f2f]">Daftar Pengguna</h2>
@@ -109,12 +145,12 @@ export default function UserManagementPage() {
                                     <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.role}</td>
                                     <td className="px-4 py-3">
                                         <span className={`
-                      inline-flex px-3 py-1 rounded-full text-xs font-medium
-                      ${user.status === 'active'
+                                            inline-flex px-3 py-1 rounded-full text-xs font-medium
+                                            ${user.status === 'active'
                                                 ? 'bg-green-100 text-green-700'
                                                 : 'bg-red-100 text-red-700'
                                             }
-                    `}>
+                                        `}>
                                             {user.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
                                         </span>
                                     </td>
@@ -206,6 +242,7 @@ export default function UserManagementPage() {
                 onConfirm={confirmDelete}
                 title="Hapus Pengguna"
                 message={`Apakah Anda yakin ingin menghapus pengguna "${selectedUser?.fullName}"?`}
+                isLoading={isDeleting}
             />
         </div>
     );

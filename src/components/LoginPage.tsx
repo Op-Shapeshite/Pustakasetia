@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAppState } from "@/contexts/AppStateContext";
+import { authService } from "@/utils/adminData";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,19 +12,28 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!username || !password) {
-      alert("Mohon isi username dan password!");
+      setError("Mohon isi username dan password!");
       return;
     }
 
-    // Simulate login
-    alert(`Login berhasil! Selamat datang, ${username}`);
-    login();
-    router.push('/dashboard');
+    try {
+      setIsLoading(true);
+      const response = await authService.login(username, password);
+      login();
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login gagal. Cek username dan password.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -48,6 +58,13 @@ export default function LoginPage() {
           Log In
         </h1>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6 md:space-y-8">
           {/* Username Field */}
@@ -64,7 +81,8 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Masukkan username"
-              className="w-full h-[50px] bg-white border border-[#cdcdcd] rounded-[7px] px-6 font-['Poppins',sans-serif] text-[16px] text-[#2f2f2f] placeholder:text-[#a7a7a7] focus:outline-none focus:border-[#ffcc00] transition-colors"
+              disabled={isLoading}
+              className="w-full h-[50px] bg-white border border-[#cdcdcd] rounded-[7px] px-6 font-['Poppins',sans-serif] text-[16px] text-[#2f2f2f] placeholder:text-[#a7a7a7] focus:outline-none focus:border-[#ffcc00] transition-colors disabled:opacity-50"
             />
           </div>
 
@@ -83,7 +101,8 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan password"
-                className="w-full h-[50px] bg-white border border-[#cdcdcd] rounded-[7px] px-6 pr-12 font-['Poppins',sans-serif] text-[16px] text-[#2f2f2f] placeholder:text-[#a7a7a7] focus:outline-none focus:border-[#ffcc00] transition-colors"
+                disabled={isLoading}
+                className="w-full h-[50px] bg-white border border-[#cdcdcd] rounded-[7px] px-6 pr-12 font-['Poppins',sans-serif] text-[16px] text-[#2f2f2f] placeholder:text-[#a7a7a7] focus:outline-none focus:border-[#ffcc00] transition-colors disabled:opacity-50"
               />
               <button
                 type="button"
@@ -102,11 +121,20 @@ export default function LoginPage() {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full h-[50px] bg-[#ffcc00] rounded-[7px] font-['Poppins',sans-serif] font-semibold text-[#2f2f2f] text-[18px] md:text-[20px] hover:opacity-90 transition-opacity mt-8 md:mt-12"
+            disabled={isLoading}
+            className="w-full h-[50px] bg-[#ffcc00] rounded-[7px] font-['Poppins',sans-serif] font-semibold text-[#2f2f2f] text-[18px] md:text-[20px] hover:opacity-90 transition-opacity mt-8 md:mt-12 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Login Now
+            {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+            {isLoading ? 'Logging in...' : 'Login Now'}
           </button>
         </form>
+
+        {/* Default Credentials Info */}
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg text-center">
+          <p className="text-sm text-gray-600">
+            Default: <strong>admin</strong> / <strong>admin123</strong>
+          </p>
+        </div>
 
         {/* Back to Home Link */}
         <button
