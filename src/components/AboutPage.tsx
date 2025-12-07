@@ -1,6 +1,6 @@
-import imgRectangle1304 from "figma:asset/5356fe8fc2ba02e35b411522adcb69849c779ed7.png";
-import imgImage from "figma:asset/35c0c172a00f3c75412ecd51b8693a82d9a75311.png";
-import imgImage6 from "figma:asset/5745484c8acedb94064cbc94f251029872ab743d.png";
+const imgRectangle1304 = "/img/library-background.png";
+const imgImage = "/img/book-cover-optimized.png";
+const imgImage6 = "/img/book-cover-optimized.png";
 
 export default function AboutPage() {
   return (
@@ -9,15 +9,15 @@ export default function AboutPage() {
       <section className="relative w-full h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <img 
-            src={imgRectangle1304} 
-            alt="Books background" 
+          <img
+            src={imgRectangle1304}
+            alt="Books background"
             className="w-full h-full object-cover"
           />
         </div>
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/50" />
-        
+
         {/* Content */}
         <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
           <h1 className="font-['Poppins',sans-serif] text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 md:mb-6">
@@ -59,9 +59,9 @@ export default function AboutPage() {
             {/* Legal dan Tercatat */}
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
               <div className="flex-shrink-0 w-32 md:w-40 lg:w-[174px]">
-                <img 
-                  src={imgImage6} 
-                  alt="Legal Document" 
+                <img
+                  src={imgImage6}
+                  alt="Legal Document"
                   className="w-full h-auto object-contain"
                 />
               </div>
@@ -78,9 +78,9 @@ export default function AboutPage() {
             {/* Kantor Pustaka Setia */}
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
               <div className="flex-shrink-0 w-32 md:w-40 lg:w-[163px]">
-                <img 
-                  src={imgImage} 
-                  alt="Office Building" 
+                <img
+                  src={imgImage}
+                  alt="Office Building"
                   className="w-full h-auto object-contain"
                 />
               </div>

@@ -1,25 +1,25 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { 
-  BookCard, 
-  CategoryFilter, 
-  SearchBar, 
-  PaginationControls 
+import { useRouter } from 'next/navigation';
+import {
+  BookCard,
+  CategoryFilter,
+  SearchBar,
+  PaginationControls
 } from './ui';
 import { Book, BookCategory } from '../types/book';
 import { getPaginatedBooks, searchBooks } from '../data/books';
 import Footer from './Footer';
 
 interface ProductsPageProps {
-  onBookClick: (book: Book) => void;
-  onNavigate: (page: string) => void;
   initialCategory?: BookCategory | 'all';
 }
 
-export default function ProductsPage({ 
-  onBookClick, 
-  onNavigate,
-  initialCategory = 'all' 
+export default function ProductsPage({
+  initialCategory = 'all'
 }: ProductsPageProps) {
+  const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<BookCategory | 'all'>(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,15 +36,12 @@ export default function ProductsPage({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Reset to page 1 when category or search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory, searchQuery]);
 
-  // Get books based on search or category filter
   const getFilteredBooks = () => {
     if (searchQuery.trim()) {
-      // Search across all books, then apply category filter if set
       let results = searchBooks(searchQuery);
 
       if (selectedCategory !== 'all') {
@@ -60,11 +57,15 @@ export default function ProductsPage({
         totalItems: results.length
       };
     }
-    
+
     return getPaginatedBooks(selectedCategory, currentPage, itemsPerPage);
   };
 
   const { books, totalPages, totalItems } = getFilteredBooks();
+
+  const handleBookClick = (book: Book) => {
+    router.push(`/books/${book.id}`);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -107,7 +108,7 @@ export default function ProductsPage({
         <div className="mt-6 text-sm text-neutral-600">
           {searchQuery ? (
             <p>
-              Menampilkan {books.length} hasil untuk "{searchQuery}" 
+              Menampilkan {books.length} hasil untuk "{searchQuery}"
               {selectedCategory !== 'all' && ` di kategori ${selectedCategory}`}
             </p>
           ) : (
@@ -128,7 +129,7 @@ export default function ProductsPage({
                 <BookCard
                   key={book.id}
                   book={book}
-                  onClick={() => onBookClick(book)}
+                  onClick={() => handleBookClick(book)}
                   variant={isMobile ? 'mobile' : 'default'}
                 />
               ))}
@@ -159,7 +160,7 @@ export default function ProductsPage({
       </div>
 
       {/* Footer */}
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }

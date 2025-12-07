@@ -1,5 +1,5 @@
 import { X, ShoppingCart, ArrowLeft } from "lucide-react";
-import imgRectangle1304 from "figma:asset/5356fe8fc2ba02e35b411522adcb69849c779ed7.png";
+// Image is hardcoded in the component
 import { addToCart } from "../utils/cartStorage";
 
 interface Book {
@@ -40,10 +40,10 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
       isbn: book.isbn,
       edition: book.edition
     });
-    
+
     // Show success message
     alert(`"${book.title}" berhasil ditambahkan ke keranjang!`);
-    
+
     // Call the optional callback
     if (onAddToCart) {
       onAddToCart();
@@ -55,13 +55,13 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
       <div className="relative w-full max-w-6xl bg-neutral-50 rounded-[24px] shadow-2xl my-8">
         {/* Header with Background Image */}
         <div className="relative h-48 md:h-64 lg:h-80 rounded-t-[24px] overflow-hidden">
-          <img 
-            src="/img/library-background.png" 
-            alt="Background" 
+          <img
+            src="/img/library-background.png"
+            alt="Background"
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/50" />
-          
+
           {/* Close Button */}
           <button
             onClick={onClose}
@@ -89,9 +89,9 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
               {/* Book Cover */}
               <div className="w-full max-w-[300px] mx-auto lg:mx-0">
                 <div className="aspect-[286/417] relative rounded-[12px] overflow-hidden shadow-[20px_20px_30px_0px_rgba(0,0,0,0.25)]">
-                  <img 
-                    src={book.image} 
-                    alt={book.title} 
+                  <img
+                    src={book.image}
+                    alt={book.title}
                     className="w-full h-full object-cover"
                   />
                 </div>

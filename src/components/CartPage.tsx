@@ -1,12 +1,12 @@
+'use client';
+
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { getCartItems, removeFromCart, getCartTotal, clearCart, CartItem } from "../utils/cartStorage";
 
-interface CartPageProps {
-  onBack: () => void;
-}
-
-export default function CartPage({ onBack }: CartPageProps) {
+export default function CartPage() {
+  const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -16,12 +16,11 @@ export default function CartPage({ onBack }: CartPageProps) {
 
   useEffect(() => {
     loadCart();
-    
-    // Listen for cart updates
+
     const handleCartUpdate = () => {
       loadCart();
     };
-    
+
     window.addEventListener('cartUpdated', handleCartUpdate);
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, []);
@@ -36,32 +35,35 @@ export default function CartPage({ onBack }: CartPageProps) {
     loadCart();
   };
 
+  const handleBack = () => {
+    router.push('/products');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.phone || !formData.address) {
       alert("Mohon lengkapi semua data!");
       return;
     }
 
-    // Prepare WhatsApp message
     let message = `*PESANAN BUKU*\n\n`;
     message += `*Data Penerima:*\n`;
     message += `Nama: ${formData.name}\n`;
     message += `Telepon: ${formData.phone}\n`;
     message += `Alamat: ${formData.address}\n\n`;
     message += `*Detail Pesanan:*\n`;
-    
+
     cartItems.forEach((item, index) => {
       message += `\n${index + 1}. ${item.title}\n`;
       message += `   Harga: ${item.price}\n`;
       message += `   Jumlah: ${item.quantity}\n`;
     });
-    
+
     const subtotal = getCartTotal();
     const shipping = 15000;
     const total = subtotal + shipping;
-    
+
     message += `\n*Ringkasan:*\n`;
     message += `Sub Total: Rp${subtotal.toLocaleString('id-ID')}\n`;
     message += `Ongkos Kirim: Rp${shipping.toLocaleString('id-ID')}\n`;
@@ -69,8 +71,7 @@ export default function CartPage({ onBack }: CartPageProps) {
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-    
-    // Clear cart after order
+
     clearCart();
     loadCart();
     setFormData({ name: "", phone: "", address: "" });
@@ -91,7 +92,7 @@ export default function CartPage({ onBack }: CartPageProps) {
             Belum ada buku yang ditambahkan ke keranjang
           </p>
           <button
-            onClick={onBack}
+            onClick={handleBack}
             className="bg-[#ffcc00] text-[#2f2f2f] font-['Poppins',sans-serif] px-8 py-3 rounded-[6px] hover:opacity-90 transition-opacity"
           >
             Lihat Produk
@@ -110,7 +111,7 @@ export default function CartPage({ onBack }: CartPageProps) {
             Pesanan Saya
           </h1>
           <button
-            onClick={onBack}
+            onClick={handleBack}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft className="h-6 w-6 text-[#2f2f2f]" />
@@ -127,8 +128,8 @@ export default function CartPage({ onBack }: CartPageProps) {
                     {/* Book Cover */}
                     <div className="w-24 md:w-32 flex-shrink-0">
                       <div className="aspect-[170/248] rounded-[12px] overflow-hidden">
-                        <img 
-                          src={item.image} 
+                        <img
+                          src={item.image}
                           alt={item.title}
                           className="w-full h-full object-cover"
                         />

@@ -1,5 +1,5 @@
 import { ArrowLeft, ShoppingCart } from "lucide-react";
-import imgRectangle1304 from "figma:asset/5356fe8fc2ba02e35b411522adcb69849c779ed7.png";
+const imgRectangle1304 = "/img/library-background.png";
 import { addToCart } from "../utils/cartStorage";
 
 interface Book {
@@ -38,7 +38,7 @@ export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
       isbn: book.isbn,
       edition: book.edition
     });
-    
+
     alert(`"${book.title}" berhasil ditambahkan ke keranjang!`);
   };
 
@@ -46,13 +46,13 @@ export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
     <div className="bg-neutral-50 min-h-screen w-full">
       {/* Background Image Section - 374px height */}
       <div className="relative h-[200px] sm:h-[280px] md:h-[374px] w-full overflow-hidden">
-        <img 
-          src={imgRectangle1304} 
-          alt="Background" 
+        <img
+          src={imgRectangle1304}
+          alt="Background"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/50" />
-        
+
         {/* Back Button */}
         <button
           onClick={onBack}
@@ -71,9 +71,9 @@ export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
             <div className="flex justify-center lg:justify-start flex-shrink-0">
               <div className="w-[240px] sm:w-[286px] md:w-[318px]">
                 <div className="aspect-[318/465] relative rounded-[12px] overflow-hidden shadow-[20px_20px_30px_0px_rgba(0,0,0,0.25)]">
-                  <img 
-                    src={book.image} 
-                    alt={book.title} 
+                  <img
+                    src={book.image}
+                    alt={book.title}
                     className="w-full h-full object-cover"
                   />
                 </div>

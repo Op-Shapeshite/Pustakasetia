@@ -1,5 +1,5 @@
 import svgPaths from "../imports/svg-zx896x9umy";
-import imgPustakaSetiaTracing2 from "figma:asset/a236558e0f6a9a9f56ec11523f0449430ba96187.png";
+import Link from 'next/link';
 
 function TablerCopyright() {
   return (
@@ -41,7 +41,7 @@ function LogosWhatsappIcon() {
   );
 }
 
-export default function Footer({ onNavigate }: { onNavigate?: (page: "home" | "about" | "products" | "contact") => void }) {
+export default function Footer() {
   return (
     <footer className="w-full bg-[#d9d9d9] mt-8 md:mt-12 lg:mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
@@ -49,9 +49,9 @@ export default function Footer({ onNavigate }: { onNavigate?: (page: "home" | "a
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Company Info */}
           <div className="space-y-4">
-            <img 
-              src='/img/logo.png' 
-              alt="Pustaka Setia" 
+            <img
+              src='/img/logo.png'
+              alt="Pustaka Setia"
               className="h-16 w-auto object-contain"
             />
             <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base leading-relaxed">
@@ -63,15 +63,15 @@ export default function Footer({ onNavigate }: { onNavigate?: (page: "home" | "a
           <div className="space-y-3">
             <h3 className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg md:text-xl">Kategori</h3>
             <nav className="flex flex-col gap-2">
-              <button onClick={() => onNavigate?.("about")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base hover:opacity-70 transition-opacity text-left">
+              <Link href="/about" className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base hover:opacity-70 transition-opacity text-left">
                 Tentang Kami
-              </button>
-              <button onClick={() => onNavigate?.("products")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base hover:opacity-70 transition-opacity text-left">
+              </Link>
+              <Link href="/products" className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base hover:opacity-70 transition-opacity text-left">
                 Produk
-              </button>
-              <button onClick={() => onNavigate?.("contact")} className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base hover:opacity-70 transition-opacity text-left">
+              </Link>
+              <Link href="/contact" className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base hover:opacity-70 transition-opacity text-left">
                 Kontak Kami
-              </button>
+              </Link>
             </nav>
           </div>
 
@@ -97,8 +97,8 @@ export default function Footer({ onNavigate }: { onNavigate?: (page: "home" | "a
             <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base">
               Kirim pesan ke admin
             </p>
-            <a 
-              href="https://api.whatsapp.com/send?phone=6282116109258" 
+            <a
+              href="https://api.whatsapp.com/send?phone=6282116109258"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center w-fit rounded-[7px] overflow-hidden shadow-lg hover:shadow-xl transition-shadow"

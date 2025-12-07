@@ -1,0 +1,20 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: '**',
+            },
+        ],
+    },
+    // Support for asset imports
+    webpack: (config) => {
+        config.resolve.alias = {
+            ...config.resolve.alias,
+        };
+        return config;
+    },
+}
+
+module.exports = nextConfig

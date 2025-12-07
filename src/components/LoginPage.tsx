@@ -1,30 +1,33 @@
+'use client';
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import imgPustakaSetiaTracing1 from "figma:asset/a236558e0f6a9a9f56ec11523f0449430ba96187.png";
+import { useAppState } from "@/contexts/AppStateContext";
 
-interface LoginPageProps {
-  onBack: () => void;
-  onLoginSuccess: () => void;
-}
-
-export default function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
+export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAppState();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username || !password) {
       alert("Mohon isi username dan password!");
       return;
     }
 
-    // Simulate login (you can connect to backend here)
+    // Simulate login
     alert(`Login berhasil! Selamat datang, ${username}`);
-    
-    // Redirect to dashboard after successful login
-    onLoginSuccess();
+    login();
+    router.push('/dashboard');
+  };
+
+  const handleBack = () => {
+    router.push('/');
   };
 
   return (
@@ -33,9 +36,9 @@ export default function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
       <div className="bg-white rounded-[24px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-full max-w-[550px] px-6 sm:px-8 md:px-12 lg:px-16 py-12 md:py-16">
         {/* Logo */}
         <div className="flex justify-center mb-8 md:mb-12">
-          <img 
-            src={imgPustakaSetiaTracing1} 
-            alt="Pustaka Setia Logo" 
+          <img
+            src="/img/logo.png"
+            alt="Pustaka Setia Logo"
             className="w-[70px] h-[64px] sm:w-[85px] sm:h-[78px] object-cover"
           />
         </div>
@@ -49,8 +52,8 @@ export default function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
         <form onSubmit={handleLogin} className="space-y-6 md:space-y-8">
           {/* Username Field */}
           <div>
-            <label 
-              htmlFor="username" 
+            <label
+              htmlFor="username"
               className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-[18px] md:text-[20px] block mb-3"
             >
               Username
@@ -67,8 +70,8 @@ export default function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
 
           {/* Password Field */}
           <div>
-            <label 
-              htmlFor="password" 
+            <label
+              htmlFor="password"
               className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-[18px] md:text-[20px] block mb-3"
             >
               Password
@@ -107,7 +110,7 @@ export default function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
 
         {/* Back to Home Link */}
         <button
-          onClick={onBack}
+          onClick={handleBack}
           className="w-full text-center font-['Poppins',sans-serif] text-[#a7a7a7] text-[14px] md:text-[16px] mt-6 hover:text-[#2f2f2f] transition-colors"
         >
           Kembali ke Beranda

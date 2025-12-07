@@ -1,18 +1,17 @@
+'use client';
+
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { BookCard } from './ui';
-import { Book, BookCategory } from '../types/book';
+import { Book } from '../types/book';
 import { books } from '../data/books';
 import Hero from './Hero';
 import Footer from './Footer';
 
-interface HomePageProps {
-  onBookClick: (book: Book) => void;
-  onNavigate: (page: string, category?: BookCategory) => void;
-}
-
-export default function HomePage({ onBookClick, onNavigate }: HomePageProps) {
+export default function HomePage() {
+  const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
-  const [visibleBooks, setVisibleBooks] = useState(8); // Start with 8 books
+  const [visibleBooks, setVisibleBooks] = useState(8);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -25,23 +24,23 @@ export default function HomePage({ onBookClick, onNavigate }: HomePageProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load more books (8 at a time) with animation
   const handleLoadMore = () => {
     setIsLoading(true);
-    
-    // Simulate loading delay for smooth animation
+
     setTimeout(() => {
       setVisibleBooks(prev => Math.min(prev + 8, books.length));
       setIsLoading(false);
-      
-      // Smooth scroll to new content
+
       setTimeout(() => {
         window.scrollBy({ top: 400, behavior: 'smooth' });
       }, 100);
     }, 300);
   };
 
-  // Get books to display based on visibleBooks state
+  const handleBookClick = (book: Book) => {
+    router.push(`/books/${book.id}`);
+  };
+
   const displayBooks = books.slice(0, visibleBooks);
   const hasMoreBooks = visibleBooks < books.length;
 
@@ -50,7 +49,7 @@ export default function HomePage({ onBookClick, onNavigate }: HomePageProps) {
       {/* Hero Section */}
       <Hero onExploreClick={() => window.scrollBy({ top: 600, behavior: 'smooth' })} />
 
-      {/* All Books Grid - 4 columns desktop, 2 columns mobile */}
+      {/* All Books Grid */}
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 py-8 md:py-12">
         {/* Section Header */}
         <div className="mb-6 md:mb-8">
@@ -62,7 +61,7 @@ export default function HomePage({ onBookClick, onNavigate }: HomePageProps) {
           </p>
         </div>
 
-        {/* Books Grid with Parallax Animation */}
+        {/* Books Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {displayBooks.map((book, index) => (
             <div
@@ -75,14 +74,14 @@ export default function HomePage({ onBookClick, onNavigate }: HomePageProps) {
             >
               <BookCard
                 book={book}
-                onClick={() => onBookClick(book)}
+                onClick={() => handleBookClick(book)}
                 variant={isMobile ? 'mobile' : 'default'}
               />
             </div>
           ))}
         </div>
 
-        {/* Load More Link */}
+        {/* Load More */}
         {hasMoreBooks && (
           <div className="flex justify-center mt-8 md:mt-12">
             <button
@@ -100,7 +99,7 @@ export default function HomePage({ onBookClick, onNavigate }: HomePageProps) {
       </div>
 
       {/* Footer */}
-      <Footer onNavigate={onNavigate} />
+      <Footer />
     </div>
   );
 }
