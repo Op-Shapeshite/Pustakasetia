@@ -62,7 +62,7 @@ export default function AdminLayout({
             />
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-h-screen md:ml-0">
+            <div className="flex-1 flex flex-col min-h-screen md:ml-[270px]">
                 {/* Header */}
                 <AdminHeader
                     title={title}
@@ -70,12 +70,8 @@ export default function AdminLayout({
                 />
 
                 {/* Content */}
-                <div className="-mt-16 relative z-10">
-                    <div className="mx-4 md:mx-6">
-                        <div className="bg-white rounded-2xl shadow-lg min-h-[calc(100vh-200px)]">
-                            {children}
-                        </div>
-                    </div>
+                <div className="relative z-10">
+                    {children}
                 </div>
             </div>
         </div>

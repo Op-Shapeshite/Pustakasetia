@@ -74,8 +74,8 @@ export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarPro
 
             {/* Sidebar */}
             <aside className={`
-        fixed md:static top-0 left-0 h-screen bg-white z-50
-        transition-transform duration-300 w-[200px] shadow-lg
+        fixed top-0 left-0 h-screen bg-white z-50
+        transition-transform duration-300 w-[270px] shadow-lg
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
                 {/* Mobile Close Button */}
@@ -86,15 +86,20 @@ export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarPro
                     <X className="w-6 h-6" />
                 </button>
 
-                {/* Logo */}
-                <div className="p-4 border-b border-gray-100">
-                    <div className="flex items-center gap-2">
+                {/* Logo & Profile Section */}
+                <div className="pt-[50px] pb-6 px-6 border-b border-gray-100 flex flex-col items-center text-center">
+
+                    {/* User Profile from Figma */}
+                    <div className="w-20 h-20 bg-gray-200 rounded-full mb-4 overflow-hidden shadow-sm">
                         <img
                             src="/img/logo.png"
-                            alt="Pustaka Setia"
-                            className="w-10 h-10 rounded-lg"
+                            alt="Admin Profile"
+                            className="w-full h-full object-cover"
                         />
-                        <span className="font-semibold text-sm text-[#2f2f2f]">PUSTAKA SETIA</span>
+                    </div>
+                    <div className="mb-6">
+                        <h3 className="font-bold text-[#2f2f2f] text-xl mb-1">Admin</h3>
+                        <p className="text-sm text-gray-500">Admin Pustaka Setia</p>
                     </div>
                 </div>
 
