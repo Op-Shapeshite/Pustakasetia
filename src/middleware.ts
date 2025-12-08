@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'pustakasetia-secret-key-change-in-production';
+// JWT_SECRET must be set in environment variables
+if (!process.env.JWT_SECRET) {
+    console.warn('WARNING: JWT_SECRET not set in middleware. Using fallback for development only.');
+}
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-in-production';
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -13,6 +17,12 @@ const publicRoutes = [
 const publicGetRoutes = [
     '/api/books',
     '/api/categories',
+];
+
+// Routes that require Admin role (all methods)
+const adminOnlyRoutes = [
+    '/api/users',
+    '/api/roles',
 ];
 
 export async function middleware(request: NextRequest) {
@@ -51,11 +61,23 @@ export async function middleware(request: NextRequest) {
         const secret = new TextEncoder().encode(JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
 
+        const userRole = String(payload.role);
+
+        // Check admin-only routes
+        if (adminOnlyRoutes.some(route => pathname.startsWith(route))) {
+            if (userRole !== 'Admin') {
+                return NextResponse.json(
+                    { error: 'Forbidden - Admin access required' },
+                    { status: 403 }
+                );
+            }
+        }
+
         // Add user info to request headers for downstream use
         const requestHeaders = new Headers(request.headers);
         requestHeaders.set('x-user-id', String(payload.userId));
         requestHeaders.set('x-username', String(payload.username));
-        requestHeaders.set('x-user-role', String(payload.role));
+        requestHeaders.set('x-user-role', userRole);
 
         return NextResponse.next({
             request: {
@@ -73,3 +95,4 @@ export async function middleware(request: NextRequest) {
 export const config = {
     matcher: '/api/:path*',
 };
+

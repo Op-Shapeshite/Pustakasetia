@@ -62,6 +62,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Password complexity validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return NextResponse.json(
+                { error: 'Password must be at least 8 characters with uppercase, lowercase, and number' },
+                { status: 400 }
+            );
+        }
+
         const hashedPassword = await hashPassword(password);
 
         const user = await prisma.user.create({

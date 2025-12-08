@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
             await mkdir(UPLOAD_DIR, { recursive: true });
         }
 
-        // Generate unique filename
+        // Generate secure unique filename (no user input)
         const timestamp = Date.now();
-        const originalName = file.name.replace(/[^a-zA-Z0-9.]/g, '-');
-        const filename = `${timestamp}-${originalName.replace(/\.[^.]+$/, '')}.webp`;
+        const randomId = crypto.randomUUID().slice(0, 8);
+        const filename = `${timestamp}-${randomId}.webp`;
         const filepath = path.join(UPLOAD_DIR, filename);
 
         // Convert file to buffer

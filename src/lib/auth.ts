@@ -1,7 +1,11 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'pustakasetia-secret-key-change-in-production';
+// JWT_SECRET must be set in environment variables
+if (!process.env.JWT_SECRET) {
+    console.warn('WARNING: JWT_SECRET not set. Using fallback for development only.');
+}
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-in-production';
 const SALT_ROUNDS = 10;
 
 export interface JWTPayload {
@@ -28,7 +32,7 @@ export async function comparePassword(password: string, hash: string): Promise<b
  * Generate a JWT token
  */
 export function generateToken(payload: JWTPayload): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' }); // Reduced from 7d for security
 }
 
 /**
