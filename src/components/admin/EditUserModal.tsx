@@ -44,7 +44,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                 fullName: user.fullName,
                 username: user.username,
                 password: '', // Password is not returned from API for security
-                role: user.role,
+                role: user.role.name,
                 status: user.status,
             });
         }

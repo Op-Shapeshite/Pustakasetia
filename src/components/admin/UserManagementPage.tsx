@@ -148,7 +148,7 @@ export default function UserManagementPage() {
                                     <td className="px-4 py-3 text-sm text-[#2f2f2f]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                     <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.fullName}</td>
                                     <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.username}</td>
-                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.role}</td>
+                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.role?.name || '-'}</td>
                                     <td className="px-4 py-3">
                                         <span className={`
                                             inline-flex px-3 py-1 rounded-full text-xs font-medium

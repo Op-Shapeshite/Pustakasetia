@@ -24,7 +24,7 @@ export interface User {
     id: number;
     username: string;
     fullName: string;
-    role: string;
+    role: Role;
     roleId: number;
     status: 'active' | 'inactive';
     createdAt: string;
