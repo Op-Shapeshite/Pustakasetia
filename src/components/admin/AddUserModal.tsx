@@ -25,23 +25,37 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
 
     useEffect(() => {
         setMounted(true);
-        setRoles(roleService.getAll());
+        // Load roles asynchronously
+        const loadRoles = async () => {
+            try {
+                const response = await roleService.getAll({ limit: 100 });
+                setRoles(response.data);
+            } catch (err) {
+                console.error('Failed to load roles:', err);
+            }
+        };
+        loadRoles();
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        userService.create({
-            fullName: formData.fullName,
-            username: formData.username,
-            password: formData.password,
-            role: formData.role,
-            status: formData.status,
-        });
+        try {
+            const roleId = roles.find(r => r.name === formData.role)?.id;
+            await userService.create({
+                fullName: formData.fullName,
+                username: formData.username,
+                password: formData.password,
+                roleId: roleId || 1,
+                status: formData.status,
+            });
 
-        onSuccess();
-        onClose();
-        resetForm();
+            onSuccess();
+            onClose();
+            resetForm();
+        } catch (err) {
+            console.error('Failed to create user:', err);
+        }
     };
 
     const resetForm = () => {

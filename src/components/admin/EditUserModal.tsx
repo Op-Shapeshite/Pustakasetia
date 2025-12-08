@@ -26,7 +26,16 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
 
     useEffect(() => {
         setMounted(true);
-        setRoles(roleService.getAll());
+        // Load roles asynchronously
+        const loadRoles = async () => {
+            try {
+                const response = await roleService.getAll({ limit: 100 });
+                setRoles(response.data);
+            } catch (err) {
+                console.error('Failed to load roles:', err);
+            }
+        };
+        loadRoles();
     }, []);
 
     useEffect(() => {
@@ -34,18 +43,32 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
             setFormData({
                 fullName: user.fullName,
                 username: user.username,
-                password: user.password,
+                password: '', // Password is not returned from API for security
                 role: user.role,
                 status: user.status,
             });
         }
     }, [user]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        userService.update(user.id, formData);
-        onSuccess();
-        onClose();
+        try {
+            // Only include password if it was changed
+            const updateData: Record<string, unknown> = {
+                fullName: formData.fullName,
+                username: formData.username,
+                roleId: roles.find(r => r.name === formData.role)?.id,
+                status: formData.status,
+            };
+            if (formData.password) {
+                updateData.password = formData.password;
+            }
+            await userService.update(user.id, updateData);
+            onSuccess();
+            onClose();
+        } catch (err) {
+            console.error('Failed to update user:', err);
+        }
     };
 
     if (!isOpen || !mounted) return null;

@@ -60,9 +60,9 @@ export default function DashboardHomePage() {
                 // I will fetch with limit 1000 for now to be safe, or just 1.
 
                 setStats({
-                    books: books.length,
-                    users: users.length,
-                    roles: roles.length,
+                    books: books.pagination?.total ?? 0,
+                    users: users.pagination?.total ?? 0,
+                    roles: roles.pagination?.total ?? 0,
                 });
             } catch (error) {
                 console.error('Failed to load stats', error);
