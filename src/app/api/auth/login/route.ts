@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { comparePassword, generateToken } from '@/lib/auth';
+import { logSecurityEvent, extractRequestInfo } from '@/lib/security-logger';
 
 // Simple in-memory rate limiting (use Redis for production)
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>();
@@ -55,6 +56,8 @@ export async function POST(request: NextRequest) {
         // Check rate limit
         const rateLimit = checkRateLimit(clientIP);
         if (rateLimit.blocked) {
+            const { userAgent } = extractRequestInfo(request);
+            logSecurityEvent('LOGIN_BLOCKED', { ip: clientIP, userAgent });
             return NextResponse.json(
                 { error: `Terlalu banyak percobaan login. Coba lagi dalam ${rateLimit.remainingTime} menit.` },
                 { status: 429 }
@@ -78,6 +81,8 @@ export async function POST(request: NextRequest) {
 
         if (!user) {
             recordFailedAttempt(clientIP);
+            const { userAgent } = extractRequestInfo(request);
+            logSecurityEvent('LOGIN_FAILED', { username, ip: clientIP, userAgent, details: { reason: 'user_not_found' } });
             return NextResponse.json(
                 { error: 'Username atau password salah' },
                 { status: 401 }
@@ -95,6 +100,8 @@ export async function POST(request: NextRequest) {
 
         if (!isValidPassword) {
             recordFailedAttempt(clientIP);
+            const { userAgent } = extractRequestInfo(request);
+            logSecurityEvent('LOGIN_FAILED', { username, userId: user.id, ip: clientIP, userAgent, details: { reason: 'invalid_password' } });
             return NextResponse.json(
                 { error: 'Username atau password salah' },
                 { status: 401 }
@@ -109,6 +116,10 @@ export async function POST(request: NextRequest) {
             username: user.username,
             role: user.role.name,
         });
+
+        // Log successful login
+        const { userAgent } = extractRequestInfo(request);
+        logSecurityEvent('LOGIN_SUCCESS', { username: user.username, userId: user.id, ip: clientIP, userAgent });
 
         return NextResponse.json({
             token,

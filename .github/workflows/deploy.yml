@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  NODE_VERSION: '20'
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -17,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install dependencies
@@ -29,24 +32,38 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DATABASE_URL: "file:./dev.db"
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'build-time-secret' }}
 
       - name: Create deployment package
         run: |
           mkdir -p deploy
+          
           # Copy build output
           cp -r .next deploy/
           cp -r public deploy/
           cp -r prisma deploy/
+          
+          # Copy pre-built Prisma client (VPS won't need to download binaries)
+          mkdir -p deploy/node_modules/.prisma
+          mkdir -p deploy/node_modules/@prisma
+          cp -r node_modules/.prisma/* deploy/node_modules/.prisma/
+          cp -r node_modules/@prisma/* deploy/node_modules/@prisma/
+          
           # Copy config files
           cp package.json deploy/
           cp package-lock.json deploy/
-          # Copy next.config (could be .js, .ts, or .mjs)
           cp next.config.* deploy/ 2>/dev/null || true
-          # Copy tsconfig for runtime
           cp tsconfig.json deploy/ 2>/dev/null || true
+          
+          # Create .env for production (without secrets - those are set on server)
+          echo "DATABASE_URL=\"file:./dev.db\"" > deploy/.env
+          
           # Create tarball
           tar -czf deploy.tar.gz -C deploy .
+          
+          # Show package size
+          ls -lh deploy.tar.gz
 
       - name: Copy files to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -58,7 +75,7 @@ jobs:
           source: "deploy.tar.gz"
           target: ${{ secrets.VPS_DIR }}
 
-      - name: Extract and restart application
+      - name: Deploy and restart application
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -69,34 +86,56 @@ jobs:
             cd ${{ secrets.VPS_DIR }}
             
             echo "📦 Extracting deployment..."
-            # Backup current .next
+            # Backup current deployment
             if [ -d ".next" ]; then
               rm -rf .next.backup
               mv .next .next.backup 2>/dev/null || true
             fi
             
-            # Extract deployment (files are at root of tar)
+            # Extract new deployment
             tar -xzf deploy.tar.gz
             rm -f deploy.tar.gz
             
-            echo "📦 Installing dependencies..."
-            npm ci --omit=dev
+            echo "📦 Installing production dependencies..."
+            # Install only production deps, Prisma client already included
+            npm ci --omit=dev --ignore-scripts
             
-            echo "🔧 Generating Prisma client..."
-            npx prisma generate
+            # Copy pre-built Prisma client back (npm ci might have removed it)
+            if [ -d "node_modules/.prisma" ]; then
+              echo "✓ Prisma client already present"
+            else
+              echo "⚠️ Prisma client missing, will try to generate..."
+              npx prisma generate 2>/dev/null || echo "Failed to generate, check network"
+            fi
             
             echo "🗄️ Running database migrations..."
             npx prisma migrate deploy 2>/dev/null || echo "No migrations to run"
             
-            echo "🚀 Restarting application..."
-            # Restart with PM2
-            if command -v pm2 &> /dev/null; then
-              pm2 delete pustakasetia 2>/dev/null || true
-              pm2 start npm --name "pustakasetia" -- start
-              pm2 save
-            else
-              echo "⚠️ PM2 not found. Install with: npm install -g pm2"
-              echo "Then run: pm2 start npm --name 'pustakasetia' -- start"
+            echo "� Setting up environment..."
+            # Ensure JWT_SECRET is set (should be in server's .env already)
+            if ! grep -q "JWT_SECRET" .env 2>/dev/null; then
+              echo "⚠️ JWT_SECRET not found in .env - please add it manually!"
             fi
             
+            echo "🚀 Restarting application..."
+            if command -v pm2 &> /dev/null; then
+              # Stop existing process
+              pm2 stop pustakasetia 2>/dev/null || true
+              pm2 delete pustakasetia 2>/dev/null || true
+              
+              # Start with environment
+              pm2 start npm --name "pustakasetia" -- start
+              pm2 save
+              
+              # Show status
+              pm2 status pustakasetia
+            else
+              echo "⚠️ PM2 not found!"
+              echo "Install with: npm install -g pm2"
+              echo "Then run: pm2 start npm --name 'pustakasetia' -- start"
+              exit 1
+            fi
+            
+            echo ""
             echo "✅ Deployment completed successfully!"
+            echo "🌐 App running at: http://localhost:3000"

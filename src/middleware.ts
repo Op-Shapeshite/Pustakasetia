@@ -25,6 +25,20 @@ const adminOnlyRoutes = [
     '/api/roles',
 ];
 
+// Simple security logging for Edge runtime
+function logSecurityEvent(event: string, data: Record<string, unknown>) {
+    const timestamp = new Date().toISOString();
+    console.log(`[SECURITY] ${timestamp} | ${event} |`, JSON.stringify(data));
+}
+
+function getClientInfo(request: NextRequest) {
+    const forwarded = request.headers.get('x-forwarded-for');
+    const realIP = request.headers.get('x-real-ip');
+    const ip = forwarded?.split(',')[0] || realIP || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    return { ip, userAgent };
+}
+
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const method = request.method;
@@ -39,7 +53,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Allow public GET for specific routes
+    // Allow public GET for specific routes (including /api/books with any limit)
     if (method === 'GET' && publicGetRoutes.some(route => pathname.startsWith(route))) {
         return NextResponse.next();
     }
@@ -48,6 +62,14 @@ export async function middleware(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        const { ip, userAgent } = getClientInfo(request);
+        logSecurityEvent('UNAUTHORIZED_ACCESS', {
+            resource: pathname,
+            method,
+            ip,
+            userAgent,
+            reason: 'missing_token',
+        });
         return NextResponse.json(
             { error: 'Unauthorized - Token diperlukan' },
             { status: 401 }
@@ -62,10 +84,22 @@ export async function middleware(request: NextRequest) {
         const { payload } = await jwtVerify(token, secret);
 
         const userRole = String(payload.role);
+        const userId = String(payload.userId);
+        const username = String(payload.username);
 
         // Check admin-only routes
         if (adminOnlyRoutes.some(route => pathname.startsWith(route))) {
             if (userRole !== 'Admin') {
+                const { ip, userAgent } = getClientInfo(request);
+                logSecurityEvent('FORBIDDEN_ACCESS', {
+                    resource: pathname,
+                    method,
+                    userId,
+                    username,
+                    userRole,
+                    ip,
+                    userAgent,
+                });
                 return NextResponse.json(
                     { error: 'Forbidden - Admin access required' },
                     { status: 403 }
@@ -75,8 +109,8 @@ export async function middleware(request: NextRequest) {
 
         // Add user info to request headers for downstream use
         const requestHeaders = new Headers(request.headers);
-        requestHeaders.set('x-user-id', String(payload.userId));
-        requestHeaders.set('x-username', String(payload.username));
+        requestHeaders.set('x-user-id', userId);
+        requestHeaders.set('x-username', username);
         requestHeaders.set('x-user-role', userRole);
 
         return NextResponse.next({
@@ -85,6 +119,13 @@ export async function middleware(request: NextRequest) {
             },
         });
     } catch {
+        const { ip, userAgent } = getClientInfo(request);
+        logSecurityEvent('TOKEN_INVALID', {
+            resource: pathname,
+            method,
+            ip,
+            userAgent,
+        });
         return NextResponse.json(
             { error: 'Unauthorized - Token tidak valid' },
             { status: 401 }
@@ -95,4 +136,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
     matcher: '/api/:path*',
 };
+
 
