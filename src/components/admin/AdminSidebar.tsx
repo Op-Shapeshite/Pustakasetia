@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Home, Book, Users, Shield, LogOut, X } from 'lucide-react';
 import { useAppState } from '@/contexts/AppStateContext';
 import { useRouter } from 'next/navigation';
@@ -11,17 +12,48 @@ interface AdminSidebarProps {
     onClose?: () => void;
 }
 
-const navItems = [
+interface NavItem {
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    roles?: string[]; // If undefined, all roles can access
+}
+
+const navItems: NavItem[] = [
     { href: '/dashboard', label: 'Dasbor', icon: Home },
     { href: '/dashboard/books', label: 'Buku', icon: Book },
-    { href: '/dashboard/users', label: 'Pengguna', icon: Users },
-    { href: '/dashboard/roles', label: 'Role', icon: Shield },
+    { href: '/dashboard/users', label: 'Pengguna', icon: Users, roles: ['Admin'] },
+    { href: '/dashboard/roles', label: 'Role', icon: Shield, roles: ['Admin'] },
 ];
 
 export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const { logout } = useAppState();
+    const [userRole, setUserRole] = useState<string>('');
+
+    // Load user role from localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    setUserRole(user.role || '');
+                } catch {
+                    console.error('Failed to parse user data');
+                }
+            }
+        }
+    }, []);
+
+    // Filter nav items based on user role
+    const filteredNavItems = navItems.filter(item => {
+        // If no roles specified, everyone can access
+        if (!item.roles) return true;
+        // Check if user's role is in allowed roles
+        return item.roles.includes(userRole);
+    });
 
     const handleLogout = () => {
         if (confirm('Apakah Anda yakin ingin keluar?')) {
@@ -71,7 +103,7 @@ export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarPro
                     <p className="text-xs text-gray-400 mb-4 uppercase tracking-wider">Main</p>
 
                     <nav className="space-y-2">
-                        {navItems.map((item) => {
+                        {filteredNavItems.map((item) => {
                             const isActive = pathname === item.href ||
                                 (item.href !== '/dashboard' && pathname.startsWith(item.href));
                             const Icon = item.icon;
@@ -110,3 +142,4 @@ export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarPro
         </>
     );
 }
+
