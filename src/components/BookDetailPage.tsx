@@ -1,6 +1,7 @@
 import { ArrowLeft, ShoppingCart } from "lucide-react";
-const imgRectangle1304 = "/img/library-background.png";
 import { addToCart } from "../utils/cartStorage";
+
+const imgRectangle1304 = "/img/library-background.png";
 
 interface Book {
   id: number;
@@ -19,9 +20,10 @@ interface Book {
 interface BookDetailPageProps {
   book: Book;
   onBack: () => void;
+  isModal?: boolean;
 }
 
-export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
+export default function BookDetailPage({ book, onBack, isModal = false }: BookDetailPageProps) {
   const handleBuy = () => {
     const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${book.price}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
@@ -43,108 +45,119 @@ export default function BookDetailPage({ book, onBack }: BookDetailPageProps) {
   };
 
   const SpecifictionItem = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="flex items-baseline text-[14px] sm:text-[16px] lg:text-[16px]">
-      <div className="w-[140px] sm:w-[160px] lg:w-[180px] flex-shrink-0 font-medium text-[#2f2f2f]">
+    <div className="flex items-baseline text-[14px] sm:text-[16px]">
+      <div className="w-[140px] sm:w-[150px] flex-shrink-0 font-medium text-[#2f2f2f]">
         {label}
       </div>
-      <div className="mr-4 text-[#2f2f2f]">:</div>
-      <div className="flex-1 text-[#2f2f2f]">
+      <div className="mr-3 text-[#2f2f2f]">:</div>
+      <div className="flex-1 text-[#2f2f2f] font-medium">
         {value}
       </div>
     </div>
   );
 
   return (
-    <div className="bg-neutral-50 min-h-screen w-full font-['Poppins',sans-serif]">
-      {/* Background Image Section - 374px height */}
-      <div className="relative h-[200px] sm:h-[280px] md:h-[374px] w-full overflow-hidden">
-        <img
-          src={imgRectangle1304}
-          alt="Background"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/50" />
+    <div className={`${isModal ? 'fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6' : 'min-h-screen w-full font-[\'Poppins\',sans-serif]'}`}>
+      {isModal && <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onBack} />}
 
-        {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="absolute top-[30px] left-[30px] sm:top-[50px] sm:left-[50px] w-[40px] h-[40px] sm:w-[50px] sm:h-[50px] bg-white rounded-full hover:bg-gray-100 transition-colors z-20 flex items-center justify-center shadow-lg"
-        >
-          <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-[#2f2f2f]" />
-        </button>
-      </div>
+      <div className={`${isModal ? 'relative w-full max-w-[1200px] h-[90vh] bg-neutral-50 rounded-2xl shadow-2xl overflow-y-auto animate-fadeInUp scrollbar-hide' : 'w-full'}`}>
 
-      {/* Main Content Container */}
-      <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-16 -mt-[100px] sm:-mt-[150px] md:-mt-[200px] relative z-10">
-        <div className="max-w-[1400px] mx-auto">
-          {/* Book Info Section - Two Column Layout */}
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-12">
-            {/* Left Column - Book Cover */}
-            <div className="flex justify-center lg:justify-start flex-shrink-0">
-              <div className="w-[240px] sm:w-[286px] md:w-[318px]">
-                <div className="aspect-[318/465] relative rounded-[12px] overflow-hidden shadow-[20px_20px_30px_0px_rgba(0,0,0,0.25)]">
+        {/* Close/Back Button */}
+        {/* Modal: Top Right of the card */}
+        {isModal && (
+          <button onClick={onBack} className="absolute top-4 right-4 z-50 p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-md transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+        )}
+        {/* Page: Top Left fixed */}
+        {!isModal && (
+          <button onClick={onBack} className="fixed top-[30px] left-[30px] z-50 p-2 bg-white rounded-full shadow-lg hover:bg-neutral-100 transition-colors">
+            <ArrowLeft className="w-6 h-6 text-[#2f2f2f]" />
+          </button>
+        )}
+
+        {/* Content Wrapper */}
+        <div className="relative w-full bg-neutral-50 min-h-full pb-12">
+
+          {/* Header Background Image */}
+          <div className="relative h-[300px] sm:h-[350px] w-full overflow-hidden">
+            <img
+              src={imgRectangle1304}
+              className="w-full object-cover brightness-[0.4]"
+              alt="Library Background"
+            />
+          </div>
+
+          {/* Overlap Content Container */}
+          <div className="w-full px-4 sm:px-8 lg:px-12 -mt-[180px] sm:-mt-[220px] relative z-10">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+
+              {/* Left Column: Book Cover */}
+              <div className="flex justify-center lg:justify-start flex-shrink-0">
+                <div className="w-[160px] sm:w-[200px] md:w-[240px] lg:w-[260px] rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
                   <img
                     src={book.image}
                     alt={book.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-cover  shadow-2xl aspect-[2/3]"
                   />
+                </div>
+              </div>
+
+              {/* Right Column: Book Info */}
+              <div className="flex flex-col flex-1 pt-4 lg:pt-16">
+
+                {/* Title & Author (White on Dark BG) */}
+                <div className="text-center lg:text-left mb-8 md:mb-10 text-white drop-shadow-lg">
+                  <h1 className="font-bold text-[24px] sm:text-[32px] lg:text-[42px] leading-tight mb-2">
+                    {book.title}
+                  </h1>
+                  <p className="font-medium text-[16px] sm:text-[18px] text-white/90">
+                    {book.author}
+                  </p>
+                </div>
+
+                {/* Specs & Buttons (Transition to White BG area) */}
+                <div className="space-y-8 lg:mt-4">
+
+                  {/* Specs Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-12 text-[#2f2f2f]">
+                    <SpecifictionItem label="Jumlah Halaman" value={`${book.pages || 198} halaman`} />
+                    <SpecifictionItem label="Ukuran Buku" value={book.size || "16 x 24 cm"} />
+                    <SpecifictionItem label="Edisi dan Cetakan" value={book.edition || "Ke-1. 2025"} />
+                    <SpecifictionItem label="ISBN" value={book.isbn || "978-979-076-799-1"} />
+                    <SpecifictionItem label="Jenis Kertas" value={book.paperType || "HVS"} />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                    <button
+                      onClick={handleBuy}
+                      className="flex-1 bg-[#22c55e] text-white font-bold px-6 py-3.5 rounded-lg hover:bg-[#16a34a] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      <span className="text-lg">BELI</span>
+                      <span className="text-lg opacity-90">{book.price}</span>
+                    </button>
+
+                    <button
+                      onClick={handleAddToCart}
+                      className="flex-1 bg-[#ffcc00] text-[#2f2f2f] font-bold px-6 py-3.5 rounded-lg hover:bg-[#e6b800] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      <ShoppingCart className="w-5 h-5 text-[#2f2f2f]" />
+                      <span className="text-lg">Masukkan Keranjang</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column - Book Details */}
-            <div className="flex flex-col justify-end pb-4 space-y-6 lg:space-y-8 flex-1">
-              {/* Title and Author */}
-              <div className="text-center lg:text-left lg:mt-[40px]">
-                <h1 className="font-black text-[#2f2f2f] lg:text-white text-[28px] sm:text-[36px] md:text-[40px] lg:text-[48px] leading-tight mb-3">
-                  {book.title}
-                </h1>
-                <p className="font-bold text-[#2f2f2f] lg:text-white text-[16px] sm:text-[18px] md:text-[20px] leading-normal">
-                  {book.author}
-                </p>
+            {/* Synopsis */}
+            <div className="mt-12 pt-8 border-t border-neutral-200">
+              <h2 className="font-bold text-[#2f2f2f] text-[24px] mb-4">
+                Sinopsis
+              </h2>
+              <div className="text-[#4a4a4a] text-[16px] leading-relaxed text-justify whitespace-pre-line">
+                {book.synopsis || "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}
               </div>
-
-              {/* Book Specifications List (No Table) */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-neutral-100 space-y-3">
-                <SpecifictionItem label="Jumlah Halaman" value={`${book.pages || 198} halaman`} />
-                <SpecifictionItem label="Ukuran Buku" value={book.size || "16 x 24 cm"} />
-                <SpecifictionItem label="Edisi dan Cetakan" value={book.edition || "Ke-1. 2025"} />
-                <SpecifictionItem label="ISBN" value={book.isbn || "978-979-076-799-1"} />
-                <SpecifictionItem label="Jenis Kertas" value={book.paperType || "HVS"} />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
-                <button
-                  onClick={handleBuy}
-                  className="bg-green-500 text-white font-bold px-6 lg:px-8 py-3 lg:py-4 rounded-[6px] hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-[16px] sm:text-[18px] lg:text-[20px] leading-normal whitespace-nowrap"
-                >
-                  <span>BELI</span>
-                  <span>{book.price}</span>
-                </button>
-
-                <button
-                  onClick={handleAddToCart}
-                  className="bg-[#ffcc00] text-[#2f2f2f] font-medium px-6 lg:px-8 py-3 lg:py-4 rounded-[6px] hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-[16px] sm:text-[18px] lg:text-[20px] leading-normal whitespace-nowrap"
-                >
-                  <ShoppingCart className="w-5 h-5 lg:w-6 lg:h-6 text-[#2f2f2f]" />
-                  <span>Masukkan Keranjang</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Synopsis Section */}
-          <div className="mt-12 lg:mt-16 xl:mt-20 pb-12">
-            <h2 className="font-medium text-[#2f2f2f] text-[32px] sm:text-[40px] lg:text-[48px] leading-normal mb-6">
-              Sinopsis
-            </h2>
-            <div className="text-[#2f2f2f] text-[16px] sm:text-[18px] lg:text-[20px] leading-relaxed text-justify">
-              {book.synopsis || (
-                <p>
-                  Gorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent auctor purus luctus enim egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convallis diam sit amet lacinia. Aliquam in elementum tellus.
-                </p>
-              )}
             </div>
           </div>
         </div>

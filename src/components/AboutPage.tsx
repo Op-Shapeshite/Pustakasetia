@@ -60,7 +60,7 @@ export default function AboutPage() {
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
               <div className="flex-shrink-0 w-32 md:w-40 lg:w-[174px]">
                 <img
-                  src={imgImage6}
+                  src="/img/legality.png"
                   alt="Legal Document"
                   className="w-full h-auto object-contain"
                 />
@@ -79,7 +79,7 @@ export default function AboutPage() {
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
               <div className="flex-shrink-0 w-32 md:w-40 lg:w-[163px]">
                 <img
-                  src={imgImage}
+                  src="/img/office-location.png"
                   alt="Office Building"
                   className="w-full h-auto object-contain"
                 />

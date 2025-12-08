@@ -100,8 +100,9 @@ export default function Header() {
   return (
     <>
       {/* MOBILE NAVBAR */}
-      <header className="lg:hidden absolute top-0 left-0 right-0 z-50 h-[87px] bg-neutral-50">
-        <Link href="/" className="absolute left-[25px] top-[25px] h-[37px] w-[40px]">
+      {/* MOBILE NAVBAR */}
+      <header className="lg:hidden sticky top-0 left-0 right-0 z-50 h-[87px] bg-neutral-50 flex items-center justify-between px-6 shadow-sm">
+        <Link href="/" className="h-[37px] w-[40px] shrink-0">
           <img
             src="/img/logo.png"
             alt="Pustaka Setia"
@@ -109,7 +110,7 @@ export default function Header() {
           />
         </Link>
 
-        <div className="absolute flex gap-[16px] h-[23px] items-center left-[270px] top-[32px]">
+        <div className="flex items-center gap-4">
           <button className="size-[24px]">
             <ProiconsSearch />
           </button>
@@ -121,17 +122,16 @@ export default function Header() {
               </span>
             )}
           </Link>
+          <button
+            className="flex items-center justify-center size-[24px]"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <Menu className="h-[20px] w-[20px] text-[#2f2f2f]" />
+          </button>
         </div>
 
-        <button
-          className="absolute flex items-center justify-center h-[23px] left-[234px] top-[32px] w-[131px]"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <Menu className="h-[17.67px] w-[19px] text-[#2f2f2f]" />
-        </button>
-
         {mobileMenuOpen && (
-          <div className="absolute top-[87px] left-0 right-0 bg-neutral-50 border-t border-gray-200 pb-4 pt-4 px-[25px]">
+          <div className="absolute top-[87px] left-0 right-0 bg-neutral-50 border-t border-gray-200 pb-4 pt-4 px-[25px] shadow-lg">
             <nav className="flex flex-col gap-4">
               <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex flex-col gap-1 text-left">
                 <p className="font-['Poppins',sans-serif] text-[#2f2f2f]">Beranda</p>
@@ -155,7 +155,7 @@ export default function Header() {
       </header>
 
       {/* DESKTOP NAVBAR */}
-      <header className={`hidden lg:block w-full bg-neutral-50 sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header className={`hidden lg:block w-full bg-neutral-50  top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-24">
             <Link href="/" className="flex-shrink-0">

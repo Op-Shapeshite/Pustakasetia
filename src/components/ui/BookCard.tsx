@@ -10,7 +10,7 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
   // Mobile variant - Grid layout (same as desktop, responsive)
   if (variant === 'mobile') {
     return (
-      <div 
+      <div
         onClick={onClick}
         className="w-full cursor-pointer group bg-white"
       >
@@ -31,7 +31,7 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
           </h3>
 
           {/* Price */}
-          <p className="text-xs font-semibold text-neutral-900">
+          <p className="text-xs font-bold text-green-500">
             {book.priceFormatted}
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
 
   // Default variant - Grid layout (4 columns desktop, 2 columns mobile)
   return (
-    <div 
+    <div
       onClick={onClick}
       className="w-full cursor-pointer group bg-white"
     >
@@ -62,7 +62,7 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
         </h3>
 
         {/* Price */}
-        <p className="text-sm font-semibold text-neutral-900">
+        <p className="text-sm font-bold text-green-500">
           {book.priceFormatted}
         </p>
       </div>
