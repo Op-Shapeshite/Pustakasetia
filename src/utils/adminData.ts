@@ -74,6 +74,16 @@ async function apiCall<T>(url: string, options?: RequestInit): Promise<T> {
         headers,
     });
 
+    // Auto-logout on 401 Unauthorized (token expired or invalid)
+    if (response.status === 401) {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+        throw new Error('Session expired. Please login again.');
+    }
+
     if (!response.ok) {
         const error = await response.json().catch(() => ({ error: 'Request failed' }));
         throw new Error(error.error || 'Request failed');
@@ -92,8 +102,7 @@ export const bookService = {
         if (params?.categoryId) searchParams.set('categoryId', params.categoryId.toString());
 
         const url = `/api/books${searchParams.toString() ? `?${searchParams}` : ''}`;
-        const response = await apiCall<PaginatedResponse<Book>>(url);
-        return response.data;
+        return apiCall<PaginatedResponse<Book>>(url);
     },
 
     getById: async (id: number) => {
@@ -130,8 +139,7 @@ export const userService = {
         if (params?.search) searchParams.set('search', params.search);
 
         const url = `/api/users${searchParams.toString() ? `?${searchParams}` : ''}`;
-        const response = await apiCall<PaginatedResponse<User>>(url);
-        return response.data;
+        return apiCall<PaginatedResponse<User>>(url);
     },
 
     getById: async (id: number) => {
@@ -167,8 +175,7 @@ export const roleService = {
         if (params?.limit) searchParams.set('limit', params.limit.toString());
 
         const url = `/api/roles${searchParams.toString() ? `?${searchParams}` : ''}`;
-        const response = await apiCall<PaginatedResponse<Role>>(url);
-        return response.data;
+        return apiCall<PaginatedResponse<Role>>(url);
     },
 
     getById: async (id: number) => {
@@ -204,8 +211,7 @@ export const categoryService = {
         if (params?.limit) searchParams.set('limit', (params.limit || 100).toString());
 
         const url = `/api/categories${searchParams.toString() ? `?${searchParams}` : ''}`;
-        const response = await apiCall<PaginatedResponse<Category>>(url);
-        return response.data;
+        return apiCall<PaginatedResponse<Category>>(url);
     },
 
     getById: async (id: number) => {

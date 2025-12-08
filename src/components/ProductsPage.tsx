@@ -9,7 +9,7 @@ import {
 } from './ui';
 import { Book, BookCategory } from '../types/book';
 import Footer from './Footer';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronDown } from 'lucide-react';
 
 // API Book type from database
 interface APIBook {
@@ -74,6 +74,7 @@ export default function ProductsPage({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const itemsPerPage = 16;
 
   const fetchBooks = useCallback(async () => {
@@ -164,108 +165,103 @@ export default function ProductsPage({
   return (
     <div className="min-h-screen bg-white">
       {/* Page Header */}
-      <div className="bg-neutral-50 border-b border-neutral-200">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 py-8 md:py-12">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 mb-2">
-            Produk Buku
-          </h1>
-          <p className="text-base md:text-lg text-neutral-600">
-            Temukan {books.length} buku berkualitas dari berbagai kategori
-          </p>
-        </div>
-      </div>
 
-      {/* Filters Section */}
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 py-6 md:py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            {error}
-            <button onClick={fetchBooks} className="ml-2 underline">Coba lagi</button>
-          </div>
-        )}
+      {/* Main Content Area */}
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 py-8">
 
-        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-          {/* Category Filter */}
-          <div className="w-full md:w-auto">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full md:w-auto px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        {/* Top Filter Bar */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+
+          {/* Custom Kategori Dropdown */}
+          <div className="relative z-10">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center gap-2 bg-[#ffcc00] hover:bg-[#ffd633] text-[#2f2f2f] px-6 py-3 rounded-lg font-['Poppins',sans-serif] font-medium transition-colors"
             >
-              <option value="all">Semua Kategori</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.name}>{cat.name}</option>
-              ))}
-            </select>
+              <span>{selectedCategory === 'all' ? 'Kategori' : selectedCategory}</span>
+              <ChevronDown className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-neutral-100 py-2">
+                <button
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-neutral-50 font-['Poppins',sans-serif] ${selectedCategory === 'all' ? 'text-[#ffcc00] font-medium' : 'text-[#2f2f2f]'
+                    }`}
+                >
+                  Semua Kategori
+                </button>
+                {categories.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setSelectedCategory(cat.name);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-neutral-50 font-['Poppins',sans-serif] ${selectedCategory === cat.name ? 'text-[#ffcc00] font-medium' : 'text-[#2f2f2f]'
+                      }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Search Bar */}
-          <div className="w-full md:w-[400px]">
-            <SearchBar
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Cari judul, penulis, atau ISBN..."
+          {/* Results Count - Right Aligned */}
+          <div>
+            <div className="w-full md:w-auto min-w-[300px]">
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Cari buku..."
+                variant={isMobile ? 'mobile' : 'default'}
+              />
+            </div>
+            <div className="text-sm text-neutral-600 font-['Poppins',sans-serif]">
+              Menampilkan {displayBooks.length} dari {totalItems} Data
+            </div>
+          </div>
+        </div>
+
+        {/* Books Grid - 4 Columns on Desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-12">
+          {displayBooks.map((book) => (
+            <BookCard
+              key={book.id}
+              book={book}
+              onClick={() => handleBookClick(book)}
+              variant={isMobile ? 'mobile' : 'default'}
+            />
+          ))}
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center">
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
               variant={isMobile ? 'mobile' : 'default'}
             />
           </div>
-        </div>
+        )}
 
-        {/* Results Info */}
-        <div className="mt-6 text-sm text-neutral-600">
-          {searchQuery ? (
-            <p>
-              Menampilkan {displayBooks.length} hasil untuk "{searchQuery}"
-              {selectedCategory !== 'all' && ` di kategori ${selectedCategory}`}
-            </p>
-          ) : (
-            <p>
-              Menampilkan {displayBooks.length} dari {totalItems} buku
-              {selectedCategory !== 'all' && ` di kategori ${selectedCategory}`}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Books Grid */}
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 pb-12">
-        {displayBooks.length > 0 ? (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-              {displayBooks.map((book) => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  onClick={() => handleBookClick(book)}
-                  variant={isMobile ? 'mobile' : 'default'}
-                />
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-12 flex justify-center">
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  variant={isMobile ? 'mobile' : 'default'}
-                />
-              </div>
-            )}
-          </>
-        ) : (
+        {displayBooks.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-xl text-neutral-600 mb-2">
+            <p className="text-xl text-neutral-600 mb-2 font-['Poppins',sans-serif]">
               Tidak ada buku ditemukan
             </p>
-            <p className="text-neutral-500">
+            <p className="text-neutral-500 font-['Poppins',sans-serif]">
               Coba ubah filter atau kata kunci pencarian Anda
             </p>
           </div>
         )}
       </div>
-
-      {/* Footer */}
       <Footer />
     </div>
   );

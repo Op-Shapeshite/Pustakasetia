@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
+import { jwtVerify } from 'jose';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'pustakasetia-secret-key-change-in-production';
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -13,7 +15,7 @@ const publicGetRoutes = [
     '/api/categories',
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const method = request.method;
 
@@ -34,35 +36,38 @@ export function middleware(request: NextRequest) {
 
     // Check for auth token
     const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader);
 
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return NextResponse.json(
             { error: 'Unauthorized - Token diperlukan' },
             { status: 401 }
         );
     }
 
-    const payload = verifyToken(token);
+    const token = authHeader.slice(7);
 
-    if (!payload) {
+    try {
+        // Verify token using jose (Edge-compatible)
+        const secret = new TextEncoder().encode(JWT_SECRET);
+        const { payload } = await jwtVerify(token, secret);
+
+        // Add user info to request headers for downstream use
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('x-user-id', String(payload.userId));
+        requestHeaders.set('x-username', String(payload.username));
+        requestHeaders.set('x-user-role', String(payload.role));
+
+        return NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        });
+    } catch {
         return NextResponse.json(
             { error: 'Unauthorized - Token tidak valid' },
             { status: 401 }
         );
     }
-
-    // Add user info to request headers for downstream use
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-user-id', payload.userId.toString());
-    requestHeaders.set('x-username', payload.username);
-    requestHeaders.set('x-user-role', payload.role);
-
-    return NextResponse.next({
-        request: {
-            headers: requestHeaders,
-        },
-    });
 }
 
 export const config = {

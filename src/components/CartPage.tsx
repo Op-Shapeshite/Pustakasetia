@@ -8,6 +8,7 @@ import { getCartItems, removeFromCart, getCartTotal, clearCart, CartItem } from 
 export default function CartPage() {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -17,12 +18,21 @@ export default function CartPage() {
   useEffect(() => {
     loadCart();
 
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // Use lg breakpoint for "Mobile/Tablet" switch in this context
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     const handleCartUpdate = () => {
       loadCart();
     };
 
     window.addEventListener('cartUpdated', handleCartUpdate);
-    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   const loadCart = () => {
@@ -35,6 +45,7 @@ export default function CartPage() {
     loadCart();
   };
 
+  // ... handleBack and handleSubmit unchanged ...
   const handleBack = () => {
     router.push('/products');
   };
@@ -103,12 +114,12 @@ export default function CartPage() {
   }
 
   return (
-    <div className="w-full py-6 md:py-8 lg:py-12">
+    <div className="w-full py-6 md:py-8 lg:py-12 relative bg-neutral-50 font-['Poppins',sans-serif]">
+      {/* "Menu Keranjang" Title for Mobile, "Pesanan Saya" for Desktop */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6 md:mb-8">
-          <h1 className="font-['Poppins',sans-serif] text-2xl md:text-3xl lg:text-4xl text-black">
-            Pesanan Saya
+          <h1 className="font-medium text-[24px] md:text-[36px] text-black">
+            {isMobile ? "Menu Keranjang" : "Pesanan Saya"}
           </h1>
           <button
             onClick={handleBack}
@@ -124,7 +135,7 @@ export default function CartPage() {
             <div className="bg-white border border-[#d9d9d9] rounded-[24px] shadow-lg p-4 md:p-6">
               <div className="space-y-6">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0">
+                  <div key={item.id} className="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0 relative">
                     {/* Book Cover */}
                     <div className="w-24 md:w-32 flex-shrink-0">
                       <div className="aspect-[170/248] rounded-[12px] overflow-hidden">
@@ -137,53 +148,60 @@ export default function CartPage() {
                     </div>
 
                     {/* Book Details */}
-                    <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base mb-1">
-                          Judul Buku
-                        </p>
-                        <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-xs md:text-sm line-clamp-3">
-                          {item.title}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base mb-1">
-                          Cetakan
-                        </p>
-                        <p className="font-['Poppins',sans-serif] text-gray-500 text-xs md:text-sm">
-                          {item.edition || "Ke-1. 2025"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base mb-1">
-                          ISBN
-                        </p>
-                        <p className="font-['Poppins',sans-serif] text-gray-500 text-xs md:text-sm">
-                          {item.isbn || "978-979-076-799-1"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-sm md:text-base mb-1">
-                          Harga
-                        </p>
-                        <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-xs md:text-sm">
-                          {item.price}
-                        </p>
+                    {isMobile ? (
+                      // Mobile View: Stacked Label : Value
+                      <div className="flex-1 space-y-1 text-sm text-[#2f2f2f]">
+                        <div className="font-semibold text-base mb-2">{item.title}</div>
+                        <div className="flex">
+                          <span className="w-24 flex-shrink-0">Cetakan</span>
+                          <span className="mr-1">:</span>
+                          <span>{item.edition || "Ke-1. 2025"}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="w-24 flex-shrink-0">ISBN</span>
+                          <span className="mr-1">:</span>
+                          <span>{item.isbn || "978-979-076-799-1"}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="w-24 flex-shrink-0">Harga</span>
+                          <span className="mr-1">:</span>
+                          <span>{item.price}</span>
+                        </div>
                         {item.quantity > 1 && (
-                          <p className="font-['Poppins',sans-serif] text-gray-500 text-xs">
-                            x{item.quantity}
-                          </p>
+                          <div className="flex">
+                            <span className="w-24 flex-shrink-0">Jumlah</span>
+                            <span className="mr-1">:</span>
+                            <span>{item.quantity}</span>
+                          </div>
                         )}
                       </div>
-                    </div>
+                    ) : (
+                      // Desktop View: Grid
+                      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <p className="text-sm md:text-base mb-1 font-medium">Judul Buku</p>
+                          <p className="text-xs md:text-sm line-clamp-3">{item.title}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm md:text-base mb-1 font-medium">Cetakan</p>
+                          <p className="text-gray-500 text-xs md:text-sm">{item.edition || "Ke-1. 2025"}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm md:text-base mb-1 font-medium">ISBN</p>
+                          <p className="text-gray-500 text-xs md:text-sm">{item.isbn || "978-979-076-799-1"}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm md:text-base mb-1 font-medium">Harga</p>
+                          <p className="text-xs md:text-sm">{item.price}</p>
+                          {item.quantity > 1 && <p className="text-gray-500 text-xs">x{item.quantity}</p>}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Remove Button */}
                     <button
                       onClick={() => handleRemoveItem(item.id)}
-                      className="flex-shrink-0 p-2 hover:bg-red-50 rounded-full transition-colors"
+                      className="absolute top-0 right-0 p-2 hover:bg-red-50 rounded-full transition-colors"
                     >
                       <Trash2 className="h-5 w-5 text-red-500" />
                     </button>
@@ -198,81 +216,63 @@ export default function CartPage() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="font-['Poppins',sans-serif] text-sm text-gray-500 mb-2 block">
-                  Nama Penerima
-                </label>
+                <label className="text-sm text-gray-500 mb-2 block">Nama Penerima</label>
                 <input
                   type="text"
                   placeholder="Masukkan nama penerima"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 font-['Poppins',sans-serif] text-sm text-gray-500 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 text-sm text-gray-500 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                 />
               </div>
 
               <div>
-                <label className="font-['Poppins',sans-serif] text-sm text-gray-500 mb-2 block">
-                  No. Telephone
-                </label>
+                <label className="text-sm text-gray-500 mb-2 block">No. Telephone</label>
                 <input
                   type="tel"
                   placeholder="Masukkan nomber telephone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
-                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 font-['Poppins',sans-serif] text-sm text-gray-500 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 text-sm text-gray-500 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                 />
               </div>
 
               <div>
-                <label className="font-['Poppins',sans-serif] text-sm text-gray-500 mb-2 block">
-                  Alamat Kirim
-                </label>
+                <label className="text-sm text-gray-500 mb-2 block">Alamat Kirim</label>
                 <textarea
                   placeholder="Masukkan alamat kirim lengkap"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required
                   rows={4}
-                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 font-['Poppins',sans-serif] text-sm text-gray-500 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00] resize-none"
+                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 text-sm text-gray-500 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00] resize-none"
                 />
               </div>
 
               {/* Price Summary */}
               <div className="space-y-3 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
-                  <p className="font-['Poppins',sans-serif] text-black text-base md:text-lg">
-                    Sub Harga
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-black text-base md:text-lg">
-                    Rp{subtotal.toLocaleString('id-ID')}
-                  </p>
+                  <p className="text-black text-base md:text-lg">Sub Harga</p>
+                  <p className="text-black text-base md:text-lg">Rp{subtotal.toLocaleString('id-ID')}</p>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <p className="font-['Poppins',sans-serif] text-black text-base md:text-lg">
-                    Ongkos Kirim
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-black text-base md:text-lg">
-                    Rp{shipping.toLocaleString('id-ID')}
-                  </p>
+                  <p className="text-black text-base md:text-lg">Ongkos Kirim</p>
+                  <p className="text-black text-base md:text-lg">Rp{shipping.toLocaleString('id-ID')}</p>
                 </div>
 
-                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                  <p className="font-['Poppins',sans-serif] text-black text-lg md:text-xl">
-                    Total Harga
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-black text-lg md:text-xl">
-                    Rp{total.toLocaleString('id-ID')}
-                  </p>
+                <div className="flex justify-between items-center pt-3 border-t border-gray-200 text-[#2f2f2f]">
+                  <p className="text-lg md:text-[20px] font-medium">Total Harga</p>
+                  <p className="text-lg md:text-[20px] font-medium">Rp{total.toLocaleString('id-ID')}</p>
                 </div>
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-green-500 text-white font-['Poppins',sans-serif] text-lg md:text-xl px-8 py-4 rounded-[6px] hover:bg-green-600 transition-colors"
+                className="w-full bg-green-500 text-white font-medium text-lg md:text-xl px-8 py-4 rounded-[6px] hover:bg-green-600 transition-colors"
               >
                 Pesan Sekarang
               </button>

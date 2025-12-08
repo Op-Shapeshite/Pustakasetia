@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { userService, User } from '@/utils/adminData';
+import { useDebounce } from '@/hooks/useDebounce';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -14,6 +15,11 @@ export default function UserManagementPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+
+    // Debounce search query
+    const debouncedSearch = useDebounce(searchQuery, 500);
 
     // Modal states
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -26,29 +32,29 @@ export default function UserManagementPage() {
         try {
             setLoading(true);
             setError(null);
-            const data = await userService.getAll({ limit: 100 });
-            setUsers(data);
+            const response = await userService.getAll({
+                page: currentPage,
+                limit: itemsPerPage,
+                search: debouncedSearch
+            });
+            setUsers(response.data);
+            setTotalItems(response.pagination.total);
+            setTotalPages(response.pagination.totalPages);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load users');
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [currentPage, itemsPerPage, debouncedSearch]);
 
     useEffect(() => {
         loadUsers();
     }, [loadUsers]);
 
-    // Filter users by search
-    const filteredUsers = users.filter(user =>
-        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    // Pagination
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+    // Reset page when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     const handleEdit = (user: User) => {
         setSelectedUser(user);
@@ -76,7 +82,7 @@ export default function UserManagementPage() {
         }
     };
 
-    if (loading) {
+    if (loading && users.length === 0) {
         return (
             <div className="p-6 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-[#ffcc00]" />
@@ -137,9 +143,9 @@ export default function UserManagementPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedUsers.map((user, index) => (
+                            {users.map((user, index) => (
                                 <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{startIndex + index + 1}</td>
+                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                     <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.fullName}</td>
                                     <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.username}</td>
                                     <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.role}</td>
@@ -174,7 +180,7 @@ export default function UserManagementPage() {
                                     </td>
                                 </tr>
                             ))}
-                            {paginatedUsers.length === 0 && (
+                            {!loading && users.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                                         {searchQuery ? 'Tidak ada pengguna yang ditemukan' : 'Belum ada data pengguna'}
@@ -185,12 +191,12 @@ export default function UserManagementPage() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                        <p className="text-sm text-gray-500">
-                            Menampilkan {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredUsers.length)} dari {filteredUsers.length} data
-                        </p>
+                {/* Pagination - Always show info bar */}
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                    <p className="text-sm text-gray-500">
+                        Menampilkan {totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} data
+                    </p>
+                    {totalPages > 1 && (
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -210,8 +216,8 @@ export default function UserManagementPage() {
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             {/* Modals */}

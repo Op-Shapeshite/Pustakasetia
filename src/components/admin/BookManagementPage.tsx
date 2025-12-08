@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { bookService, Book } from '@/utils/adminData';
+import { useDebounce } from '@/hooks/useDebounce';
 import AddBookModal from './AddBookModal';
 import EditBookModal from './EditBookModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -14,6 +15,11 @@ export default function BookManagementPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+
+    // Debounce search query
+    const debouncedSearch = useDebounce(searchQuery, 500);
 
     // Modal states
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -26,30 +32,29 @@ export default function BookManagementPage() {
         try {
             setLoading(true);
             setError(null);
-            const data = await bookService.getAll({ limit: 100 });
-            setBooks(data);
+            const response = await bookService.getAll({
+                page: currentPage,
+                limit: itemsPerPage,
+                search: debouncedSearch
+            });
+            setBooks(response.data);
+            setTotalItems(response.pagination.total);
+            setTotalPages(response.pagination.totalPages);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load books');
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [currentPage, itemsPerPage, debouncedSearch]);
 
     useEffect(() => {
         loadBooks();
     }, [loadBooks]);
 
-    // Filter books by search
-    const filteredBooks = books.filter(book =>
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.isbn.includes(searchQuery)
-    );
-
-    // Pagination
-    const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedBooks = filteredBooks.slice(startIndex, startIndex + itemsPerPage);
+    // Reset page when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearch]);
 
     const handleEdit = (book: Book) => {
         setSelectedBook(book);
@@ -81,7 +86,7 @@ export default function BookManagementPage() {
         return `Rp${price.toLocaleString('id-ID')}`;
     };
 
-    if (loading) {
+    if (loading && books.length === 0) {
         return (
             <div className="p-6 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-[#ffcc00]" />
@@ -143,9 +148,9 @@ export default function BookManagementPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedBooks.map((book, index) => (
+                            {books.map((book, index) => (
                                 <tr key={book.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{startIndex + index + 1}</td>
+                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
                                             <img
@@ -183,7 +188,7 @@ export default function BookManagementPage() {
                                     </td>
                                 </tr>
                             ))}
-                            {paginatedBooks.length === 0 && (
+                            {!loading && books.length === 0 && (
                                 <tr>
                                     <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                                         {searchQuery ? 'Tidak ada buku yang ditemukan' : 'Belum ada data buku'}
@@ -194,12 +199,12 @@ export default function BookManagementPage() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                        <p className="text-sm text-gray-500">
-                            Menampilkan {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredBooks.length)} dari {filteredBooks.length} data
-                        </p>
+                {/* Pagination - Always show info bar */}
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                    <p className="text-sm text-gray-500">
+                        Menampilkan {totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} data
+                    </p>
+                    {totalPages > 1 && (
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -219,8 +224,8 @@ export default function BookManagementPage() {
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             {/* Modals */}

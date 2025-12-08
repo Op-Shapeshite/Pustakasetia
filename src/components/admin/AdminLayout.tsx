@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 
@@ -12,6 +14,44 @@ export default function AdminLayout({
     title?: string;
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        // Delay check slightly to ensure localStorage is ready after navigation
+        const checkAuth = () => {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                router.replace('/login');
+            } else {
+                setIsAuthenticated(true);
+            }
+            setIsLoading(false);
+        };
+
+        // Small delay to ensure storage is ready
+        const timer = setTimeout(checkAuth, 100);
+        return () => clearTimeout(timer);
+    }, [router]);
+
+    // Show loading while checking auth
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#f6f8fd]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#ffcc00]" />
+            </div>
+        );
+    }
+
+    // If not authenticated, show nothing (redirect is happening)
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#f6f8fd]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#ffcc00]" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen bg-[#f6f8fd]">
