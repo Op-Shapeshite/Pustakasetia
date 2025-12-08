@@ -44,26 +44,23 @@ jobs:
           cp -r public deploy/
           cp -r prisma deploy/
           
-          # Copy pre-built Prisma client (VPS won't need to download binaries)
-          mkdir -p deploy/node_modules/.prisma
-          mkdir -p deploy/node_modules/@prisma
-          cp -r node_modules/.prisma/* deploy/node_modules/.prisma/
-          cp -r node_modules/@prisma/* deploy/node_modules/@prisma/
-          
           # Copy config files
           cp package.json deploy/
           cp package-lock.json deploy/
           cp next.config.* deploy/ 2>/dev/null || true
           cp tsconfig.json deploy/ 2>/dev/null || true
           
-          # Create .env for production (without secrets - those are set on server)
-          echo "DATABASE_URL=\"file:./dev.db\"" > deploy/.env
+          # Create .env for production
+          echo 'DATABASE_URL="file:./dev.db"' > deploy/.env
           
-          # Create tarball
+          # IMPORTANT: Create separate tarball for Prisma client
+          tar -czf prisma-client.tar.gz -C node_modules .prisma @prisma
+          
+          # Create main deployment tarball
           tar -czf deploy.tar.gz -C deploy .
           
-          # Show package size
-          ls -lh deploy.tar.gz
+          # Show package sizes
+          ls -lh deploy.tar.gz prisma-client.tar.gz
 
       - name: Copy files to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -72,7 +69,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
-          source: "deploy.tar.gz"
+          source: "deploy.tar.gz,prisma-client.tar.gz"
           target: ${{ secrets.VPS_DIR }}
 
       - name: Deploy and restart application
@@ -85,7 +82,7 @@ jobs:
           script: |
             cd ${{ secrets.VPS_DIR }}
             
-            echo "📦 Extracting deployment..."
+            echo "📦 Step 1: Extracting deployment..."
             # Backup current deployment
             if [ -d ".next" ]; then
               rm -rf .next.backup
@@ -96,43 +93,36 @@ jobs:
             tar -xzf deploy.tar.gz
             rm -f deploy.tar.gz
             
-            echo "📦 Installing production dependencies..."
-            # Install only production deps, Prisma client already included
+            echo "📦 Step 2: Installing production dependencies..."
             npm ci --omit=dev --ignore-scripts
             
-            # Copy pre-built Prisma client back (npm ci might have removed it)
-            if [ -d "node_modules/.prisma" ]; then
-              echo "✓ Prisma client already present"
-            else
-              echo "⚠️ Prisma client missing, will try to generate..."
-              npx prisma generate 2>/dev/null || echo "Failed to generate, check network"
-            fi
+            echo "📦 Step 3: Installing pre-built Prisma client..."
+            # Extract pre-built Prisma client AFTER npm ci (this is the fix!)
+            tar -xzf prisma-client.tar.gz -C node_modules
+            rm -f prisma-client.tar.gz
             
-            echo "🗄️ Running database migrations..."
+            echo "✓ Prisma client installed from pre-built package"
+            
+            echo "🗄️ Step 4: Running database migrations..."
             npx prisma migrate deploy 2>/dev/null || echo "No migrations to run"
             
-            echo "� Setting up environment..."
-            # Ensure JWT_SECRET is set (should be in server's .env already)
+            echo "🔧 Step 5: Checking environment..."
             if ! grep -q "JWT_SECRET" .env 2>/dev/null; then
               echo "⚠️ JWT_SECRET not found in .env - please add it manually!"
             fi
             
-            echo "🚀 Restarting application..."
+            echo "🚀 Step 6: Restarting application..."
             if command -v pm2 &> /dev/null; then
-              # Stop existing process
               pm2 stop pustakasetia 2>/dev/null || true
               pm2 delete pustakasetia 2>/dev/null || true
-              
-              # Start with environment
               pm2 start npm --name "pustakasetia" -- start
               pm2 save
               
-              # Show status
+              # Wait a moment and check status
+              sleep 3
               pm2 status pustakasetia
             else
-              echo "⚠️ PM2 not found!"
-              echo "Install with: npm install -g pm2"
-              echo "Then run: pm2 start npm --name 'pustakasetia' -- start"
+              echo "⚠️ PM2 not found! Install with: npm install -g pm2"
               exit 1
             fi
             
