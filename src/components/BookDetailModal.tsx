@@ -1,20 +1,7 @@
 import { X, ShoppingCart, ArrowLeft } from "lucide-react";
 // Image is hardcoded in the component
 import { useAppState } from "../contexts/AppStateContext";
-
-interface Book {
-  id: number;
-  image: string;
-  title: string;
-  author: string;
-  price: string;
-  pages?: number;
-  size?: string;
-  edition?: string;
-  isbn?: string;
-  paperType?: string;
-  synopsis?: string;
-}
+import { Book } from "../types/book";
 
 interface BookDetailModalProps {
   book: Book;
@@ -26,9 +13,8 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
   const { addToCart } = useAppState();
 
   const handleBuy = () => {
-    // Parse price for formatting
-    const priceNumber = parseInt(book.price.toString().replace(/[^\d]/g, '')) || 0;
-    const formattedPrice = `Rp${priceNumber.toLocaleString('id-ID')}`;
+    // Use formatted price from book object or format it
+    const formattedPrice = book.priceFormatted || `Rp${book.price.toLocaleString('id-ID')}`;
 
     // Open WhatsApp with book details
     const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${formattedPrice}`;
@@ -37,21 +23,15 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
   };
 
   const getDisplayPrice = () => {
-    const priceNumber = parseInt(book.price.toString().replace(/[^\d]/g, '')) || 0;
-    return `Rp ${priceNumber.toLocaleString('id-ID')}`;
+    return book.priceFormatted || `Rp ${book.price.toLocaleString('id-ID')}`;
   };
 
   const handleAddToCart = () => {
-    // Convert string price to number for context if needed, or keep as string if context handles it.
-    // AppStateContext CartItem expects price: number. Book has price: string.
-    // We need to parse the price.
-    const priceNumber = parseInt(book.price.toString().replace(/[^\d]/g, ''));
-
     addToCart({
       id: book.id,
       image: book.image,
       title: book.title,
-      price: priceNumber,
+      price: book.price,
       // author field is not in CartItem interface in AppStateContext yet
     });
 
@@ -63,6 +43,7 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
       onAddToCart();
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">

@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useInView, Variants } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 
 interface HeroProps {
@@ -10,15 +10,15 @@ const TypingText = ({ text, className, delay = 0 }: { text: string; className?: 
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
-    visible: (i = 1) => ({
+    visible: (i: number = 1) => ({
       opacity: 1,
       transition: { staggerChildren: 0.12, delayChildren: 0.04 * i + delay },
     }),
   };
 
-  const child = {
+  const child: Variants = {
     visible: {
       opacity: 1,
       y: 0,
