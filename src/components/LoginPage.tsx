@@ -27,6 +27,12 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       const response = await authService.login(username, password);
+
+      // Save user data to localStorage for role-based access
+      if (response.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+      }
+
       login();
       router.push('/dashboard');
     } catch (err) {
