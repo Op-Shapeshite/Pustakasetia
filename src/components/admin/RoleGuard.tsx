@@ -26,7 +26,8 @@ export default function RoleGuard({
                     const user = JSON.parse(userStr);
                     const userRole = user.role || '';
 
-                    if (allowedRoles.includes(userRole)) {
+                    // Case-insensitive role check
+                    if (allowedRoles.some(role => role.toLowerCase() === userRole.toLowerCase())) {
                         setIsAuthorized(true);
                     } else {
                         // User doesn't have permission

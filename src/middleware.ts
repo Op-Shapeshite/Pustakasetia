@@ -87,9 +87,9 @@ export async function middleware(request: NextRequest) {
         const userId = String(payload.userId);
         const username = String(payload.username);
 
-        // Check admin-only routes
+        // Check admin-only routes (case-insensitive)
         if (adminOnlyRoutes.some(route => pathname.startsWith(route))) {
-            if (userRole !== 'Admin') {
+            if (userRole.toLowerCase() !== 'admin') {
                 const { ip, userAgent } = getClientInfo(request);
                 logSecurityEvent('FORBIDDEN_ACCESS', {
                     resource: pathname,

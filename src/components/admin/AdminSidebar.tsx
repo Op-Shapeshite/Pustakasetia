@@ -47,12 +47,12 @@ export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarPro
         }
     }, []);
 
-    // Filter nav items based on user role
+    // Filter nav items based on user role (case-insensitive)
     const filteredNavItems = navItems.filter(item => {
         // If no roles specified, everyone can access
         if (!item.roles) return true;
-        // Check if user's role is in allowed roles
-        return item.roles.includes(userRole);
+        // Check if user's role is in allowed roles (case-insensitive)
+        return item.roles.some(role => role.toLowerCase() === userRole.toLowerCase());
     });
 
     const handleLogout = () => {
