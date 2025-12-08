@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { getCartItems, removeFromCart, getCartTotal, clearCart, CartItem } from "../utils/cartStorage";
+import { getCartItems, removeFromCart, getCartTotal, clearCart, CartItem, calculateCartTotal } from "../utils/cartStorage";
 
 export default function CartPage() {
   const router = useRouter();
@@ -88,7 +88,7 @@ export default function CartPage() {
     setFormData({ name: "", phone: "", address: "" });
   };
 
-  const subtotal = getCartTotal();
+  const subtotal = calculateCartTotal(cartItems);
   const shipping = 15000;
   const total = subtotal + shipping;
 
@@ -165,7 +165,7 @@ export default function CartPage() {
                         <div className="flex">
                           <span className="w-24 flex-shrink-0">Harga</span>
                           <span className="mr-1">:</span>
-                          <span>{item.price}</span>
+                          <span>{typeof item.price === 'number' ? `Rp${item.price.toLocaleString('id-ID')}` : item.price}</span>
                         </div>
                         {item.quantity > 1 && (
                           <div className="flex">
@@ -192,7 +192,9 @@ export default function CartPage() {
                         </div>
                         <div>
                           <p className="text-sm md:text-base mb-1 font-medium">Harga</p>
-                          <p className="text-xs md:text-sm">{item.price}</p>
+                          <p className="text-xs md:text-sm">
+                            {typeof item.price === 'number' ? `Rp${item.price.toLocaleString('id-ID')}` : item.price}
+                          </p>
                           {item.quantity > 1 && <p className="text-gray-500 text-xs">x{item.quantity}</p>}
                         </div>
                       </div>

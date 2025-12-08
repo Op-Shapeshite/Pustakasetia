@@ -24,7 +24,19 @@ interface BookDetailPageProps {
 }
 
 export default function BookDetailPage({ book, onBack, isModal = false }: BookDetailPageProps) {
-  const handleBuy = () => {
+  const handleBuy = async () => {
+    try {
+      // Increment sold count
+      await fetch('/api/books/buy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: book.id })
+      });
+    } catch (error) {
+      console.error('Failed to update sold count:', error);
+      // Continue to WhatsApp even if tracking fails
+    }
+
     const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${book.price}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAppState } from "@/contexts/AppStateContext";
+import { motion } from "framer-motion";
 
 function ProiconsSearch() {
   return (
@@ -111,14 +112,11 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <button className="size-[24px]">
-            <ProiconsSearch />
-          </button>
           <Link href="/cart" className="relative size-[24px]">
             <SolarCart3Outline />
-            {cartCount > 0 && (
+            {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {cartCount}
+                {cart.reduce((acc, item) => acc + item.quantity, 0)}
               </span>
             )}
           </Link>
@@ -166,28 +164,48 @@ export default function Header() {
               />
             </Link>
 
+
+
             <nav className="flex items-center gap-8 xl:gap-12">
-              <Link href="/" className="flex flex-col gap-1 items-center">
+              <Link href="/" className="relative flex flex-col gap-1 items-center group">
                 <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Beranda</p>
-                {currentPage === "home" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
+                {currentPage === "home" && (
+                  <motion.div
+                    layoutId="active-nav"
+                    className="absolute -bottom-2 bg-[#ffcc00] h-[3px] w-[40px]"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
               </Link>
-              <Link href="/about" className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
-                <div className="flex flex-col gap-1 items-center">
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Tentang Kami</p>
-                  {currentPage === "about" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
-                </div>
+              <Link href="/about" className="relative flex flex-col gap-1 items-center group font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
+                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Tentang Kami</p>
+                {currentPage === "about" && (
+                  <motion.div
+                    layoutId="active-nav"
+                    className="absolute -bottom-2 bg-[#ffcc00] h-[3px] w-[40px]"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
               </Link>
-              <Link href="/products" className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
-                <div className="flex flex-col gap-1 items-center">
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Produk</p>
-                  {currentPage === "products" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
-                </div>
+              <Link href="/products" className="relative flex flex-col gap-1 items-center group font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
+                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Produk</p>
+                {currentPage === "products" && (
+                  <motion.div
+                    layoutId="active-nav"
+                    className="absolute -bottom-2 bg-[#ffcc00] h-[3px] w-[40px]"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
               </Link>
-              <Link href="/contact" className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
-                <div className="flex flex-col gap-1 items-center">
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Kontak Kami</p>
-                  {currentPage === "contact" && <div className="bg-[#ffcc00] h-[3px] w-[40px]" />}
-                </div>
+              <Link href="/contact" className="relative flex flex-col gap-1 items-center group font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap hover:opacity-70 transition-opacity">
+                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-lg xl:text-xl whitespace-nowrap">Kontak Kami</p>
+                {currentPage === "contact" && (
+                  <motion.div
+                    layoutId="active-nav"
+                    className="absolute -bottom-2 bg-[#ffcc00] h-[3px] w-[40px]"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
               </Link>
             </nav>
 
@@ -197,9 +215,9 @@ export default function Header() {
               </button>
               <Link href="/cart" className="hover:opacity-70 transition-opacity relative">
                 <SolarCart3Outline />
-                {cartCount > 0 && (
+                {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartCount}
+                    {cart.reduce((acc, item) => acc + item.quantity, 0)}
                   </span>
                 )}
               </Link>

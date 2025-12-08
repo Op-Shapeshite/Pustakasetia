@@ -7,7 +7,7 @@ import { Book } from '../types/book';
 import Hero from './Hero';
 import Footer from './Footer';
 import { Loader2 } from 'lucide-react';
-import BookDetailPage from './BookDetailPage';
+import BookDetailModal from './BookDetailModal';
 
 // API Book type from database
 interface APIBook {
@@ -55,6 +55,7 @@ export default function HomePage() {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [books, setBooks] = useState<Book[]>([]);
+    // Force recompile trigger - updated formatting
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [visibleBooks, setVisibleBooks] = useState(8);
@@ -195,10 +196,9 @@ export default function HomePage() {
 
             {/* Book Detail Modal */}
             {selectedBook && (
-                <BookDetailPage
+                <BookDetailModal
                     book={selectedBook}
-                    onBack={handleCloseModal}
-                    isModal={true}
+                    onClose={handleCloseModal}
                 />
             )}
         </div>

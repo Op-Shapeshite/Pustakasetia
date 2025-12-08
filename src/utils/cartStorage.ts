@@ -3,7 +3,7 @@ export interface CartItem {
   image: string;
   title: string;
   author: string;
-  price: string;
+  price: string | number;
   isbn?: string;
   edition?: string;
   quantity: number;
@@ -13,7 +13,7 @@ const CART_STORAGE_KEY = 'pustaka_setia_cart';
 
 export const getCartItems = (): CartItem[] => {
   if (typeof window === 'undefined') return [];
-  
+
   try {
     const cartData = localStorage.getItem(CART_STORAGE_KEY);
     return cartData ? JSON.parse(cartData) : [];
@@ -25,10 +25,10 @@ export const getCartItems = (): CartItem[] => {
 
 export const addToCart = (item: Omit<CartItem, 'quantity'>): void => {
   const currentCart = getCartItems();
-  
+
   // Check if item already exists
   const existingItemIndex = currentCart.findIndex(cartItem => cartItem.id === item.id);
-  
+
   if (existingItemIndex > -1) {
     // Increase quantity if item exists
     currentCart[existingItemIndex].quantity += 1;
@@ -36,7 +36,7 @@ export const addToCart = (item: Omit<CartItem, 'quantity'>): void => {
     // Add new item with quantity 1
     currentCart.push({ ...item, quantity: 1 });
   }
-  
+
   saveCart(currentCart);
 };
 
@@ -51,10 +51,10 @@ export const updateCartItemQuantity = (itemId: number, quantity: number): void =
     removeFromCart(itemId);
     return;
   }
-  
+
   const currentCart = getCartItems();
   const itemIndex = currentCart.findIndex(item => item.id === itemId);
-  
+
   if (itemIndex > -1) {
     currentCart[itemIndex].quantity = quantity;
     saveCart(currentCart);
@@ -65,12 +65,22 @@ export const clearCart = (): void => {
   saveCart([]);
 };
 
-export const getCartTotal = (): number => {
-  const items = getCartItems();
+export const calculateCartTotal = (items: CartItem[]): number => {
   return items.reduce((total, item) => {
-    const price = parseInt(item.price.replace(/[^\d]/g, ''));
+    let price = 0;
+    if (typeof item.price === 'number') {
+      price = item.price;
+    } else if (typeof item.price === 'string') {
+      // Remove any non-digit characters and parse
+      price = parseInt(item.price.replace(/[^\d]/g, '')) || 0;
+    }
     return total + (price * item.quantity);
   }, 0);
+};
+
+export const getCartTotal = (): number => {
+  const items = getCartItems();
+  return calculateCartTotal(items);
 };
 
 export const getCartItemCount = (): number => {

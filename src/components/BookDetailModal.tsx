@@ -1,6 +1,6 @@
 import { X, ShoppingCart, ArrowLeft } from "lucide-react";
 // Image is hardcoded in the component
-import { addToCart } from "../utils/cartStorage";
+import { useAppState } from "../contexts/AppStateContext";
 
 interface Book {
   id: number;
@@ -23,22 +23,36 @@ interface BookDetailModalProps {
 }
 
 export default function BookDetailModal({ book, onClose, onAddToCart }: BookDetailModalProps) {
+  const { addToCart } = useAppState();
+
   const handleBuy = () => {
+    // Parse price for formatting
+    const priceNumber = parseInt(book.price.toString().replace(/[^\d]/g, '')) || 0;
+    const formattedPrice = `Rp${priceNumber.toLocaleString('id-ID')}`;
+
     // Open WhatsApp with book details
-    const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${book.price}`;
+    const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${formattedPrice}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
+  const getDisplayPrice = () => {
+    const priceNumber = parseInt(book.price.toString().replace(/[^\d]/g, '')) || 0;
+    return `Rp ${priceNumber.toLocaleString('id-ID')}`;
+  };
+
   const handleAddToCart = () => {
+    // Convert string price to number for context if needed, or keep as string if context handles it.
+    // AppStateContext CartItem expects price: number. Book has price: string.
+    // We need to parse the price.
+    const priceNumber = parseInt(book.price.toString().replace(/[^\d]/g, ''));
+
     addToCart({
       id: book.id,
       image: book.image,
       title: book.title,
-      author: book.author,
-      price: book.price,
-      isbn: book.isbn,
-      edition: book.edition
+      price: priceNumber,
+      // author field is not in CartItem interface in AppStateContext yet
     });
 
     // Show success message
@@ -51,31 +65,33 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
-      <div className="relative w-full max-w-6xl bg-neutral-50 rounded-[24px] shadow-2xl my-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-6xl bg-neutral-50 rounded-[24px] shadow-2xl my-8 overflow-hidden">
         {/* Header with Background Image */}
-        <div className="relative h-48 md:h-64 lg:h-80 rounded-t-[24px] overflow-hidden">
-          <img
-            src="/img/library-background.png"
-            alt="Background"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/50" />
+        <div className="relative h-36 md:h-48 lg:h-64 w-full">
+          <div className="absolute inset-0">
+            <img
+              src="/img/library-background.png"
+              alt="Background"
+              className="w-full h-full object-cover brightness-[0.4]"
+            />
+          </div>
 
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+            className="absolute top-4 right-4 md:top-6 md:right-6 z-50 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors backdrop-blur-md border border-white/20 shadow-lg"
+            aria-label="Close"
           >
-            <X className="h-5 w-5 md:h-6 md:w-6 text-[#2f2f2f]" />
+            <X className="h-6 w-6" />
           </button>
 
           {/* Book Title and Author on Header */}
-          <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 text-white">
-            <h1 className="font-['Poppins',sans-serif] text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-2 line-clamp-2">
+          <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 text-white z-10">
+            <h1 className="font-['Poppins',sans-serif] font-bold text-xl md:text-2xl lg:text-3xl xl:text-4xl mb-2 line-clamp-2 drop-shadow-lg">
               {book.title}
             </h1>
-            <p className="font-['Poppins',sans-serif] text-sm md:text-base lg:text-lg opacity-90 line-clamp-1">
+            <p className="font-['Poppins',sans-serif] text-sm md:text-base lg:text-lg opacity-90 line-clamp-1 drop-shadow-md">
               {book.author}
             </p>
           </div>
@@ -83,12 +99,12 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
 
         {/* Content */}
         <div className="p-4 md:p-6 lg:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8 lg:gap-12">
             {/* Left Column - Book Cover and Actions */}
             <div className="space-y-6">
               {/* Book Cover */}
-              <div className="w-full max-w-[300px] mx-auto lg:mx-0">
-                <div className="aspect-[286/417] relative rounded-[12px] overflow-hidden shadow-[20px_20px_30px_0px_rgba(0,0,0,0.25)]">
+              <div className="w-full max-w-[240px] md:max-w-[280px] mx-auto lg:mx-0">
+                <div className="aspect-[2/3] relative rounded-[12px] overflow-hidden shadow-2xl transform lg:-translate-y-12 lg:mb-[-3rem] border-4 border-white">
                   <img
                     src={book.image}
                     alt={book.title}
@@ -98,72 +114,61 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-3">
+              <div className="space-y-3 pt-4 lg:pt-16">
                 <button
                   onClick={handleBuy}
-                  className="w-full bg-green-500 text-white font-['Poppins',sans-serif] px-6 py-4 rounded-[6px] hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-green-500 text-white font-['Poppins',sans-serif] font-semibold px-6 py-3 rounded-xl hover:bg-green-600 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
                 >
-                  <span className="text-lg md:text-xl">BELI</span>
-                  <span className="text-lg md:text-xl">{book.price}</span>
+                  <span className="text-lg">BELI {getDisplayPrice()}</span>
                 </button>
 
                 <button
                   onClick={handleAddToCart}
-                  className="w-full bg-[#ffcc00] text-[#2f2f2f] font-['Poppins',sans-serif] px-6 py-4 rounded-[6px] hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  className="w-full bg-[#ffcc00] text-[#2f2f2f] font-['Poppins',sans-serif] font-semibold px-6 py-3 rounded-xl hover:bg-[#ffdb4d] transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg hover:shadow-orange-500/20"
                 >
                   <ShoppingCart className="h-5 w-5" />
-                  <span className="text-lg md:text-xl">Masukkan Keranjang</span>
+                  <span className="text-lg">KRANJANG</span>
                 </button>
               </div>
             </div>
 
             {/* Right Column - Details and Synopsis */}
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Book Specifications */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg mb-1">
-                    Jumlah Halaman
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-base md:text-lg">
-                    : {book.pages || 198}
-                  </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
+                <div className="flex flex-col">
+                  <span className="text-sm text-neutral-500 mb-1">Jumlah Halaman</span>
+                  <span className="font-['Poppins',sans-serif] text-[#2f2f2f] font-medium text-lg">
+                    {book.pages || 198} Halaman
+                  </span>
                 </div>
 
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg mb-1">
-                    Ukuran Buku
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-base md:text-lg">
-                    : {book.size || "16 x 24 cm"}
-                  </p>
+                <div className="flex flex-col">
+                  <span className="text-sm text-neutral-500 mb-1">Ukuran Buku</span>
+                  <span className="font-['Poppins',sans-serif] text-[#2f2f2f] font-medium text-lg">
+                    {book.size || "16 x 24 cm"}
+                  </span>
                 </div>
 
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg mb-1">
-                    Edisi dan Cetakan
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-base md:text-lg">
-                    : {book.edition || "Ke-1. 2025"}
-                  </p>
+                <div className="flex flex-col">
+                  <span className="text-sm text-neutral-500 mb-1">Edisi dan Cetakan</span>
+                  <span className="font-['Poppins',sans-serif] text-[#2f2f2f] font-medium text-lg">
+                    {book.edition || "Ke-1. 2025"}
+                  </span>
                 </div>
 
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg mb-1">
-                    ISBN
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-base md:text-lg">
-                    : {book.isbn || "978-979-076-799-1"}
-                  </p>
+                <div className="flex flex-col">
+                  <span className="text-sm text-neutral-500 mb-1">ISBN</span>
+                  <span className="font-['Poppins',sans-serif] text-[#2f2f2f] font-medium text-lg">
+                    {book.isbn || "978-979-076-799-1"}
+                  </span>
                 </div>
 
-                <div>
-                  <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg mb-1">
-                    Jenis Kertas
-                  </p>
-                  <p className="font-['Poppins',sans-serif] text-gray-500 text-base md:text-lg">
-                    : {book.paperType || "HVS"}
-                  </p>
+                <div className="flex flex-col">
+                  <span className="text-sm text-neutral-500 mb-1">Jenis Kertas</span>
+                  <span className="font-['Poppins',sans-serif] text-[#2f2f2f] font-medium text-lg">
+                    {book.paperType || "HVS"}
+                  </span>
                 </div>
               </div>
 

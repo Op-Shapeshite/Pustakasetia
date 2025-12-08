@@ -7,6 +7,7 @@ import {
   SearchBar,
   PaginationControls
 } from './ui';
+import BookDetailModal from './BookDetailModal';
 import { Book, BookCategory } from '../types/book';
 import Footer from './Footer';
 import { Loader2, ChevronDown } from 'lucide-react';
@@ -76,6 +77,7 @@ export default function ProductsPage({
   const [currentPage, setCurrentPage] = useState(1);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const itemsPerPage = 16;
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   const fetchBooks = useCallback(async () => {
     try {
@@ -150,7 +152,11 @@ export default function ProductsPage({
   const { books: displayBooks, totalPages, totalItems } = getFilteredBooks();
 
   const handleBookClick = (book: Book) => {
-    router.push(`/books/${book.id}`);
+    setSelectedBook(book);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedBook(null);
   };
 
   if (loading) {
@@ -260,6 +266,13 @@ export default function ProductsPage({
               Coba ubah filter atau kata kunci pencarian Anda
             </p>
           </div>
+        )}
+
+        {selectedBook && (
+          <BookDetailModal
+            book={selectedBook}
+            onClose={handleCloseModal}
+          />
         )}
       </div>
       <Footer />
