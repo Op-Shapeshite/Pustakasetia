@@ -1,0 +1,100 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build application
+        run: npm run build
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          cp -r .next deploy/
+          cp -r public deploy/
+          cp -r prisma deploy/
+          cp package.json deploy/
+          cp package-lock.json deploy/
+          cp next.config.ts deploy/
+          cp -r src deploy/ 2>/dev/null || true
+          tar -czf deploy.tar.gz deploy
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd ${{ secrets.VPS_DIR }}
+            # Backup current deployment
+            if [ -d ".next" ]; then
+              rm -rf .next.backup
+              mv .next .next.backup 2>/dev/null || true
+            fi
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "deploy.tar.gz"
+          target: ${{ secrets.VPS_DIR }}
+
+      - name: Extract and restart application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd ${{ secrets.VPS_DIR }}
+            
+            # Extract deployment
+            tar -xzf deploy.tar.gz
+            cp -rf deploy/* .
+            rm -rf deploy deploy.tar.gz
+            
+            # Install production dependencies
+            npm ci --production
+            
+            # Generate Prisma client
+            npx prisma generate
+            
+            # Run database migrations (if needed)
+            npx prisma migrate deploy 2>/dev/null || true
+            
+            # Restart application using PM2
+            if command -v pm2 &> /dev/null; then
+              pm2 restart pustakasetia || pm2 start npm --name "pustakasetia" -- start
+            else
+              echo "PM2 not found. Please restart the application manually."
+            fi
+            
+            echo "✅ Deployment completed successfully!"
