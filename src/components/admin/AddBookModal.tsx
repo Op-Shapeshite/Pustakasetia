@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { X, Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
 import { bookService, categoryService } from '@/utils/adminData';
 import dynamic from 'next/dynamic';
 import SearchableSelect from './SearchableSelect';
 import AuthorAutocomplete from './AuthorAutocomplete';
+import BaseModal from './BaseModal';
 
 // Dynamically import RichTextEditor to prevent SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
@@ -238,197 +238,188 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
         setMounted(true);
     }, []);
 
-    if (!isOpen || !mounted) return null;
-
-    const modalContent = (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
-            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-
-            <div className="relative bg-[#f6f8fd] rounded-[24px] w-full max-w-[1000px] max-h-[90vh] overflow-y-auto shadow-xl my-8">
-                <div className="sticky top-0 bg-[#f6f8fd] px-8 py-6 border-b border-gray-200 flex items-center justify-between z-10">
-                    <h2 className="font-['Poppins',sans-serif] font-medium text-xl text-black">
-                        TAMBAH DATA BUKU
-                    </h2>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-[#2f2f2f]" />
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="p-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
-                        {/* Left: Cover Upload */}
-                        <div>
-                            <p className="font-['Poppins',sans-serif] text-sm text-gray-500 mb-3">Cover Buku</p>
-                            <div
-                                onClick={() => fileInputRef.current?.click()}
-                                onDrop={handleDrop}
-                                onDragOver={handleDragOver}
-                                className={`aspect-[3/4] bg-white border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#ffcc00] transition-colors overflow-hidden ${uploadError ? 'border-red-400' : 'border-gray-300'
-                                    }`}
-                            >
-                                {isUploading ? (
-                                    <>
-                                        <Loader2 className="w-12 h-12 text-[#ffcc00] mb-3 animate-spin" />
-                                        <p className="text-sm text-gray-500">Mengupload...</p>
-                                    </>
-                                ) : coverPreview ? (
-                                    <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                    <>
-                                        <Upload className="w-12 h-12 text-gray-400 mb-3" />
-                                        <p className="text-sm text-gray-500">Upload Cover</p>
-                                        <p className="text-xs text-gray-400 mt-1">PNG, JPG max 2MB</p>
-                                    </>
-                                )}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                />
-                            </div>
-                            {uploadError && (
-                                <p className="text-xs text-red-500 mt-2">{uploadError}</p>
-                            )}
-                            <p className="text-xs text-[#c1121f] mt-2">*Cover Berukuran A4</p>
-                        </div>
-
-                        {/* Right: Form Fields */}
-                        <div className="space-y-5">
-                            {/* Row 1 */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="block text-sm text-gray-500 mb-2">Judul Buku</label>
-                                    <input
-                                        type="text"
-                                        value={formData.title}
-                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                        placeholder="Masukkan judul buku"
-                                        required
-                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                                    />
-                                </div>
-                                <div>
-                                    <AuthorAutocomplete
-                                        label="Penulis"
-                                        value={formData.author}
-                                        onChange={(value) => setFormData({ ...formData, author: value })}
-                                        placeholder="Masukkan nama penulis"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Row 2 */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                <div>
-                                    <label className="block text-sm text-gray-500 mb-2">Jumlah Halaman</label>
-                                    <input
-                                        type="number"
-                                        value={formData.pages}
-                                        onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
-                                        placeholder="198"
-                                        required
-                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm text-gray-500 mb-2">Ukuran Buku</label>
-                                    <input
-                                        type="text"
-                                        value={formData.size}
-                                        onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                                        placeholder="16 x 24 cm"
-                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm text-gray-500 mb-2">Edisi</label>
-                                    <input
-                                        type="text"
-                                        value={formData.edition}
-                                        onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
-                                        placeholder="Ke-1. 2025"
-                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Row 3: ISBN, Price, Category */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                <div>
-                                    <label className="block text-sm text-gray-500 mb-2">ISBN</label>
-                                    <input
-                                        type="text"
-                                        value={formData.isbn}
-                                        onChange={handleISBNChange}
-                                        placeholder="978-XXX-XXX-XXX-X"
-                                        required
-                                        maxLength={17}
-                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] font-mono"
-                                    />
-                                    <p className="text-xs text-gray-400 mt-1">Format: 978-XXX-XXX-XXX-X</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm text-gray-500 mb-2">Harga</label>
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">Rp</span>
-                                        <input
-                                            type="text"
-                                            value={formData.priceDisplay}
-                                            onChange={handlePriceChange}
-                                            placeholder="0"
-                                            required
-                                            className="w-full bg-white border border-[#d9d9d9] rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <SearchableSelect
-                                        label="Kategori"
-                                        options={categories}
-                                        value={formData.categoryId}
-                                        onChange={(value) => setFormData({ ...formData, categoryId: value })}
-                                        onCreateNew={handleCreateCategory}
-                                        placeholder="Pilih kategori..."
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Synopsis with WYSIWYG */}
-                            <div>
-                                <label className="block text-sm text-gray-500 mb-2">Sinopsis</label>
-                                <RichTextEditor
-                                    value={formData.synopsis}
-                                    onChange={handleSynopsisChange}
-                                    placeholder="Masukkan sinopsis buku..."
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Footer Buttons */}
-                    <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-8 py-3 border border-[#2f2f2f] rounded-lg font-medium text-[#2f2f2f] hover:bg-gray-100 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting || isUploading}
-                            className="px-8 py-3 bg-[#ffcc00] rounded-lg font-semibold text-[#2f2f2f] hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
-                        >
-                            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                            Tambah
-                        </button>
-                    </div>
-                </form>
-            </div>
+    const footer = (
+        <div className="flex justify-end gap-4">
+            <button
+                type="button"
+                onClick={onClose}
+                className="px-8 py-3 border border-[#2f2f2f] rounded-lg font-medium text-[#2f2f2f] hover:bg-gray-100 transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                form="add-book-form"
+                disabled={isSubmitting || isUploading}
+                className="px-8 py-3 bg-[#ffcc00] rounded-lg font-semibold text-[#2f2f2f] hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+            >
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                Tambah
+            </button>
         </div>
     );
 
-    return createPortal(modalContent, document.body);
+    return (
+        <BaseModal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="TAMBAH DATA BUKU"
+            size="xl"
+            footer={footer}
+        >
+            <form id="add-book-form" onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+                    {/* Left: Cover Upload */}
+                    <div>
+                        <p className="font-['Poppins',sans-serif] text-sm text-gray-500 mb-3">Cover Buku</p>
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            className={`aspect-[3/4] bg-white border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#ffcc00] transition-colors overflow-hidden ${uploadError ? 'border-red-400' : 'border-gray-300'
+                                }`}
+                        >
+                            {isUploading ? (
+                                <>
+                                    <Loader2 className="w-12 h-12 text-[#ffcc00] mb-3 animate-spin" />
+                                    <p className="text-sm text-gray-500">Mengupload...</p>
+                                </>
+                            ) : coverPreview ? (
+                                <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
+                            ) : (
+                                <>
+                                    <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                                    <p className="text-sm text-gray-500">Upload Cover</p>
+                                    <p className="text-xs text-gray-400 mt-1">PNG, JPG max 2MB</p>
+                                </>
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handleFileChange}
+                                className="hidden"
+                            />
+                        </div>
+                        {uploadError && (
+                            <p className="text-xs text-red-500 mt-2">{uploadError}</p>
+                        )}
+                        <p className="text-xs text-[#c1121f] mt-2">*Cover Berukuran A4</p>
+                    </div>
+
+                    {/* Right: Form Fields */}
+                    <div className="space-y-5">
+                        {/* Row 1 */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">Judul Buku</label>
+                                <input
+                                    type="text"
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    placeholder="Masukkan judul buku"
+                                    required
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                />
+                            </div>
+                            <div>
+                                <AuthorAutocomplete
+                                    label="Penulis"
+                                    value={formData.author}
+                                    onChange={(value) => setFormData({ ...formData, author: value })}
+                                    placeholder="Masukkan nama penulis"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 2 */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">Jumlah Halaman</label>
+                                <input
+                                    type="number"
+                                    value={formData.pages}
+                                    onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
+                                    placeholder="198"
+                                    required
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">Ukuran Buku</label>
+                                <input
+                                    type="text"
+                                    value={formData.size}
+                                    onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                                    placeholder="16 x 24 cm"
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">Edisi</label>
+                                <input
+                                    type="text"
+                                    value={formData.edition}
+                                    onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
+                                    placeholder="Ke-1. 2025"
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 3: ISBN, Price, Category */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">ISBN</label>
+                                <input
+                                    type="text"
+                                    value={formData.isbn}
+                                    onChange={handleISBNChange}
+                                    placeholder="978-XXX-XXX-XXX-X"
+                                    required
+                                    maxLength={17}
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] font-mono"
+                                />
+                                <p className="text-xs text-gray-400 mt-1">Format: 978-XXX-XXX-XXX-X</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">Harga</label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">Rp</span>
+                                    <input
+                                        type="text"
+                                        value={formData.priceDisplay}
+                                        onChange={handlePriceChange}
+                                        placeholder="0"
+                                        required
+                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <SearchableSelect
+                                    label="Kategori"
+                                    options={categories}
+                                    value={formData.categoryId}
+                                    onChange={(value) => setFormData({ ...formData, categoryId: value })}
+                                    onCreateNew={handleCreateCategory}
+                                    placeholder="Pilih kategori..."
+                                />
+                            </div>
+                        </div>
+
+                        {/* Synopsis with WYSIWYG */}
+                        <div>
+                            <label className="block text-sm text-gray-500 mb-2">Sinopsis</label>
+                            <RichTextEditor
+                                value={formData.synopsis}
+                                onChange={handleSynopsisChange}
+                                placeholder="Masukkan sinopsis buku..."
+                            />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </BaseModal>
+    );
 }

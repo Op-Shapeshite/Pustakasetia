@@ -25,8 +25,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body className={`${poppins.variable} font-sans bg-neutral-50 min-h-screen w-full overflow-x-hidden`}>
+        <html lang="en" suppressHydrationWarning>
+            <body className={`${poppins.variable} font-sans bg-neutral-50 min-h-screen w-full overflow-x-hidden`} suppressHydrationWarning>
                 <NextTopLoader
                     color="#ffcc00"
                     initialPosition={0.08}

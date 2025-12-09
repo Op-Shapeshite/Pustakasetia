@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Loader2 } from 'lucide-react';
 import { bookService, Book } from '@/utils/adminData';
 import AuthorAutocomplete from './AuthorAutocomplete';
 
@@ -17,6 +17,12 @@ const categories = ['Pendidikan', 'Manajemen', 'Hukum', 'Agama', 'Bahasa', 'Sast
 
 export default function EditBookModal({ isOpen, onClose, onSuccess, book }: EditBookModalProps) {
     const [mounted, setMounted] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [formData, setFormData] = useState({
         title: '',
         author: '',
@@ -27,6 +33,7 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
         category: '',
         edition: '',
         synopsis: '',
+        image: '',
     });
 
     useEffect(() => {
@@ -45,27 +52,98 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                 category: book.category,
                 edition: book.edition,
                 synopsis: book.synopsis,
+                image: book.image || '',
             });
+            setCoverPreview(book.image || null);
         }
     }, [book]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            setUploadError('Format file tidak valid. Hanya JPEG, PNG, WebP yang diizinkan.');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setUploadError('File terlalu besar. Maksimal 5MB.');
+            return;
+        }
+
+        setUploadError(null);
+        setIsUploading(true);
+
+        try {
+            const uploadData = new FormData();
+            uploadData.append('file', file);
+            const token = localStorage.getItem('auth_token');
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                headers: {
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                },
+                body: uploadData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const result = await response.json();
+            setFormData(prev => ({ ...prev, image: result.url }));
+            setCoverPreview(result.url);
+        } catch (err) {
+            setUploadError(err instanceof Error ? err.message : 'Gagal mengupload gambar');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
+        const file = e.dataTransfer.files?.[0];
+        if (file && fileInputRef.current) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInputRef.current.files = dataTransfer.files;
+            const event = new Event('change', { bubbles: true });
+            fileInputRef.current.dispatchEvent(event);
+        }
+    };
 
-        bookService.update(book.id, {
-            title: formData.title,
-            author: formData.author,
-            pages: parseInt(formData.pages) || 0,
-            size: formData.size,
-            isbn: formData.isbn,
-            price: parseInt(formData.price) || 0,
-            category: formData.category,
-            edition: formData.edition,
-            synopsis: formData.synopsis,
-        });
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+    };
 
-        onSuccess();
-        onClose();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            await bookService.update(book.id, {
+                title: formData.title,
+                author: formData.author,
+                pages: parseInt(formData.pages) || 0,
+                size: formData.size,
+                isbn: formData.isbn,
+                price: parseInt(formData.price) || 0,
+                category: formData.category,
+                edition: formData.edition,
+                synopsis: formData.synopsis,
+                image: formData.image,
+            });
+
+            onSuccess();
+            onClose();
+        } catch (err) {
+            console.error('Failed to update book:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!isOpen || !mounted) return null;
