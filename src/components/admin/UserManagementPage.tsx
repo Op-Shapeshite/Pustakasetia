@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { userService, User } from '@/utils/adminData';
 import { useDebounce } from '@/hooks/useDebounce';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import AdminPageContainer from './AdminPageContainer';
+import AdminDataTable, { Column } from './AdminDataTable';
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState<User[]>([]);
@@ -82,6 +84,45 @@ export default function UserManagementPage() {
         }
     };
 
+    // Define table columns
+    const columns: Column<User>[] = [
+        {
+            header: 'Id',
+            render: (user, index) => (currentPage - 1) * itemsPerPage + index + 1,
+            className: 'px-6 py-4 text-sm text-gray-900'
+        },
+        {
+            header: 'Nama Lengkap',
+            accessor: 'fullName',
+            className: 'px-6 py-4 text-sm font-medium text-gray-900'
+        },
+        {
+            header: 'Username',
+            accessor: 'username',
+            className: 'px-6 py-4 text-sm text-gray-700'
+        },
+        {
+            header: 'Role',
+            accessor: 'role.name',
+            className: 'px-6 py-4 text-sm text-gray-700'
+        },
+        {
+            header: 'Status',
+            render: (user) => (
+                <span className={`
+                    inline-flex px-3 py-1 rounded-full text-xs font-medium
+                    ${user.status === 'active'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }
+                `}>
+                    {user.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
+                </span>
+            ),
+            className: 'px-6 py-4'
+        }
+    ];
+
     if (loading && users.length === 0) {
         return (
             <div className="p-6 flex items-center justify-center">
@@ -92,133 +133,27 @@ export default function UserManagementPage() {
     }
 
     return (
-        <div className="p-6">
-            {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
-                    <button onClick={loadUsers} className="ml-2 underline">Coba lagi</button>
-                </div>
-            )}
-
-            {/* Header Actions */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <h2 className="text-xl font-semibold text-[#2f2f2f]">Daftar Pengguna</h2>
-
-                <div className="flex items-center gap-4">
-                    {/* Search */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Cari pengguna..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg w-[250px] text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                        />
-                    </div>
-
-                    {/* Add Button */}
-                    <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center gap-2 bg-[#ffcc00] text-[#2f2f2f] px-4 py-2 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Tambah Pengguna
-                    </button>
-                </div>
-            </div>
-
-            {/* Table */}
-            <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-[#ffcc00]">
-                                <th className="text-left px-4 py-3 font-semibold text-[#2f2f2f] text-sm">No</th>
-                                <th className="text-left px-4 py-3 font-semibold text-[#2f2f2f] text-sm">Nama Lengkap</th>
-                                <th className="text-left px-4 py-3 font-semibold text-[#2f2f2f] text-sm">Username</th>
-                                <th className="text-left px-4 py-3 font-semibold text-[#2f2f2f] text-sm">Role</th>
-                                <th className="text-left px-4 py-3 font-semibold text-[#2f2f2f] text-sm">Status</th>
-                                <th className="text-center px-4 py-3 font-semibold text-[#2f2f2f] text-sm">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((user, index) => (
-                                <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.fullName}</td>
-                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.username}</td>
-                                    <td className="px-4 py-3 text-sm text-[#2f2f2f]">{user.role?.name || '-'}</td>
-                                    <td className="px-4 py-3">
-                                        <span className={`
-                                            inline-flex px-3 py-1 rounded-full text-xs font-medium
-                                            ${user.status === 'active'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-100 text-red-700'
-                                            }
-                                        `}>
-                                            {user.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button
-                                                onClick={() => handleEdit(user)}
-                                                className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                                                title="Edit"
-                                            >
-                                                <Pencil className="w-4 h-4 text-blue-500" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(user)}
-                                                className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                                title="Hapus"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-red-500" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {!loading && users.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                                        {searchQuery ? 'Tidak ada pengguna yang ditemukan' : 'Belum ada data pengguna'}
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination - Always show info bar */}
-                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                    <p className="text-sm text-gray-500">
-                        Menampilkan {totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalItems)} dari {totalItems} data
-                    </p>
-                    {totalPages > 1 && (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <span className="text-sm text-[#2f2f2f]">
-                                {currentPage} / {totalPages}
-                            </span>
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <ChevronRight className="w-4 h-4" />
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
+        <AdminPageContainer
+            searchValue={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Cari pengguna..."
+            onAddClick={() => setIsAddModalOpen(true)}
+            addButtonText="Tambah Baru"
+            error={error}
+            onRetry={loadUsers}
+        >
+            <AdminDataTable
+                columns={columns}
+                data={users}
+                loading={loading}
+                searchQuery={searchQuery}
+                emptyMessage="Belum ada data pengguna"
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+            />
 
             {/* Modals */}
             <AddUserModal
@@ -250,6 +185,6 @@ export default function UserManagementPage() {
                 message={`Apakah Anda yakin ingin menghapus pengguna "${selectedUser?.fullName}"?`}
                 isLoading={isDeleting}
             />
-        </div>
+        </AdminPageContainer>
     );
 }

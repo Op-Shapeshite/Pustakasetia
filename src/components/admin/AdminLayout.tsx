@@ -94,12 +94,12 @@ export default function AdminLayout({
 
                 {/* Content - Scrollable Area */}
                 <div
-                    className={`flex-1 overflow-y-scroll  relative ${isScrolled ? 'bg-[#f6f8fd] -mt-2' : '-mt-[60px] '}`}
+                    className={`flex-1 overflow-y-scroll scrollbar-hide relative ${isScrolled ? 'bg-[#f6f8fd] -mt-2' : '-mt-[60px] '}`}
                     onScroll={handleScroll}
 
                 >
                     <div
-                        className="relative pb-12 mt-[70px]  scrollbar-hide h-full "
+                        className="relative pb-12 mt-[70px]   h-full "
                     >
                         {/* <div className="  "> */}
                         {children}
