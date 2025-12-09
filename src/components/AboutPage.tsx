@@ -1,3 +1,5 @@
+import Footer from "./Footer";
+
 const imgRectangle1304 = "/img/library-background.png";
 const imgImage = "/img/book-cover-optimized.png";
 const imgImage6 = "/img/book-cover-optimized.png";
@@ -96,6 +98,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

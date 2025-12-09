@@ -1,56 +1,8 @@
+'use client';
+
 import { motion, useScroll, useTransform, useSpring, useInView, Variants } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-
-interface HeroProps {
-  onExploreClick?: () => void;
-}
-
-const TypingText = ({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) => {
-  const words = text.split(" ");
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  const container: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05, delayChildren: delay }, // 0.05s per letter = typing speed
-    },
-  };
-
-  const child: Variants = {
-    hidden: {
-      opacity: 0,
-    },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0, // Instant appearance for typewriter feel
-      },
-    },
-  };
-
-  return (
-    <motion.div
-      ref={ref}
-      style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-start" }} // Removed overflow:hidden to allow potential cursor
-      variants={container}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-      className={className}
-    >
-      {words.map((word, index) => (
-        <span key={index} style={{ marginRight: "0.25em", display: "inline-block" }}>
-          {Array.from(word).map((letter, letterIndex) => (
-            <motion.span variants={child} key={letterIndex} style={{ display: "inline-block" }}>
-              {letter}
-            </motion.span>
-          ))}
-        </span>
-      ))}
-    </motion.div>
-  );
-};
+import { useRouter } from "next/navigation";
 
 const CountUp = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
   const ref = useRef(null);
@@ -78,7 +30,8 @@ const CountUp = ({ value, suffix = "" }: { value: number; suffix?: string }) => 
   return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
 };
 
-export default function Hero({ onExploreClick }: HeroProps) {
+export default function Hero() {
+  const router = useRouter();
   const [stats, setStats] = useState({
     totalCategories: 0,
     totalBooks: 0,
@@ -117,7 +70,7 @@ export default function Hero({ onExploreClick }: HeroProps) {
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="font-['Poppins',sans-serif] font-semibold text-3xl md:text-5xl lg:text-[64px] leading-[1.2] text-neutral-900 text-left"
+                  className="font-['Poppins',sans-serif] font-semibold text-3xl md:text-5xl lg:text-[64px] md:leading-[1.2] text-neutral-900 text-left"
                 >
                   Jelajahi koleksi buku terbaik kami untuk Anda
                 </motion.h1>
@@ -130,7 +83,7 @@ export default function Hero({ onExploreClick }: HeroProps) {
 
               {/* CTA Button */}
               <button
-                onClick={onExploreClick}
+                onClick={() => router.push('/products')}
                 className="font-['Poppins',sans-serif] font-semibold bg-[#ffcc00] hover:bg-[#f0c000] text-neutral-900 text-base md:text-[20px] px-8 py-3 md:px-10 md:py-4 rounded-full w-fit transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Jelajahi Sekarang
