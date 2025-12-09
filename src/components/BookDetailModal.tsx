@@ -1,7 +1,7 @@
 import { X, ShoppingCart, ArrowLeft } from "lucide-react";
 // Image is hardcoded in the component
 import { useAppState } from "../contexts/AppStateContext";
-import { useToast } from "../contexts/ToastContext";
+import { usePopup } from "../contexts/PopupContext";
 import { Book } from "../types/book";
 
 interface BookDetailModalProps {
@@ -12,16 +12,22 @@ interface BookDetailModalProps {
 
 export default function BookDetailModal({ book, onClose, onAddToCart }: BookDetailModalProps) {
   const { addToCart } = useAppState();
-  const { showToast } = useToast();
+  const { showPopup } = usePopup();
 
   const handleBuy = () => {
-    // Use formatted price from book object or format it
-    const formattedPrice = book.priceFormatted || `Rp${book.price.toLocaleString('id-ID')}`;
+    // Navigate to WhatsApp after popup closes
+    const doRedirect = () => {
+      // Use formatted price from book object or format it
+      const formattedPrice = book.priceFormatted || `Rp${book.price.toLocaleString('id-ID')}`;
 
-    // Open WhatsApp with book details
-    const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${formattedPrice}`;
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+      // Open WhatsApp with book details
+      const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${formattedPrice}`;
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    };
+
+    // Show redirect message with callback
+    showPopup("Mengarahkan ke WhatsApp...", "info", doRedirect);
   };
 
   const getDisplayPrice = () => {
@@ -40,7 +46,7 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
     });
 
     // Show success message
-    showToast(`"${book.title}" berhasil ditambahkan ke keranjang!`, "success");
+    showPopup(`"${book.title}" berhasil ditambahkan ke keranjang!`, "success");
 
     // Call the optional callback
     if (onAddToCart) {
@@ -75,7 +81,7 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
 
           {/* Title & Author (Positioned to the right of the book cover placeholder) */}
           {/* We use padding-left to push text to the right, assuming book cover is on the left */}
-          <div className="absolute bottom-0 left-1/2 -translate-y-1/2 left-4 right-4 md:left-[340px] md:right-12 z-10 text-white">
+          <div className="hidden md:block absolute bottom-0 left-1/2 -translate-y-1/2 left-4 right-4 md:left-[340px] md:right-12 z-10 text-white">
             <h1 className="font-['Poppins',sans-serif] font-bold text-2xl md:text-3xl lg:text-[40px] leading-tight mb-3 drop-shadow-md">
               {book.title}
             </h1>
@@ -97,6 +103,16 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
                   alt={book.title}
                   className="w-full h-full object-cover"
                 />
+              </div>
+
+              {/* Mobile Title & Author (Visible only on mobile, below image) */}
+              <div className="block md:hidden mt-6 text-center">
+                <h1 className="font-['Poppins',sans-serif] font-bold text-2xl text-[#2f2f2f] leading-tight mb-2">
+                  {book.title}
+                </h1>
+                <p className="font-['Poppins',sans-serif] text-base text-gray-600 font-medium">
+                  {book.author}
+                </p>
               </div>
             </div>
 

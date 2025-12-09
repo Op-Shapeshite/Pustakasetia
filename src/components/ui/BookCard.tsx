@@ -31,7 +31,7 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
           </p>
 
           {/* Title - 2 lines max */}
-          <h3 className="text-sm font-bold text-neutral-900 line-clamp-2 leading-[1.4] font-['Poppins',sans-serif]">
+          <h3 className="text-sm font-bold text-neutral-900 line-clamp-1 font-['Poppins',sans-serif]">
             {book.title}
           </h3>
 
@@ -67,7 +67,7 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
         </p>
 
         {/* Title - 2 lines max */}
-        <h3 className="text-lg font-bold text-neutral-900 line-clamp-2 leading-[1.4] font-['Poppins',sans-serif]">
+        <h3 className="text-lg font-bold text-neutral-900 line-clamp-1 leading-[1.4] font-['Poppins',sans-serif]">
           {book.title}
         </h3>
 

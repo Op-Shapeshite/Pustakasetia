@@ -3,6 +3,9 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AppStateProvider } from "@/contexts/AppStateContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { PopupProvider } from "@/contexts/PopupContext";
+import { Toaster } from "@/components/ui/sonner";
+import { AnnouncementPopup } from "@/components/ui/AnnouncementPopup";
 import NextTopLoader from 'nextjs-toploader';
 
 const poppins = Poppins({
@@ -37,7 +40,11 @@ export default function RootLayout({
                 />
                 <AppStateProvider>
                     <ToastProvider>
-                        {children}
+                        <PopupProvider>
+                            {children}
+                            <AnnouncementPopup />
+                            <Toaster />
+                        </PopupProvider>
                     </ToastProvider>
                 </AppStateProvider>
             </body>

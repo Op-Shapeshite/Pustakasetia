@@ -59,7 +59,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
             {/* Legal dan Tercatat */}
-            <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-start">
               <div className="flex-shrink-0 w-32 md:w-40 lg:w-[174px]">
                 <img
                   src="/img/legality.png"
@@ -67,18 +67,18 @@ export default function AboutPage() {
                   className="w-full h-auto object-contain"
                 />
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 space-y-3 text-center md:text-left">
                 <h3 className="font-['Poppins',sans-serif] text-[#2f2f2f] text-xl md:text-2xl">
                   Legal dan Tercatat
                 </h3>
-                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg lg:text-xl leading-relaxed text-justify">
+                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg lg:text-xl leading-relaxed text-justify md:text-justify">
                   CV. Pustaka Setia tercatat dengan legal dan memiliki akte resmi di Notaris .................................................................................
                 </p>
               </div>
             </div>
 
             {/* Kantor Pustaka Setia */}
-            <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-start">
               <div className="flex-shrink-0 w-32 md:w-40 lg:w-[163px]">
                 <img
                   src="/img/office-location.png"
@@ -86,11 +86,11 @@ export default function AboutPage() {
                   className="w-full h-auto object-contain"
                 />
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 space-y-3 text-center md:text-left">
                 <h3 className="font-['Poppins',sans-serif] text-[#2f2f2f] text-xl md:text-2xl">
                   Kantor Pustaka Setia
                 </h3>
-                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg lg:text-xl leading-relaxed text-justify">
+                <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg lg:text-xl leading-relaxed text-justify md:text-justify">
                   CV. Pustaka Setia aktif berkantor di Jl. BKR No.162-164, Cigereleng, Kec. Regol, Kota Bandung, Jawa Barat 40253
                 </p>
               </div>
