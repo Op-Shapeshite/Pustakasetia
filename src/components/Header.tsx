@@ -206,12 +206,12 @@ export default function Header() {
       {/* DESKTOP NAVBAR */}
       <header className={`hidden lg:block w-full bg-neutral-50 sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-24">
+          <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex-shrink-0">
               <img
                 src="/img/logo.png"
                 alt="Pustaka Setia"
-                className="h-16 w-auto object-contain"
+                className="h-12 w-auto object-contain"
               />
             </Link>
 

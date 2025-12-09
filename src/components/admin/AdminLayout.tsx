@@ -18,6 +18,12 @@ export default function AdminLayout({
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
 
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        setIsScrolled(e.currentTarget.scrollTop > 20);
+    };
+
     useEffect(() => {
         // Delay check slightly to ensure localStorage is ready after navigation
         const checkAuth = () => {
@@ -54,24 +60,51 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="flex min-h-screen bg-[#f6f8fd]">
-            {/* Sidebar */}
+        <div className="h-screen w-full bg-[#f6f8fd] relative overflow-hidden">
+            {/* Global Background Image for Library Effect - LIMITED TO HEADER AREA ONLY */}
+            <div className="fixed top-0 left-0 w-full h-[260px] pointer-events-none">
+                <img
+                    src="/img/library-background.png"
+                    alt="Library Background"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-blue-900/40 mix-blend-multiply" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
+            </div>
+
+            {/* Solid White Background Below Header - BLOCKS library background */}
+            <div className="fixed top-[260px] left-0 w-full h-full bg-[#f6f8fd] pointer-events-none" />
+
             <AdminSidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                isScrolled={isScrolled}
             />
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col min-h-screen md:ml-[270px]">
-                {/* Header */}
-                <AdminHeader
-                    title={title}
-                    onMenuClick={() => setIsSidebarOpen(true)}
-                />
+            {/* Main content area - Flex column for fixed header + scrolling content */}
+            <div className="flex flex-col h-full md:ml-[270px] relative z-10">
+                {/* Header - Fixed at top of this column */}
+                <div className="flex-shrink-0 transition-all duration-300">
+                    <AdminHeader
+                        title={title}
+                        onMenuClick={() => setIsSidebarOpen(true)}
+                        isScrolled={isScrolled}
+                    />
+                </div>
 
-                {/* Content */}
-                <div className="relative z-10">
-                    {children}
+                {/* Content - Scrollable Area */}
+                <div
+                    className={`flex-1 overflow-y-scroll  relative ${isScrolled ? 'bg-[#f6f8fd] -mt-2' : '-mt-[60px] '}`}
+                    onScroll={handleScroll}
+
+                >
+                    <div
+                        className="relative pb-12 mt-[70px]  scrollbar-hide h-full "
+                    >
+                        {/* <div className="  "> */}
+                        {children}
+                        {/* </div> */}
+                    </div>
                 </div>
             </div>
         </div>

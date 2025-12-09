@@ -21,11 +21,15 @@ export default function DashboardPage() {
   return (
     <div className="bg-[#f6f8fd] min-h-screen w-full relative overflow-x-hidden">
       {/* Header Background */}
-      <div className="absolute left-0 top-0 w-full h-[180px] md:h-[180px]">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6]" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-transparent" />
+      {/* Header Background */}
+      <div className="absolute left-0 top-0 w-full h-[300px] z-0">
+        <img
+          src="/img/library-background.png"
+          alt="Library Background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-blue-900/60 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#f6f8fd]" />
       </div>
 
       {/* Logo - Top Left */}
@@ -71,17 +75,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Date Picker - Top Right */}
-      <div className="hidden md:flex absolute right-[25px] top-[25px] z-50 items-center gap-2 bg-white/95 backdrop-blur-sm border border-white/50 rounded-lg px-4 py-2 shadow-lg">
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-          <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" fill="#2f2f2f" />
-        </svg>
-        <p className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-sm">
-          6 Okt - 12 Okt 2025
-        </p>
-        <svg className="w-4 h-4" viewBox="0 0 8 7" fill="none">
-          <path d="M4 0L0 5h8L4 0z" fill="#2f2f2f" />
-        </svg>
-      </div>
+
 
       <div className="flex">
         {/* Sidebar */}

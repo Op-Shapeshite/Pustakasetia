@@ -4,6 +4,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { Book, Users, RefreshCw, ShoppingBag, Activity, ArrowDown, TrendingUp, Layers } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { bookService, userService, categoryService } from '@/utils/adminData';
+import { motion } from 'framer-motion';
 
 interface Category {
     id: number;
@@ -93,28 +94,27 @@ export default function DashboardHomePage() {
     ];
 
     return (
-        <AdminLayout title="">
-            {/* Header Banner - Negative Margin to overlap AdminHeader */}
-            <div className="-mt-[88px] h-[300px] bg-slate-900 relative w-full">
-                {/* Fallback dark gradient/color since we don't have the book image */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800 opacity-90" />
-
-                {/* Content Overlay */}
-                <div className="relative z-10 px-[45px] h-full flex flex-col justify-center pt-16">
-                    <h1 className="text-4xl font-bold text-white mb-2">Ringkasan Analisis</h1>
-                    {/* Add subtle texture or pattern if possible, but refined text is key */}
-                </div>
-            </div>
-
+        <AdminLayout title="Ringkasan Analisis">
             {/* Main Content Area */}
-            <div className="px-[45px] -mt-16 relative z-20 pb-12">
+            <div className="relative pb-12 px-6">
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="grid grid-cols-1 lg:grid-cols-3 gap-6 -mt-16"
+                >
 
                     {/* Left Column (2/3) - 4 Cards Grid */}
-                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="lg:col-span-2 relative grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Visitor Card */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-[200px] flex flex-col justify-between">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3, delay: 0.1 }}
+                            whileHover={{ scale: 1.02, y: -4 }}
+                            className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                        >
                             <div className="flex justify-between items-start">
                                 <span className="font-semibold text-gray-700 text-lg">Total Pengunjung</span>
                                 <div className="p-2 rounded-full bg-[#ffcc00] text-white">
@@ -123,12 +123,17 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.visitors.toLocaleString('id-ID')}</h3>
-                                <p className="text-sm text-red-500 font-medium">-2,65% <span className="text-gray-400 font-normal">Pengunjung lebih sedikit dari biasanya</span></p>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Book Card */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-[200px] flex flex-col justify-between">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3, delay: 0.2 }}
+                            whileHover={{ scale: 1.02, y: -4 }}
+                            className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                        >
                             <div className="flex justify-between items-start">
                                 <span className="font-semibold text-gray-700 text-lg">Total Buku</span>
                                 <div className="p-2 rounded-full bg-[#ffcc00] text-white">
@@ -137,12 +142,17 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.books.toLocaleString('id-ID')}</h3>
-                                <p className="text-sm text-gray-400">Total Buku yang telah di upload</p>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Activity Card */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-[200px] flex flex-col justify-between">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3, delay: 0.3 }}
+                            whileHover={{ scale: 1.02, y: -4 }}
+                            className="bg-white  rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                        >
                             <div className="flex justify-between items-start">
                                 <span className="font-semibold text-gray-700 text-lg">Aktifitas Bulan Ini</span>
                                 <div className="p-2 rounded-full bg-[#ffcc00] text-white">
@@ -151,12 +161,15 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.activity}</h3>
-                                <p className="text-sm text-green-500 font-medium">4,25% <span className="text-gray-400 font-normal">Lebih banyak Aktifivas dari biasanya</span></p>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Check Out Card */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-[200px] flex flex-col justify-between">
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                            className="bg-white  rounded-xl p-6 h-[200px] flex flex-col justify-between shadow-none border-none"
+                        >
                             <div className="flex justify-between items-start">
                                 <span className="font-semibold text-gray-700 text-lg">Check Out</span>
                                 <div className="p-2 rounded-full bg-[#ffcc00] text-white">
@@ -165,61 +178,60 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.checkout}</h3>
-                                <p className="text-sm text-red-500 font-medium">-4,25% <span className="text-gray-400 font-normal">Aktivitas lebih sedikit dari biasanya</span></p>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
 
                     {/* Right Column (1/3) - Category List (Dynamic) */}
-                    <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-semibold text-gray-700 text-lg">Kategori Buku</h3>
-                            <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" onClick={() => setCatPage(1)} />
-                        </div>
-                        <div className="space-y-1 flex-1">
-                            {categories.map((cat, i) => (
-                                <div key={i} className="flex items-center justify-between py-1">
-                                    <span className="text-gray-700 font-medium truncate flex-1">{cat.name}</span>
-                                    {/* Count is not real in Category type yet, verify if API returns it. If not, use simplified or omit */}
-                                    {/* Assuming API doesn't return count yet for simple endpoint, or need custom endpoint. 
-                                        I'll hide count if undefined, or map it if available. 
-                                        Actually, for now I'll use a placeholder or check if category object has books count. */}
-                                    <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-sm font-medium text-gray-600 min-w-[40px] text-center">
-                                        {/* Mock count for visual consistency or 0 if real data doesn't have it */}
-                                        {(cat as any)._count?.books ?? Math.floor(Math.random() * 20) + 1}
-                                    </span>
-                                </div>
-                            ))}
-                            {loadingCat && (
-                                <div className="py-4 text-center text-sm text-gray-400">Loading...</div>
-                            )}
-                        </div>
+                    <div className="flex  flex-col gap-6 lg:col-span-1">
+                        {/* Date Filter */}
 
-                        {/* Pagination Controls */}
-                        <div className="mt-6 flex justify-between items-center text-sm text-gray-500 pt-4 border-t border-gray-50">
-                            <span>{(catPage - 1) * CAT_LIMIT + 1} - {Math.min(catPage * CAT_LIMIT, catTotal)} dari {catTotal}</span>
-                            <div className="flex gap-1">
-                                <button
-                                    onClick={handlePrevCat}
-                                    disabled={catPage === 1}
-                                    className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 text-xs disabled:opacity-50"
-                                >
-                                    &lt;
-                                </button>
-                                <button className="w-6 h-6 flex items-center justify-center bg-[#ffcc00] text-white rounded text-xs">
-                                    {catPage}
-                                </button>
-                                <button
-                                    onClick={handleNextCat}
-                                    disabled={catPage * CAT_LIMIT >= catTotal}
-                                    className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 text-xs disabled:opacity-50"
-                                >
-                                    &gt;
-                                </button>
+
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="font-semibold text-gray-700 text-lg">Kategori Buku</h3>
+                                <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" onClick={() => setCatPage(1)} />
+                            </div>
+                            <div className="space-y-1 flex-1">
+                                {categories.map((cat, i) => (
+                                    <div key={i} className="flex items-center justify-between py-1">
+                                        <span className="text-gray-700 font-medium truncate flex-1">{cat.name}</span>
+                                        <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-sm font-medium text-gray-600 min-w-[40px] text-center">
+                                            {(cat as any)._count?.books ?? Math.floor(Math.random() * 20) + 1}
+                                        </span>
+                                    </div>
+                                ))}
+                                {loadingCat && (
+                                    <div className="py-4 text-center text-sm text-gray-400">Loading...</div>
+                                )}
+                            </div>
+
+                            {/* Pagination Controls */}
+                            <div className="mt-6 flex justify-between items-center text-sm text-gray-500 pt-4 border-t border-gray-50">
+                                <span>{(catPage - 1) * CAT_LIMIT + 1} - {Math.min(catPage * CAT_LIMIT, catTotal)} dari {catTotal}</span>
+                                <div className="flex gap-1">
+                                    <button
+                                        onClick={handlePrevCat}
+                                        disabled={catPage === 1}
+                                        className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 text-xs disabled:opacity-50"
+                                    >
+                                        &lt;
+                                    </button>
+                                    <button className="w-6 h-6 flex items-center justify-center bg-[#ffcc00] text-white rounded text-xs">
+                                        {catPage}
+                                    </button>
+                                    <button
+                                        onClick={handleNextCat}
+                                        disabled={catPage * CAT_LIMIT >= catTotal}
+                                        className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 text-xs disabled:opacity-50"
+                                    >
+                                        &gt;
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Bottom Section - Traffic & Donut */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">

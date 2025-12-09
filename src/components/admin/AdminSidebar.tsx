@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 interface AdminSidebarProps {
     isOpen?: boolean;
     onClose?: () => void;
+    isScrolled?: boolean;
 }
 
 interface NavItem {
@@ -26,7 +27,7 @@ const navItems: NavItem[] = [
     { href: '/dashboard/roles', label: 'Role', icon: Shield, roles: ['Admin'] },
 ];
 
-export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarProps) {
+export default function AdminSidebar({ isOpen = true, onClose, isScrolled = false }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const { logout } = useAppState();
@@ -65,46 +66,63 @@ export default function AdminSidebar({ isOpen = true, onClose }: AdminSidebarPro
     return (
         <>
             {/* Mobile Overlay */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                    onClick={onClose}
-                />
-            )}
+            <div
+                className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                onClick={onClose}
+            />
 
             {/* Sidebar */}
             <aside className={`
-        fixed top-0 left-0 h-screen bg-white z-50
-        transition-transform duration-300 w-[270px] shadow-lg
+        fixed top-0 left-0 h-screen z-50
+        transition-transform duration-300 w-[270px]
+        flex flex-col gap-4
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
-                {/* Mobile Close Button */}
+      `}
+            >
+                {/* Mobile Close Button - repositioned slightly */}
                 <button
                     onClick={onClose}
-                    className="md:hidden absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+                    className="md:hidden absolute top-4 right-4 text-gray-600 hover:text-gray-800 z-50"
                 >
                     <X className="w-6 h-6" />
                 </button>
 
-                {/* Logo & Profile Section */}
-                <div className="pt-[50px] pb-6 px-6 border-b border-gray-100 flex flex-col items-center text-center">
-
-                    {/* User Profile from Figma */}
-                    <div className="w-20 h-20 bg-gray-200 rounded-full mb-4 overflow-hidden shadow-sm">
-                        <img
-                            src="/img/logo.png"
-                            alt="Admin Profile"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <h3 className="font-bold text-[#2f2f2f] text-xl mb-1">Admin</h3>
-                        <p className="text-sm text-gray-500">Admin Pustaka Setia</p>
-                    </div>
+                {/* Logo & Profile Section - Shows in both states */}
+                <div className={`px-6 flex flex-col transition-all duration-300 ${isScrolled ? 'pt-4 pb-2' : 'pt-[30px] items-center text-center'}`}>
+                    {isScrolled ? (
+                        // Scrolled/Compact State: Row Layout
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden shadow-sm border-2 border-white flex-shrink-0">
+                                <img
+                                    src="/img/logo.png"
+                                    alt="Admin Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-white text-sm uppercase">Pustaka Setia</h3>
+                            </div>
+                        </div>
+                    ) : (
+                        // Default State: Large Centered Layout
+                        <>
+                            <div className="w-20 h-20 bg-gray-200 rounded-xl mb-4 overflow-hidden shadow-sm border-2 border-white">
+                                <img
+                                    src="/img/logo.png"
+                                    alt="Admin Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="mb-2">
+                                <h3 className="font-bold text-white text-xl mb-1">Admin</h3>
+                                <p className="text-sm text-white/80">Admin Pustaka Setia</p>
+                            </div>
+                        </>
+                    )}
                 </div>
 
-                {/* Navigation */}
-                <div className="p-4">
+                {/* Navigation - White Background Container with Rounded Corners */}
+                <div className={`flex-1 bg-white px-4 shadow-[4px_0_24px_rgba(0,0,0,0.02)] ${isScrolled ? 'py-4' : 'py-8 rounded-tr-[30px]'}`}>
                     <p className="text-xs text-gray-400 mb-4 uppercase tracking-wider">Main</p>
 
                     <nav className="space-y-2">

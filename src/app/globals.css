@@ -2,12 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Custom Animations for Parallax Effects */
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(40px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -24,6 +29,7 @@
     opacity: 0;
     transform: translateY(60px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -40,6 +46,8 @@
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
