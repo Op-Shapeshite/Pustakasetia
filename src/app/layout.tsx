@@ -7,6 +7,8 @@ import { PopupProvider } from "@/contexts/PopupContext";
 import { Toaster } from "@/components/ui/sonner";
 import { AnnouncementPopup } from "@/components/ui/AnnouncementPopup";
 import NextTopLoader from 'nextjs-toploader';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+import PageTracker from '@/components/PageTracker';
 
 const poppins = Poppins({
     subsets: ['latin'],
@@ -15,8 +17,32 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-    title: "Pustaka Setia - Your Online Bookstore",
-    description: "Discover and purchase books from our extensive collection",
+    title: {
+        default: "Pustaka Setia - Toko Buku Online Terlengkap",
+        template: "%s | Pustaka Setia"
+    },
+    description: "Temukan koleksi buku terlengkap di Pustaka Setia. Beli buku online dengan harga terbaik untuk semua kalangan.",
+    keywords: ['toko buku', 'beli buku online', 'pustaka setia', 'buku murah', 'toko buku indonesia'],
+    authors: [{ name: 'Pustaka Setia' }],
+    creator: 'Pustaka Setia',
+    publisher: 'Pustaka Setia',
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+    alternates: {
+        canonical: '/',
+    },
+    openGraph: {
+        type: 'website',
+        locale: 'id_ID',
+        siteName: 'Pustaka Setia',
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+        },
+    },
 };
 
 export default function RootLayout({
@@ -25,8 +51,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="id" suppressHydrationWarning>
             <body className={`${poppins.variable} font-sans bg-neutral-50 min-h-screen w-full overflow-x-hidden`} suppressHydrationWarning>
+                <GoogleAnalytics />
+                <PageTracker />
                 <NextTopLoader
                     color="#ffcc00"
                     initialPosition={0.08}

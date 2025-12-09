@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
+import { gaService } from '@/lib/google-analytics';
 
 const prisma = new PrismaClient();
 
@@ -33,7 +34,7 @@ function getTrafficSource(referrer: string | null): string {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { page, referrer } = body;
+        const { page, referrer, pageTitle } = body;
 
         // Get or create visitor ID from cookie
         const cookieStore = await cookies();
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
         const deviceType = getDeviceType(userAgent);
         const source = getTrafficSource(referrer);
 
-        // Create page view record
+        // 1. Save to local database
         await prisma.pageView.create({
             data: {
                 visitorId,
@@ -59,6 +60,16 @@ export async function POST(request: NextRequest) {
                 referrer: referrer || null
             }
         });
+
+        // 2. Send to Google Analytics (if configured)
+        if (gaService.isEnabled()) {
+            await gaService.trackPageView(visitorId, {
+                page_location: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}${page}`,
+                page_title: pageTitle || page,
+                page_referrer: referrer || undefined,
+                device_category: deviceType
+            });
+        }
 
         // Create or update traffic source
         const existingSource = await prisma.trafficSource.findFirst({
