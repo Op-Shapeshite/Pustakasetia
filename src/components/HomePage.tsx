@@ -127,7 +127,7 @@ export default function HomePage() {
     return (
         <div className="min-h-screen bg-white">
             {/* Hero Section */}
-            <Hero onExploreClick={() => window.scrollBy({ top: 600, behavior: 'smooth' })} />
+            <Hero />
 
             {/* All Books Grid */}
             <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 py-8 md:py-12">
