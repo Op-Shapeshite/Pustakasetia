@@ -194,6 +194,11 @@ export default function BookManagementPage() {
             searchValue={searchQuery}
             onSearchChange={setSearchQuery}
             searchPlaceholder="Cari buku..."
+            limit={itemsPerPage}
+            onLimitChange={(newLimit) => {
+                setItemsPerPage(newLimit);
+                setCurrentPage(1);
+            }}
             onAddClick={() => setIsAddModalOpen(true)}
             addButtonText="Tambah Baru"
             error={error}

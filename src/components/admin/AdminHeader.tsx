@@ -1,7 +1,10 @@
+'use client';
+
 import { useState } from 'react';
-import { Menu, Calendar as CalendarIcon } from 'lucide-react'; // Renamed icon
+import { Menu, Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { usePathname } from 'next/navigation';
 
 interface AdminHeaderProps {
     title: string;
@@ -11,6 +14,8 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ title, onMenuClick, isScrolled = false }: AdminHeaderProps) {
     const [date, setDate] = useState<Date | undefined>(new Date());
+    const pathname = usePathname();
+    const isDashboardPage = pathname === '/dashboard';
 
     return (
         <div className={`relative transition-all duration-500 ease-in-out flex w-full z-30 ${isScrolled ? 'h-[88px] items-center' : 'h-[260px] items-start'}`}>
@@ -34,30 +39,33 @@ export default function AdminHeader({ title, onMenuClick, isScrolled = false }: 
 
                     {/* Right Side: Modern Date Filter */}
                     <div className="flex items-end gap-4">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <div className="hidden md:flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2.5 rounded-xl shadow-lg hover:bg-white/20 transition-all cursor-pointer group relative z-50">
-                                    <div className="p-1.5 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
-                                        <CalendarIcon className="w-4 h-4 text-white" />
+                        {/* Only show calendar filter on /dashboard page */}
+                        {isDashboardPage && (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <div className="hidden md:flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2.5 rounded-xl shadow-lg hover:bg-white/20 transition-all cursor-pointer group relative z-50">
+                                        <div className="p-1.5 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
+                                            <CalendarIcon className="w-4 h-4 text-white" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium leading-none mb-0.5">Filter Date</span>
+                                            <span className="text-sm font-semibold text-white leading-none">
+                                                {date ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pick a date'}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium leading-none mb-0.5">Filter Date</span>
-                                        <span className="text-sm font-semibold text-white leading-none">
-                                            {date ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pick a date'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white border-none shadow-xl z-[60]" align="end">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={setDate}
-                                    initialFocus
-                                    className="bg-white rounded-md border"
-                                />
-                            </PopoverContent>
-                        </Popover>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 bg-white border-none shadow-xl z-[60]" align="end">
+                                    <Calendar
+                                        mode="single"
+                                        selected={date}
+                                        onSelect={setDate}
+                                        initialFocus
+                                        className="bg-white rounded-md border"
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        )}
                     </div>
                 </div>
             </div>
