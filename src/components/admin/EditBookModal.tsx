@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Upload } from 'lucide-react';
 import { bookService, Book } from '@/utils/adminData';
+import AuthorAutocomplete from './AuthorAutocomplete';
 
 interface EditBookModalProps {
     isOpen: boolean;
@@ -116,13 +117,11 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-500 mb-2">Penulis</label>
-                                    <input
-                                        type="text"
+                                    <AuthorAutocomplete
+                                        label="Penulis"
                                         value={formData.author}
-                                        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                        required
-                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                        onChange={(value) => setFormData({ ...formData, author: value })}
+                                        placeholder="Masukkan nama penulis"
                                     />
                                 </div>
                             </div>

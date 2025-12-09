@@ -6,6 +6,7 @@ import { X, Upload, Loader2 } from 'lucide-react';
 import { bookService, categoryService } from '@/utils/adminData';
 import dynamic from 'next/dynamic';
 import SearchableSelect from './SearchableSelect';
+import AuthorAutocomplete from './AuthorAutocomplete';
 
 // Dynamically import RichTextEditor to prevent SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
@@ -309,14 +310,11 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-500 mb-2">Penulis</label>
-                                    <input
-                                        type="text"
+                                    <AuthorAutocomplete
+                                        label="Penulis"
                                         value={formData.author}
-                                        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                        onChange={(value) => setFormData({ ...formData, author: value })}
                                         placeholder="Masukkan nama penulis"
-                                        required
-                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                                     />
                                 </div>
                             </div>

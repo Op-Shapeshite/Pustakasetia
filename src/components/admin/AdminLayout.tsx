@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
@@ -17,10 +17,15 @@ export default function AdminLayout({
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
+    const pathname = usePathname();
 
     const [isScrolled, setIsScrolled] = useState(false);
 
+    // Only apply scroll effect on /dashboard page
+    const isDashboardPage = pathname === '/dashboard';
+
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        if (!isDashboardPage) return; // Skip scroll logic for other pages
         setIsScrolled(e.currentTarget.scrollTop > 20);
     };
 
