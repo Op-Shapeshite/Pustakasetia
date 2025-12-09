@@ -25,13 +25,18 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
 
         {/* Book Info */}
         <div className="space-y-1">
+          {/* Author - Above Title */}
+          <p className="text-xs text-neutral-500 font-['Poppins',sans-serif] line-clamp-1">
+            {book.author}
+          </p>
+
           {/* Title - 2 lines max */}
-          <h3 className="text-xs font-medium text-neutral-900 line-clamp-2 leading-[1.4]">
+          <h3 className="text-sm font-bold text-neutral-900 line-clamp-2 leading-[1.4] font-['Poppins',sans-serif]">
             {book.title}
           </h3>
 
           {/* Price */}
-          <p className="text-xs font-bold text-green-500">
+          <p className="text-sm font-bold text-[#22C55E] font-['Poppins',sans-serif]">
             {book.priceFormatted}
           </p>
         </div>
@@ -56,13 +61,18 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
 
       {/* Book Info */}
       <div className="space-y-1">
+        {/* Author - Above Title */}
+        <p className="text-sm text-neutral-500 font-['Poppins',sans-serif] line-clamp-1">
+          {book.author}
+        </p>
+
         {/* Title - 2 lines max */}
-        <h3 className="text-sm font-medium text-neutral-900 line-clamp-2 leading-[1.4]">
+        <h3 className="text-lg font-bold text-neutral-900 line-clamp-2 leading-[1.4] font-['Poppins',sans-serif]">
           {book.title}
         </h3>
 
         {/* Price */}
-        <p className="text-sm font-bold text-green-500">
+        <p className="text-base font-bold text-[#22C55E] font-['Poppins',sans-serif]">
           {book.priceFormatted}
         </p>
       </div>

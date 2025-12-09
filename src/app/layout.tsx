@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AppStateProvider } from "@/contexts/AppStateContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import NextTopLoader from 'nextjs-toploader';
 
 const poppins = Poppins({
@@ -35,7 +36,9 @@ export default function RootLayout({
                     shadow="0 0 10px #ffcc00,0 0 5px #ffcc00"
                 />
                 <AppStateProvider>
-                    {children}
+                    <ToastProvider>
+                        {children}
+                    </ToastProvider>
                 </AppStateProvider>
             </body>
         </html>

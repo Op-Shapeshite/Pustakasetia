@@ -1,6 +1,7 @@
 import { X, ShoppingCart, ArrowLeft } from "lucide-react";
 // Image is hardcoded in the component
 import { useAppState } from "../contexts/AppStateContext";
+import { useToast } from "../contexts/ToastContext";
 import { Book } from "../types/book";
 
 interface BookDetailModalProps {
@@ -11,6 +12,7 @@ interface BookDetailModalProps {
 
 export default function BookDetailModal({ book, onClose, onAddToCart }: BookDetailModalProps) {
   const { addToCart } = useAppState();
+  const { showToast } = useToast();
 
   const handleBuy = () => {
     // Use formatted price from book object or format it
@@ -32,11 +34,13 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
       image: book.image,
       title: book.title,
       price: book.price,
-      // author field is not in CartItem interface in AppStateContext yet
+      author: book.author,
+      isbn: book.isbn,
+      edition: book.edition,
     });
 
     // Show success message
-    alert(`"${book.title}" berhasil ditambahkan ke keranjang!`);
+    showToast(`"${book.title}" berhasil ditambahkan ke keranjang!`, "success");
 
     // Call the optional callback
     if (onAddToCart) {

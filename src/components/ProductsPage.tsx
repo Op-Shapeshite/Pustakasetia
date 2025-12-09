@@ -218,18 +218,9 @@ export default function ProductsPage({
           </div>
 
           {/* Results Count - Right Aligned */}
-          <div>
-            <div className="w-full md:w-auto min-w-[300px]">
-              <SearchBar
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Cari buku..."
-                variant={isMobile ? 'mobile' : 'default'}
-              />
-            </div>
-            <div className="text-sm text-neutral-600 font-['Poppins',sans-serif]">
-              Menampilkan {displayBooks.length} dari {totalItems} Data
-            </div>
+
+          <div className="text-sm text-neutral-600 font-['Poppins',sans-serif]">
+            Menampilkan {displayBooks.length} dari {totalItems} Data
           </div>
         </div>
 

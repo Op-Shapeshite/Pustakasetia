@@ -1,5 +1,6 @@
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { addToCart } from "../utils/cartStorage";
+import { useToast } from "../contexts/ToastContext";
 
 const imgRectangle1304 = "/img/library-background.png";
 
@@ -24,6 +25,8 @@ interface BookDetailPageProps {
 }
 
 export default function BookDetailPage({ book, onBack, isModal = false }: BookDetailPageProps) {
+  const { showToast } = useToast();
+
   const handleBuy = async () => {
     try {
       // Increment sold count
@@ -53,7 +56,7 @@ export default function BookDetailPage({ book, onBack, isModal = false }: BookDe
       edition: book.edition
     });
 
-    alert(`"${book.title}" berhasil ditambahkan ke keranjang!`);
+    showToast(`"${book.title}" berhasil ditambahkan ke keranjang!`, "success");
   };
 
   const SpecifictionItem = ({ label, value }: { label: string; value: string | number }) => (

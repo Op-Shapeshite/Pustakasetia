@@ -12,29 +12,20 @@ const TypingText = ({ text, className, delay = 0 }: { text: string; className?: 
 
   const container: Variants = {
     hidden: { opacity: 0 },
-    visible: (i: number = 1) => ({
+    visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.12, delayChildren: 0.04 * i + delay },
-    }),
+      transition: { staggerChildren: 0.05, delayChildren: delay }, // 0.05s per letter = typing speed
+    },
   };
 
   const child: Variants = {
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-      },
-    },
     hidden: {
       opacity: 0,
-      y: 20,
+    },
+    visible: {
+      opacity: 1,
       transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
+        duration: 0, // Instant appearance for typewriter feel
       },
     },
   };
@@ -42,7 +33,7 @@ const TypingText = ({ text, className, delay = 0 }: { text: string; className?: 
   return (
     <motion.div
       ref={ref}
-      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "flex-start" }}
+      style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-start" }} // Removed overflow:hidden to allow potential cursor
       variants={container}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
@@ -120,12 +111,16 @@ export default function Hero({ onExploreClick }: HeroProps) {
           <div className="flex flex-col lg:flex-row">
             {/* Left Content */}
             <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left space-y-6 md:space-y-8 px-4 md:px-8 lg:px-16 pt-12 pb-2 md:py-16 lg:py-20 w-full lg:w-1/2 z-10 relative bg-white lg:bg-transparent">
-              {/* Heading with Typing Animation */}
+              {/* Heading with Slide Animation */}
               <div className="flex justify-center lg:justify-start w-full">
-                <TypingText
-                  text="Jelajahi koleksi buku terbaik kami untuk Anda"
+                <motion.h1
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
                   className="font-['Poppins',sans-serif] font-semibold text-3xl md:text-5xl lg:text-[64px] leading-[1.2] text-neutral-900 text-left"
-                />
+                >
+                  Jelajahi koleksi buku terbaik kami untuk Anda
+                </motion.h1>
               </div>
 
               {/* Description */}

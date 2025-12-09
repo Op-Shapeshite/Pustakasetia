@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { getCartItems, removeFromCart, getCartTotal, clearCart, CartItem, calculateCartTotal } from "../utils/cartStorage";
+import { useAppState } from "@/contexts/AppStateContext";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function CartPage() {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { cart, removeFromCart, clearCart } = useAppState();
+  const { showToast } = useToast();
   const [isMobile, setIsMobile] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -16,83 +18,68 @@ export default function CartPage() {
   });
 
   useEffect(() => {
-    loadCart();
-
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // Use lg breakpoint for "Mobile/Tablet" switch in this context
+      setIsMobile(window.innerWidth < 1024);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    const handleCartUpdate = () => {
-      loadCart();
-    };
-
-    window.addEventListener('cartUpdated', handleCartUpdate);
     return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdate);
       window.removeEventListener('resize', checkMobile);
     };
   }, []);
 
-  const loadCart = () => {
-    const items = getCartItems();
-    setCartItems(items);
-  };
-
   const handleRemoveItem = (itemId: number) => {
     removeFromCart(itemId);
-    loadCart();
   };
 
-  // ... handleBack and handleSubmit unchanged ...
   const handleBack = () => {
     router.push('/products');
   };
+
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const subtotal = calculateTotal();
+  const shipping = 15000;
+  const total = subtotal + shipping;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.phone || !formData.address) {
-      alert("Mohon lengkapi semua data!");
+      showToast("Mohon lengkapi semua data!", "warning");
       return;
     }
 
-    let message = `*PESANAN BUKU*\n\n`;
-    message += `*Data Penerima:*\n`;
-    message += `Nama: ${formData.name}\n`;
-    message += `Telepon: ${formData.phone}\n`;
-    message += `Alamat: ${formData.address}\n\n`;
-    message += `*Detail Pesanan:*\n`;
+    let message = `*PESANAN BUKU*\\n\\n`;
+    message += `*Data Penerima:*\\n`;
+    message += `Nama: ${formData.name}\\n`;
+    message += `Telepon: ${formData.phone}\\n`;
+    message += `Alamat: ${formData.address}\\n\\n`;
+    message += `*Detail Pesanan:*\\n`;
 
-    cartItems.forEach((item, index) => {
-      message += `\n${index + 1}. ${item.title}\n`;
-      message += `   Harga: ${item.price}\n`;
-      message += `   Jumlah: ${item.quantity}\n`;
+    cart.forEach((item, index) => {
+      message += `\\n${index + 1}. ${item.title}\\n`;
+      message += `   Harga: Rp${item.price.toLocaleString('id-ID')}\\n`;
+      message += `   Jumlah: ${item.quantity}\\n`;
     });
 
-    const subtotal = getCartTotal();
-    const shipping = 15000;
-    const total = subtotal + shipping;
-
-    message += `\n*Ringkasan:*\n`;
-    message += `Sub Total: Rp${subtotal.toLocaleString('id-ID')}\n`;
-    message += `Ongkos Kirim: Rp${shipping.toLocaleString('id-ID')}\n`;
+    message += `\\n*Ringkasan:*\\n`;
+    message += `Sub Total: Rp${subtotal.toLocaleString('id-ID')}\\n`;
+    message += `Ongkos Kirim: Rp${shipping.toLocaleString('id-ID')}\\n`;
     message += `*Total: Rp${total.toLocaleString('id-ID')}*`;
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
 
     clearCart();
-    loadCart();
     setFormData({ name: "", phone: "", address: "" });
+    showToast("Pesanan berhasil dikirim!", "success");
   };
 
-  const subtotal = calculateCartTotal(cartItems);
-  const shipping = 15000;
-  const total = subtotal + shipping;
-
-  if (cartItems.length === 0) {
+  if (cart.length === 0) {
     return (
       <div className="w-full min-h-[60vh] flex flex-col items-center justify-center py-12">
         <div className="max-w-md text-center space-y-4">
@@ -132,70 +119,80 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Column - Cart Items */}
           <div className="space-y-6">
-            <div className="bg-white border border-[#d9d9d9] rounded-[24px] shadow-lg p-4 md:p-6">
-              <div className="space-y-6">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0 relative">
+            <div className="bg-white border border-[#d9d9d9] rounded-[24px] shadow-lg overflow-hidden">
+              {/* Desktop Header */}
+              <div className="hidden lg:flex items-center gap-6 px-6 py-4 bg-neutral-50 border-b border-gray-100 text-sm font-medium text-gray-500">
+                <div className="w-24 flex-shrink-0">Produk</div>
+                <div className="flex-1 grid grid-cols-12 gap-4">
+                  <div className="col-span-4">Judul Buku</div>
+                  <div className="col-span-3">Cetakan</div>
+                  <div className="col-span-3">ISBN</div>
+                  <div className="col-span-2">Harga</div>
+                </div>
+                <div className="w-5"></div>
+              </div>
+
+              <div className="p-4 md:p-6 space-y-6 lg:space-y-0 lg:divide-y lg:divide-gray-100">
+                {cart.map((item) => (
+                  <div key={item.id} className="flex flex-col lg:flex-row gap-4 lg:items-center pb-6 lg:pb-4 lg:pt-4 border-b border-gray-200 lg:border-none last:border-b-0 last:pb-0 relative">
                     {/* Book Cover */}
-                    <div className="w-24 md:w-32 flex-shrink-0">
-                      <div className="aspect-[170/248] rounded-[12px] overflow-hidden">
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                    <div className="flex gap-4 lg:w-24 flex-shrink-0">
+                      {item.image && (
+                        <div className="w-24 lg:w-24 flex-shrink-0">
+                          <div className="aspect-[3/4] rounded-[8px] overflow-hidden border border-gray-100 shadow-sm">
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Book Details */}
                     {isMobile ? (
-                      // Mobile View: Stacked Label : Value
-                      <div className="flex-1 space-y-1 text-sm text-[#2f2f2f]">
-                        <div className="font-semibold text-base mb-2">{item.title}</div>
-                        <div className="flex">
-                          <span className="w-24 flex-shrink-0">Cetakan</span>
-                          <span className="mr-1">:</span>
+                      // Mobile View: Stacked Label : Value (Optimized)
+                      <div className="flex-1 space-y-2 text-sm text-[#2f2f2f]">
+                        <div className="font-semibold text-base pr-8">{item.title}</div>
+                        {item.author && <div className="text-gray-500 text-xs mb-2">{item.author}</div>}
+
+                        <div className="grid grid-cols-[80px,1fr] gap-x-2 gap-y-1">
+                          <span className="text-gray-500">Cetakan</span>
                           <span>{item.edition || "Ke-1. 2025"}</span>
+
+                          <span className="text-gray-500">ISBN</span>
+                          <span>{item.isbn || "978-979-000-000-0"}</span>
+
+                          <span className="text-gray-500">Harga</span>
+                          <span className="font-semibold text-green-600">Rp{item.price.toLocaleString('id-ID')}</span>
+
+                          {item.quantity > 1 && (
+                            <>
+                              <span className="text-gray-500">Jumlah</span>
+                              <span>{item.quantity}</span>
+                            </>
+                          )}
                         </div>
-                        <div className="flex">
-                          <span className="w-24 flex-shrink-0">ISBN</span>
-                          <span className="mr-1">:</span>
-                          <span>{item.isbn || "978-979-076-799-1"}</span>
-                        </div>
-                        <div className="flex">
-                          <span className="w-24 flex-shrink-0">Harga</span>
-                          <span className="mr-1">:</span>
-                          <span>{typeof item.price === 'number' ? `Rp${item.price.toLocaleString('id-ID')}` : item.price}</span>
-                        </div>
-                        {item.quantity > 1 && (
-                          <div className="flex">
-                            <span className="w-24 flex-shrink-0">Jumlah</span>
-                            <span className="mr-1">:</span>
-                            <span>{item.quantity}</span>
-                          </div>
-                        )}
                       </div>
                     ) : (
-                      // Desktop View: Grid
-                      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                          <p className="text-sm md:text-base mb-1 font-medium">Judul Buku</p>
-                          <p className="text-xs md:text-sm line-clamp-3">{item.title}</p>
+                      // Desktop View: Table Grid (Aligned with Header)
+                      <div className="flex-1 grid grid-cols-12 gap-4 items-center">
+                        <div className="col-span-4 pr-4">
+                          <p className="text-sm font-semibold text-[#2f2f2f] line-clamp-2 mb-1">{item.title}</p>
+                          <p className="text-xs text-gray-400 line-clamp-1">{item.author || "Penulis"}</p>
                         </div>
-                        <div>
-                          <p className="text-sm md:text-base mb-1 font-medium">Cetakan</p>
-                          <p className="text-gray-500 text-xs md:text-sm">{item.edition || "Ke-1. 2025"}</p>
+                        <div className="col-span-3">
+                          <p className="text-sm text-gray-600">{item.edition || "Ke-1. 2025"}</p>
                         </div>
-                        <div>
-                          <p className="text-sm md:text-base mb-1 font-medium">ISBN</p>
-                          <p className="text-gray-500 text-xs md:text-sm">{item.isbn || "978-979-076-799-1"}</p>
+                        <div className="col-span-3">
+                          <p className="text-sm text-gray-600">{item.isbn || "978-979-000-000-0"}</p>
                         </div>
-                        <div>
-                          <p className="text-sm md:text-base mb-1 font-medium">Harga</p>
-                          <p className="text-xs md:text-sm">
-                            {typeof item.price === 'number' ? `Rp${item.price.toLocaleString('id-ID')}` : item.price}
+                        <div className="col-span-2">
+                          <p className="text-sm font-bold text-green-600">
+                            Rp{item.price.toLocaleString('id-ID')}
                           </p>
-                          {item.quantity > 1 && <p className="text-gray-500 text-xs">x{item.quantity}</p>}
+                          {item.quantity > 1 && <p className="text-xs text-gray-400 mt-1">x{item.quantity}</p>}
                         </div>
                       </div>
                     )}
@@ -203,9 +200,10 @@ export default function CartPage() {
                     {/* Remove Button */}
                     <button
                       onClick={() => handleRemoveItem(item.id)}
-                      className="absolute top-0 right-0 p-2 hover:bg-red-50 rounded-full transition-colors"
+                      className="absolute top-0 right-0 lg:static lg:p-2 hover:bg-red-50 rounded-full transition-colors group"
+                      title="Hapus"
                     >
-                      <Trash2 className="h-5 w-5 text-red-500" />
+                      <Trash2 className="h-5 w-5 text-gray-300 group-hover:text-red-500 transition-colors" />
                     </button>
                   </div>
                 ))}

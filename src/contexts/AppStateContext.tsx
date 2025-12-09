@@ -9,6 +9,9 @@ interface CartItem {
     price: number;
     quantity: number;
     image?: string;
+    author?: string; // Added field
+    isbn?: string;   // Added field
+    edition?: string; // Added field
 }
 
 interface AppState {
