@@ -138,7 +138,7 @@ export default function DashboardPage() {
         {/* Main Content */}
         <main className="flex-1 pt-[230px] md:pt-[200px] px-4 md:px-8 pb-8">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             {/* Total Pengunjung */}
             <div className="bg-white rounded-2xl shadow-md p-6 relative">
               <div className="absolute right-6 top-6">
@@ -184,8 +184,8 @@ export default function DashboardPage() {
               <div className="absolute right-6 top-6">
                 <svg className="w-9 h-9" viewBox="0 0 37 37" fill="none">
                   <circle cx="18.5" cy="18.5" r="18.5" fill="#FFCC00" />
-                  <path d="M16 21c1.66 0 2.99-1.34 2.99-3S17.66 15 16 15c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 15 8 15C6.34 15 5 16.34 5 18s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V29h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V29h6v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="white" opacity="0.5" />
-                  <path d="M16 21c1.66 0 2.99-1.34 2.99-3S17.66 15 16 15c-1.66 0-3 1.34-3 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V29h14v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="white" />
+                  <path d="M23.5 15.5L16.5 22.5L12.5 18.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="18.5" cy="18.5" r="9" stroke="white" strokeWidth="2" fill="none" />
                 </svg>
               </div>
               <p className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-lg mb-6">
@@ -197,6 +197,27 @@ export default function DashboardPage() {
               <p className="font-['Poppins',sans-serif] text-sm">
                 <span className="text-[#60d669]">4,25%</span>{' '}
                 <span className="text-gray-500">Lebih banyak Aktifivas dari biasanya</span>
+              </p>
+            </div>
+
+            {/* Check Out */}
+            <div className="bg-white rounded-2xl shadow-md p-6 relative">
+              <div className="absolute right-6 top-6">
+                <svg className="w-9 h-9" viewBox="0 0 37 37" fill="none">
+                  <circle cx="18.5" cy="18.5" r="18.5" fill="#FFCC00" />
+                  <path d="M14 14h8v8h-8z" fill="white" opacity="0.5" />
+                  <path d="M12 18h12M18 12v12" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+              <p className="font-['Poppins',sans-serif] font-medium text-[#2f2f2f] text-lg mb-6">
+                Check Out
+              </p>
+              <p className="font-['Poppins',sans-serif] font-medium text-3xl text-black mb-3">
+                43
+              </p>
+              <p className="font-['Poppins',sans-serif] text-sm">
+                <span className="text-[#df0404]">-4,25%</span>{' '}
+                <span className="text-gray-500">Aktivitas lebih sedikit dari biasanya</span>
               </p>
             </div>
           </div>

@@ -123,6 +123,10 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.visitors.toLocaleString('id-ID')}</h3>
+                                <p className="text-sm">
+                                    <span className="text-red-500">-2,65%</span>{' '}
+                                    <span className="text-gray-500">Pengunjung lebih sedikit dari biasanya</span>
+                                </p>
                             </div>
                         </motion.div>
 
@@ -142,6 +146,9 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.books.toLocaleString('id-ID')}</h3>
+                                <p className="text-sm text-gray-500">
+                                    Total Buku yang telah di upload
+                                </p>
                             </div>
                         </motion.div>
 
@@ -161,6 +168,10 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.activity}</h3>
+                                <p className="text-sm">
+                                    <span className="text-green-500">4,25%</span>{' '}
+                                    <span className="text-gray-500">Lebih banyak Aktifitas dari biasanya</span>
+                                </p>
                             </div>
                         </motion.div>
 
@@ -178,6 +189,10 @@ export default function DashboardHomePage() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.checkout}</h3>
+                                <p className="text-sm">
+                                    <span className="text-red-500">-4,25%</span>{' '}
+                                    <span className="text-gray-500">Aktivitas lebih sedikit dari biasanya</span>
+                                </p>
                             </div>
                         </motion.div>
                     </div>
