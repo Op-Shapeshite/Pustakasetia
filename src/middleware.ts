@@ -17,6 +17,7 @@ const publicRoutes = [
 const publicGetRoutes = [
     '/api/books',
     '/api/categories',
+    '/api/analytics', // Allow analytics endpoints for dashboard
 ];
 
 // Routes that require Admin role (all methods)

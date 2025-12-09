@@ -20,22 +20,23 @@ model Category {
 }
 
 model Book {
-  id         Int      @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   title      String
   author     String
   pages      Int
   size       String
-  isbn       String   @unique
+  isbn       String     @unique
   price      Float
   edition    String
   synopsis   String?
   image      String?
-  stock      Int      @default(0)
+  stock      Int        @default(0)
   categoryId Int
-  sold       Int      @default(0)
-  category   Category @relation(fields: [categoryId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  sold       Int        @default(0)
+  category   Category   @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  bookSales  BookSale[]
 }
 
 model Role {
@@ -57,4 +58,46 @@ model User {
   status    String   @default("active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Analytics & Tracking Models
+
+model PageView {
+  id         Int      @id @default(autoincrement())
+  visitorId  String // Anonymous visitor identifier (UUID from cookie)
+  page       String // Page URL
+  userAgent  String? // User agent string
+  deviceType String? // mobile, desktop, tablet
+  referrer   String? // Traffic source/referrer
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([deviceType])
+  @@index([visitorId])
+}
+
+model TrafficSource {
+  id          Int      @id @default(autoincrement())
+  source      String // google, instagram, tiktok, direct, link
+  visitorId   String // Anonymous visitor identifier
+  sessions    Int      @default(1)
+  bounceRate  Float? // Percentage
+  avgDuration Int? // Average session duration in seconds
+  createdAt   DateTime @default(now())
+
+  @@index([source])
+  @@index([createdAt])
+  @@index([visitorId])
+}
+
+model BookSale {
+  id         Int      @id @default(autoincrement())
+  bookId     Int
+  book       Book     @relation(fields: [bookId], references: [id])
+  quantity   Int      @default(1)
+  totalPrice Float // Total price
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([bookId])
 }

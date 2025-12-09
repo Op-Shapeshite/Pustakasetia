@@ -17,11 +17,20 @@ interface Category {
 export default function DashboardHomePage() {
     const [stats, setStats] = useState({
         visitors: 0,
+        visitorChange: 0,
         books: 0,
         categories: 0,
-        sales: 120, // Mock for now
-        activity: 941, // Mock
-        checkout: 43 // Mock
+        activity: 0,
+        activityChange: 0,
+        checkout: 0,
+        checkoutChange: 0
+    });
+
+    const [trafficData, setTrafficData] = useState<any[]>([]);
+    const [deviceData, setDeviceData] = useState({
+        mobile: 0,
+        desktop: 0,
+        mobilePercentage: 0
     });
 
     // Category Widget State
@@ -29,30 +38,67 @@ export default function DashboardHomePage() {
     const [catPage, setCatPage] = useState(1);
     const [catTotal, setCatTotal] = useState(0);
     const [loadingCat, setLoadingCat] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const CAT_LIMIT = 5;
 
-    // Fetch Global Stats
+    // Fetch Analytics Stats
     useEffect(() => {
-        async function fetchGlobalStats() {
+        async function fetchAnalyticsStats() {
             try {
-                const [booksRes, usersRes, catsRes] = await Promise.all([
-                    bookService.getAll({ limit: 1 }),
-                    userService.getAll({ limit: 1 }),
-                    categoryService.getAll({ limit: 1 })
-                ]);
+                setLoading(true);
+                const response = await fetch('/api/analytics/stats');
+                const data = await response.json();
 
-                setStats(prev => ({
-                    ...prev,
-                    books: booksRes.pagination?.total ?? 0,
-                    visitors: usersRes.pagination?.total ?? 0,
-                    categories: catsRes.pagination?.total ?? 0,
-                }));
+                setStats({
+                    visitors: data.totalVisitors || 0,
+                    visitorChange: data.visitorChange || 0,
+                    books: data.totalBooks || 0,
+                    categories: 0, // Will be set from categories fetch
+                    activity: data.totalActivity || 0,
+                    activityChange: data.activityChange || 0,
+                    checkout: data.totalCheckout || 0,
+                    checkoutChange: data.checkoutChange || 0
+                });
             } catch (error) {
-                console.error('Failed to fetch stats', error);
+                console.error('Failed to fetch analytics stats', error);
+            } finally {
+                setLoading(false);
             }
         }
-        fetchGlobalStats();
+        fetchAnalyticsStats();
+    }, []);
+
+    // Fetch Traffic Data
+    useEffect(() => {
+        async function fetchTrafficData() {
+            try {
+                const response = await fetch('/api/analytics/traffic');
+                const result = await response.json();
+                setTrafficData(result.data || []);
+            } catch (error) {
+                console.error('Failed to fetch traffic data', error);
+            }
+        }
+        fetchTrafficData();
+    }, []);
+
+    // Fetch Device Statistics
+    useEffect(() => {
+        async function fetchDeviceStats() {
+            try {
+                const response = await fetch('/api/analytics/devices');
+                const data = await response.json();
+                setDeviceData({
+                    mobile: data.mobile || 0,
+                    desktop: data.desktop || 0,
+                    mobilePercentage: data.mobilePercentage || 0
+                });
+            } catch (error) {
+                console.error('Failed to fetch device stats', error);
+            }
+        }
+        fetchDeviceStats();
     }, []);
 
     // Fetch Categories for Widget with Pagination
@@ -85,14 +131,6 @@ export default function DashboardHomePage() {
         }
     };
 
-    const trafficData = [
-        { source: 'Google', users: 465, sessions: 754, bounce: '23,5%', duration: '00:06:25', trend: 'up' },
-        { source: 'Instagram', users: 787, sessions: 987, bounce: '16,2%', duration: '00:06:25', trend: 'up' },
-        { source: 'Direct', users: 463, sessions: 541, bounce: '-9,4%', duration: '00:06:25', trend: 'down' },
-        { source: 'Tiktok', users: 862, sessions: 954, bounce: '-10,6%', duration: '00:06:25', trend: 'down' },
-        { source: 'Link', users: 458, sessions: 504, bounce: '31,5%', duration: '00:06:25', trend: 'up' },
-    ];
-
     return (
         <AdminLayout title="Ringkasan Analisis">
             {/* Main Content Area */}
@@ -124,8 +162,12 @@ export default function DashboardHomePage() {
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.visitors.toLocaleString('id-ID')}</h3>
                                 <p className="text-sm">
-                                    <span className="text-red-500">-2,65%</span>{' '}
-                                    <span className="text-gray-500">Pengunjung lebih sedikit dari biasanya</span>
+                                    <span className={stats.visitorChange < 0 ? "text-red-500" : "text-green-500"}>
+                                        {stats.visitorChange >= 0 ? '+' : ''}{stats.visitorChange.toFixed(2)}%
+                                    </span>{' '}
+                                    <span className="text-gray-500">
+                                        {stats.visitorChange < 0 ? 'Pengunjung lebih sedikit dari biasanya' : 'Pengunjung lebih banyak dari biasanya'}
+                                    </span>
                                 </p>
                             </div>
                         </motion.div>
@@ -169,8 +211,12 @@ export default function DashboardHomePage() {
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.activity}</h3>
                                 <p className="text-sm">
-                                    <span className="text-green-500">4,25%</span>{' '}
-                                    <span className="text-gray-500">Lebih banyak Aktifitas dari biasanya</span>
+                                    <span className={stats.activityChange < 0 ? "text-red-500" : "text-green-500"}>
+                                        {stats.activityChange >= 0 ? '+' : ''}{stats.activityChange.toFixed(2)}%
+                                    </span>{' '}
+                                    <span className="text-gray-500">
+                                        {stats.activityChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Lebih banyak Aktifitas dari biasanya'}
+                                    </span>
                                 </p>
                             </div>
                         </motion.div>
@@ -190,8 +236,12 @@ export default function DashboardHomePage() {
                             <div>
                                 <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.checkout}</h3>
                                 <p className="text-sm">
-                                    <span className="text-red-500">-4,25%</span>{' '}
-                                    <span className="text-gray-500">Aktivitas lebih sedikit dari biasanya</span>
+                                    <span className={stats.checkoutChange < 0 ? "text-red-500" : "text-green-500"}>
+                                        {stats.checkoutChange >= 0 ? '+' : ''}{stats.checkoutChange.toFixed(2)}%
+                                    </span>{' '}
+                                    <span className="text-gray-500">
+                                        {stats.checkoutChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Aktivitas lebih banyak dari biasanya'}
+                                    </span>
                                 </p>
                             </div>
                         </motion.div>
@@ -273,8 +323,8 @@ export default function DashboardHomePage() {
                                             <td className="py-4 text-gray-700">{row.source}</td>
                                             <td className="py-4 text-right text-gray-500">{row.users}</td>
                                             <td className="py-4 text-right text-gray-500">{row.sessions}</td>
-                                            <td className={`py-4 text-right font-medium ${row.bounce.includes('-') ? 'text-red-500' : 'text-green-500'}`}>{row.bounce}</td>
-                                            <td className="py-4 text-right text-gray-500">{row.duration}</td>
+                                            <td className="py-4 text-right font-medium text-gray-700">{row.bounceRate}%</td>
+                                            <td className="py-4 text-right text-gray-500">{row.avgDuration}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -297,26 +347,28 @@ export default function DashboardHomePage() {
 
                         <div className="flex-1 flex items-center justify-center relative">
                             {/* CSS Conic Gradient Donut */}
-                            <div className="w-48 h-48 rounded-full relative" style={{ background: 'conic-gradient(#ffcc00 0% 80%, #e5e7eb 80% 100%)' }}>
+                            <div className="w-48 h-48 rounded-full relative" style={{
+                                background: `conic-gradient(#ffcc00 0% ${deviceData.mobilePercentage}%, #e5e7eb ${deviceData.mobilePercentage}% 100%)`
+                            }}>
                                 <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center flex-col">
-                                    <span className="text-4xl font-bold text-[#2f2f2f]">80%</span>
+                                    <span className="text-4xl font-bold text-[#2f2f2f]">{deviceData.mobilePercentage.toFixed(0)}%</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex justify-center gap-8 mt-8">
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+                                <div className="w-3 h-3 bg-[#ffcc00] rounded-sm"></div>
                                 <div className="flex flex-col">
                                     <span className="text-xs text-gray-500">Mobile</span>
-                                    <span className="text-sm font-bold text-[#2f2f2f]">1700</span>
+                                    <span className="text-sm font-bold text-[#2f2f2f]">{deviceData.mobile}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-[#ffcc00] rounded-sm"></div>
+                                <div className="w-3 h-3 bg-gray-300 rounded-sm"></div>
                                 <div className="flex flex-col">
                                     <span className="text-xs text-gray-500">Desktop</span>
-                                    <span className="text-sm font-bold text-[#2f2f2f]">200</span>
+                                    <span className="text-sm font-bold text-[#2f2f2f]">{deviceData.desktop}</span>
                                 </div>
                             </div>
                         </div>

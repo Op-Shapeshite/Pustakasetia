@@ -16,7 +16,7 @@ export default function RoleManagementPage() {
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
 
@@ -156,6 +156,11 @@ export default function RoleManagementPage() {
             searchValue={searchQuery}
             onSearchChange={setSearchQuery}
             searchPlaceholder="Cari role..."
+            limit={itemsPerPage}
+            onLimitChange={(newLimit) => {
+                setItemsPerPage(newLimit);
+                setCurrentPage(1);
+            }}
             onAddClick={() => setIsAddModalOpen(true)}
             addButtonText="Tambah Baru"
             error={error}
