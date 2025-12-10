@@ -1,9 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Externalize server-only packages to prevent webpack bundling issues
+    serverExternalPackages: [
+        'https-proxy-agent',
+        'agent-base',
+        'google-auth-library',
+        'gaxios',
+    ],
     images: {
         remotePatterns: [
             {
                 protocol: 'https',
+                hostname: '**',
+            },
+            {
+                protocol: 'http',
                 hostname: '**',
             },
         ],

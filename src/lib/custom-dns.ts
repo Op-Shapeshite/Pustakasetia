@@ -3,7 +3,19 @@
 
 import dns from 'dns';
 import https from 'https';
-import http from 'http';
+
+// DNS-over-HTTPS response types
+interface DnsAnswer {
+    name: string;
+    type: number;
+    TTL: number;
+    data: string;
+}
+
+interface DnsResponse {
+    Status: number;
+    Answer?: DnsAnswer[];
+}
 
 // Cache for DNS resolutions (5 minute TTL)
 const dnsCache = new Map<string, { ip: string; expires: number }>();
@@ -32,10 +44,10 @@ async function resolveWithDoH(hostname: string): Promise<string | null> {
 
             res.on('end', () => {
                 try {
-                    const json = JSON.parse(data);
+                    const json: DnsResponse = JSON.parse(data);
                     if (json.Answer && json.Answer.length > 0) {
-                        // Get first A record
-                        const aRecord = json.Answer.find((a: any) => a.type === 1);
+                        // Get first A record (type 1)
+                        const aRecord = json.Answer.find((a: DnsAnswer) => a.type === 1);
                         if (aRecord) {
                             resolve(aRecord.data);
                             return;
@@ -79,9 +91,10 @@ async function resolveWithCloudflareDoH(hostname: string): Promise<string | null
 
             res.on('end', () => {
                 try {
-                    const json = JSON.parse(data);
+                    const json: DnsResponse = JSON.parse(data);
                     if (json.Answer && json.Answer.length > 0) {
-                        const aRecord = json.Answer.find((a: any) => a.type === 1);
+                        // Get first A record (type 1)
+                        const aRecord = json.Answer.find((a: DnsAnswer) => a.type === 1);
                         if (aRecord) {
                             resolve(aRecord.data);
                             return;
@@ -107,11 +120,11 @@ async function resolveWithCloudflareDoH(hostname: string): Promise<string | null
  */
 async function resolveWithSystem(hostname: string): Promise<string | null> {
     return new Promise((resolve) => {
-        dns.resolve4(hostname, { ttl: false }, (err, addresses) => {
-            if (err || !addresses || addresses.length === 0) {
+        dns.lookup(hostname, { family: 4 }, (err, address) => {
+            if (err || !address) {
                 resolve(null);
             } else {
-                resolve(addresses[0]);
+                resolve(address);
             }
         });
     });

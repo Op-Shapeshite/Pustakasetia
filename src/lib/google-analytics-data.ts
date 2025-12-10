@@ -56,8 +56,8 @@ class GoogleAnalyticsDataService {
             const agent = proxyAgent || getCustomDnsAgent();
 
             // GoogleAuth supports transporterOptions at runtime but types don't include it
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            this.auth = new GoogleAuth({
+            // Using type assertion to avoid type error while keeping runtime functionality
+            const authOptions = {
                 credentials: {
                     client_email: this.clientEmail,
                     private_key: this.privateKey,
@@ -67,7 +67,9 @@ class GoogleAnalyticsDataService {
                 transporterOptions: {
                     agent: agent,
                 }
-            } as any);
+            } as ConstructorParameters<typeof GoogleAuth>[0];
+
+            this.auth = new GoogleAuth(authOptions);
 
             if (proxyAgent) {
                 console.log('[GA Data API] Using proxy for OAuth requests');
@@ -80,7 +82,7 @@ class GoogleAnalyticsDataService {
 
     private async getAccessToken(): Promise<string> {
         const maxRetries = 3;
-        let lastError: any;
+        let lastError: Error | undefined;
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
@@ -103,9 +105,9 @@ class GoogleAnalyticsDataService {
 
                 console.log('[GA Data API] Access token obtained successfully');
                 return accessToken;
-            } catch (error: any) {
-                lastError = error;
-                console.error(`[GA Data API] Token attempt ${attempt} failed:`, error.message);
+            } catch (error: unknown) {
+                lastError = error instanceof Error ? error : new Error(String(error));
+                console.error(`[GA Data API] Token attempt ${attempt} failed:`, lastError.message);
 
                 // Wait before retry (exponential backoff)
                 if (attempt < maxRetries) {
