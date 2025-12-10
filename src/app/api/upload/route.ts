@@ -4,13 +4,12 @@ import { existsSync } from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'covers');
-
 // POST /api/upload - Upload and compress image
 export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const file = formData.get('file') as File;
+        const folder = formData.get('folder') as string || 'covers'; // Default to 'covers'
 
         if (!file) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -27,16 +26,20 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'File too large. Maximum 5MB allowed.' }, { status: 400 });
         }
 
+        // Sanitize folder name to prevent directory traversal
+        const safeFolder = folder.replace(/[^a-zA-Z0-9-_]/g, '');
+        const uploadDir = path.join(process.cwd(), 'uploads', safeFolder);
+
         // Ensure upload directory exists
-        if (!existsSync(UPLOAD_DIR)) {
-            await mkdir(UPLOAD_DIR, { recursive: true });
+        if (!existsSync(uploadDir)) {
+            await mkdir(uploadDir, { recursive: true });
         }
 
         // Generate secure unique filename (no user input)
         const timestamp = Date.now();
         const randomId = crypto.randomUUID().slice(0, 8);
         const filename = `${timestamp}-${randomId}.webp`;
-        const filepath = path.join(UPLOAD_DIR, filename);
+        const filepath = path.join(uploadDir, filename);
 
         // Convert file to buffer
         const bytes = await file.arrayBuffer();
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
             .toFile(filepath);
 
         // Return public URL
-        const publicUrl = `/uploads/covers/${filename}`;
+        const publicUrl = `/uploads/${safeFolder}/${filename}`;
 
         return NextResponse.json({
             url: publicUrl,
