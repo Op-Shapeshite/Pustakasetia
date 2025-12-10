@@ -1,6 +1,5 @@
 'use client';
 
-import svgPaths from "../imports/svg-zx896x9umy";
 import { Menu, X, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -9,43 +8,8 @@ import { useAppState } from "@/contexts/AppStateContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Book } from "../types/book";
 import BookDetailModal from "./BookDetailModal";
+import { SearchIcon, CartIcon, UserIcon } from "./ui/icons";
 
-function ProiconsSearch() {
-  return (
-    <div className="relative shrink-0 size-[24px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
-        <g>
-          <path d={svgPaths.p24a4e880} stroke="#2F2F2F" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function SolarCart3Outline() {
-  return (
-    <div className="relative shrink-0 size-[24px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
-        <g>
-          <path d={svgPaths.p627faf2} fill="#2F2F2F" />
-          <path clipRule="evenodd" d={svgPaths.pa88b80} fill="#2F2F2F" fillRule="evenodd" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function MdiUserOutline() {
-  return (
-    <div className="relative shrink-0 size-[24px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
-        <g>
-          <path d={svgPaths.pba10b80} fill="#2F2F2F" />
-        </g>
-      </svg>
-    </div>
-  );
-}
 
 export default function Header() {
   const pathname = usePathname();
@@ -164,7 +128,7 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <Link href="/cart" className="relative size-[24px]">
-            <SolarCart3Outline />
+            <CartIcon />
             {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                 {cart.reduce((acc, item) => acc + item.quantity, 0)}
@@ -301,7 +265,7 @@ export default function Header() {
                     }}
                     className="flex shrink-0 items-center justify-center size-[24px] hover:opacity-70 transition-opacity focus:outline-none"
                   >
-                    {isSearchOpen ? <X className="size-[18px] text-[#2f2f2f]" /> : <ProiconsSearch />}
+                    {isSearchOpen ? <X className="size-[18px] text-[#2f2f2f]" /> : <SearchIcon />}
                   </button>
                 </motion.div>
 
@@ -360,7 +324,7 @@ export default function Header() {
               </div>
 
               <Link href="/cart" className="hover:opacity-70 transition-opacity relative">
-                <SolarCart3Outline />
+                <CartIcon />
                 {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {cart.reduce((acc, item) => acc + item.quantity, 0)}
@@ -368,7 +332,7 @@ export default function Header() {
                 )}
               </Link>
               <Link href={isLoggedIn ? "/dashboard" : "/login"} className="hover:opacity-70 transition-opacity">
-                <MdiUserOutline />
+                <UserIcon />
               </Link>
             </div>
           </div>

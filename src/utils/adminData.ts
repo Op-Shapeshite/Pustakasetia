@@ -1,7 +1,7 @@
 // Admin Dashboard API Services
 // Uses API endpoints for data persistence with SQLite backend
 
-// Types
+// Types for API responses
 export interface Book {
     id: number;
     title: string;
@@ -10,12 +10,13 @@ export interface Book {
     size: string;
     isbn: string;
     price: number;
-    category: string;
+    category?: string;
     categoryId: number;
     edition: string;
     synopsis: string;
     image: string;
     stock: number;
+    sold?: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -109,7 +110,7 @@ export const bookService = {
         return apiCall<Book>(`/api/books/${id}`);
     },
 
-    create: async (book: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'category'>) => {
+    create: async (book: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'category' | 'sold'>) => {
         return apiCall<Book>('/api/books', {
             method: 'POST',
             body: JSON.stringify(book),

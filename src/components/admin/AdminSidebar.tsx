@@ -59,17 +59,20 @@ export default function AdminSidebar({ isOpen = true, onClose, isScrolled = fals
     const handleLogout = () => {
         if (confirm('Apakah Anda yakin ingin keluar?')) {
             logout();
-            router.push('/');
+            // Use window.location for full page redirect to ensure clean state
+            window.location.href = '/';
         }
     };
 
     return (
         <>
-            {/* Mobile Overlay */}
-            <div
-                className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                onClick={onClose}
-            />
+            {/* Mobile Overlay - only render when open on mobile */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    onClick={onClose}
+                />
+            )}
 
             {/* Sidebar */}
             <aside className={`
@@ -151,10 +154,16 @@ export default function AdminSidebar({ isOpen = true, onClose, isScrolled = fals
                     </nav>
 
                     {/* Logout */}
-                    <div className="mt-8 pt-4 border-t border-gray-100">
+                    <div className="mt-8 pt-4 border-t border-gray-100 relative z-50">
                         <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors w-full"
+                            type="button"
+                            onClick={() => {
+                                console.log('Logout clicked!');
+                                logout();
+                                localStorage.clear();
+                                window.location.href = '/';
+                            }}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors w-full cursor-pointer"
                         >
                             <LogOut className="w-5 h-5" />
                             <span className="font-medium text-sm">Logout</span>

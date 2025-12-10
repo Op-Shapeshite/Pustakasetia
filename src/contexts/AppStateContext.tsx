@@ -106,10 +106,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
     const logout = () => {
         setIsLoggedIn(false);
-        // Clear user data and token from localStorage
+        // Clear user data, token, and auth flag from localStorage
         if (typeof window !== 'undefined') {
             localStorage.removeItem('user');
             localStorage.removeItem('auth_token');
+            localStorage.removeItem('isLoggedIn');
         }
     };
 
