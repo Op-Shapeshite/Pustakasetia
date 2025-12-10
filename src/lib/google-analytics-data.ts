@@ -55,17 +55,6 @@ class GoogleAnalyticsDataService {
                     private_key: this.privateKey,
                 },
                 scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
-                // Add custom client options for timeout
-                clientOptions: {
-                    timeout: 30000, // 30 seconds timeout
-                    retry: true,
-                    retryConfig: {
-                        retry: 3,
-                        retryDelay: 1000,
-                        statusCodesToRetry: [[100, 199], [429, 429], [500, 599]],
-                        httpMethodsToRetry: ['GET', 'POST'],
-                    }
-                }
             });
         }
         return this.auth;
@@ -79,12 +68,23 @@ class GoogleAnalyticsDataService {
             try {
                 console.log(`[GA Data API] Getting access token... (attempt ${attempt}/${maxRetries})`);
 
-                const auth = this.getAuth();
-                const client = await auth.getClient();
-                const token = await client.getAccessToken();
+                // Create timeout promise (30 seconds)
+                const timeoutPromise = new Promise<never>((_, reject) => {
+                    setTimeout(() => reject(new Error('OAuth request timeout after 30s')), 30000);
+                });
+
+                // Race between auth and timeout
+                const tokenPromise = (async () => {
+                    const auth = this.getAuth();
+                    const client = await auth.getClient();
+                    const token = await client.getAccessToken();
+                    return token.token || '';
+                })();
+
+                const accessToken = await Promise.race([tokenPromise, timeoutPromise]);
 
                 console.log('[GA Data API] Access token obtained successfully');
-                return token.token || '';
+                return accessToken;
             } catch (error: any) {
                 lastError = error;
                 console.error(`[GA Data API] Token attempt ${attempt} failed:`, error.message);
