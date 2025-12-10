@@ -11,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-in-producti
 const publicRoutes = [
     '/api/auth/login',
     '/api/categories', // Allow public read for categories (for forms)
+    '/api/stats', // Allow public read for homepage stats
 ];
 
 // Routes that allow public GET but require auth for mutations

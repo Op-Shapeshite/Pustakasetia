@@ -20,6 +20,7 @@ export default function Hero() {
       try {
         const res = await fetch('/api/stats');
         const data = await res.json();
+        console.log(data)
         if (data.data) {
           setStats(data.data);
         }
