@@ -54,7 +54,7 @@ class GoogleAnalyticsService {
                     params: {
                         page_location: pageView.page_location,
                         page_title: pageView.page_title,
-                        page_referrer: pageView.page_referrer || '(direct)',
+                        page_referrer: pageView.page_referrer || 'direct',
                         device_category: pageView.device_category || 'desktop',
                         engagement_time_msec: '100',
                     }

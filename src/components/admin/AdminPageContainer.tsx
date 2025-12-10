@@ -129,7 +129,7 @@ export default function AdminPageContainer({
                 {/* Add Button */}
                 <button
                     onClick={onAddClick}
-                    className="flex items-center gap-2 bg-[#ffcc00] text-gray-900 px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-[#ffdb4d] transition-colors shadow-sm"
+                    className="flex items-center gap-2 bg-[#ffcc00] z-50 text-gray-900 px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-[#ffdb4d] transition-colors shadow-sm"
                 >
                     <Plus className="w-4 h-4" />
                     {addButtonText}
