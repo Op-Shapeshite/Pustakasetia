@@ -4,6 +4,7 @@ import { Menu, X, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAppState } from "@/contexts/AppStateContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Book } from "../types/book";
@@ -118,11 +119,13 @@ export default function Header() {
     <>
       {/* MOBILE NAVBAR */}
       <header className="lg:hidden sticky top-0 left-0 right-0 z-50 h-[87px] bg-white flex items-center justify-between px-6 shadow-sm">
-        <Link href="/" className="h-[37px] w-[40px] shrink-0">
-          <img
+        <Link href="/" className="relative h-[37px] w-[40px] shrink-0">
+          <Image
             src="/img/logo.png"
             alt="Pustaka Setia"
-            className="size-full object-contain"
+            fill
+            className="object-contain"
+            sizes="40px"
           />
         </Link>
 
@@ -138,6 +141,7 @@ export default function Header() {
           <button
             className="flex items-center justify-center size-[24px]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             <Menu className="h-[20px] w-[20px] text-[#2f2f2f]" />
           </button>
@@ -171,11 +175,14 @@ export default function Header() {
       <header className={`hidden lg:block w-full bg-white sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex-shrink-0">
-              <img
+            <Link href="/" className="flex-shrink-0 relative h-12 w-32">
+              <Image
                 src="/img/logo.png"
                 alt="Pustaka Setia"
-                className="h-12 w-auto object-contain"
+                fill
+                className="object-contain object-left"
+                priority
+                sizes="(max-width: 1280px) 100vw, 150px"
               />
             </Link>
 
@@ -264,6 +271,7 @@ export default function Header() {
                       }
                     }}
                     className="flex shrink-0 items-center justify-center size-[24px] hover:opacity-70 transition-opacity focus:outline-none"
+                    aria-label="Toggle search"
                   >
                     {isSearchOpen ? <X className="size-[18px] text-[#2f2f2f]" /> : <SearchIcon />}
                   </button>
@@ -300,10 +308,12 @@ export default function Header() {
                               className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 text-left border-b last:border-0 border-neutral-100 transition-colors group"
                             >
                               <div className="relative h-12 w-9 rounded overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
-                                <img
+                                <Image
                                   src={book.image}
                                   alt={book.title}
-                                  className="h-full w-full object-cover"
+                                  fill
+                                  className="object-cover"
+                                  sizes="36px"
                                 />
                               </div>
                               <div className="flex-1 min-w-0">

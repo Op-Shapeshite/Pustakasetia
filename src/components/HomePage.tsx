@@ -8,55 +8,18 @@ import Hero from './Hero';
 import Footer from './Footer';
 import { Loader2 } from 'lucide-react';
 import BookDetailModal from './BookDetailModal';
+import { mapAPIBookToBook } from '@/utils/bookMapper';
 
-// API Book type from database
-interface APIBook {
-    id: number;
-    title: string;
-    author: string;
-    pages: number;
-    size: string;
-    isbn: string;
-    price: number;
-    edition: string;
-    synopsis: string | null;
-    image: string | null;
-    stock: number;
-    category: { id: number; name: string };
-    createdAt: string;
-    updatedAt: string;
+interface HomePageProps {
+    initialBooks?: Book[];
 }
 
-// Convert API book to frontend Book type
-function mapAPIBookToBook(apiBook: APIBook): Book {
-    return {
-        id: apiBook.id,
-        title: apiBook.title,
-        author: apiBook.author,
-        price: apiBook.price,
-        priceFormatted: `Rp${apiBook.price.toLocaleString('id-ID')}`,
-        image: apiBook.image || '/img/book-cover-optimized.png',
-        pages: apiBook.pages,
-        size: apiBook.size,
-        edition: apiBook.edition,
-        isbn: apiBook.isbn,
-        paperType: 'HVS',
-        synopsis: apiBook.synopsis || '',
-        category: apiBook.category.name as Book['category'],
-        tags: [],
-        stock: apiBook.stock,
-        bestseller: false,
-        featured: false,
-        publishYear: new Date(apiBook.createdAt).getFullYear(),
-    };
-}
-
-export default function HomePage() {
+export default function HomePage({ initialBooks = [] }: HomePageProps) {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
-    const [books, setBooks] = useState<Book[]>([]);
+    const [books, setBooks] = useState<Book[]>(initialBooks);
     // Force recompile trigger - updated formatting
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(initialBooks.length === 0);
     const [error, setError] = useState<string | null>(null);
     const [visibleBooks, setVisibleBooks] = useState(8);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -78,8 +41,12 @@ export default function HomePage() {
     }, []);
 
     useEffect(() => {
-        fetchBooks();
-    }, [fetchBooks]);
+        if (initialBooks.length === 0) {
+            fetchBooks();
+        } else {
+            setLoading(false);
+        }
+    }, [fetchBooks, initialBooks.length]);
 
     useEffect(() => {
         const checkMobile = () => {

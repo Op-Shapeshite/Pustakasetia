@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Hero() {
   const router = useRouter();
@@ -67,14 +68,21 @@ export default function Hero() {
 
             {/* Right Hero Image */}
             <div className="relative w-full lg:w-1/2 overflow-hidden h-[400px] lg:h-[700px] lg:pr-0 flex items-end justify-center lg:justify-end pb-0">
-              <motion.img
+              <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-                src="/img/hand-hero-section.png"
-                alt="Koleksi Buku Pustaka Setia"
-                className="w-full h-full lg:w-auto right-0 lg:h-[800px] object-contain object-bottom transform lg:translate-x-10"
-              />
+                className="relative w-full h-full lg:w-full right-0 lg:h-[800px] transform lg:translate-x-10"
+              >
+                <Image
+                  src="/img/hand-hero-section.png"
+                  alt="Koleksi Buku Pustaka Setia"
+                  fill
+                  priority
+                  className="object-contain object-bottom"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </motion.div>
             </div>
           </div>
         </div>
