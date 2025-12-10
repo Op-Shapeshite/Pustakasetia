@@ -28,6 +28,7 @@ model Book {
   isbn       String     @unique
   price      Float
   edition    String
+  paper_type String     @default("HVS")
   synopsis   String?
   image      String?
   stock      Int        @default(0)

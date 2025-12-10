@@ -103,7 +103,7 @@ jobs:
             echo "✓ Prisma client installed from pre-built package"
             
             echo "🗄️ Step 4: Running database migrations..."
-            npx prisma migrate deploy 2>/dev/null || echo "No migrations to run"
+            npx prisma db push 2>/dev/null || echo "No migrations to run"
             
             echo "🔧 Step 5: Checking environment..."
             if ! grep -q "JWT_SECRET" .env 2>/dev/null; then
