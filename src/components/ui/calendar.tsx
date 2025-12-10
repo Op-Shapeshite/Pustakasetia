@@ -31,8 +31,8 @@ function Calendar({
     }
 
     // Pass through if parent provided handler
-    if (props.onDayMouseDown) {
-      props.onDayMouseDown(day, activeModifiers, e);
+    if ((props as any).onDayMouseDown) {
+      (props as any).onDayMouseDown(day, activeModifiers, e);
     }
   };
 
@@ -50,8 +50,8 @@ function Calendar({
       (props.onSelect as any)(range, day, activeModifiers, e);
     }
     // Pass through
-    if (props.onDayMouseEnter) {
-      props.onDayMouseEnter(day, activeModifiers, e);
+    if ((props as any).onDayMouseEnter) {
+      (props as any).onDayMouseEnter(day, activeModifiers, e);
     }
   };
 
@@ -78,19 +78,19 @@ function Calendar({
       // Prevent the 'click' from overriding our drag selection
       return;
     }
-    if (props.onSelect) {
-      props.onSelect(range, selectedDay, modifiers, e);
+    if ((props as any).onSelect) {
+      (props as any).onSelect(range, selectedDay, modifiers, e);
     }
   };
 
-  const { onSelect, mode, onDayMouseDown, onDayMouseEnter, ...otherProps } = props;
+  const { onSelect, mode, onDayMouseDown, onDayMouseEnter, ...otherProps } = props as any;
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3 select-none", className)} // Added select-none
       mode={mode}
-      onSelect={onSelect}
+      onSelect={handleOnSelect}
       onDayMouseDown={handleDayMouseDown}
       onDayMouseEnter={handleDayMouseEnter}
       classNames={{

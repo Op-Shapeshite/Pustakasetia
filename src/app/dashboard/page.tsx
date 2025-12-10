@@ -186,7 +186,7 @@ export default function DashboardHomePage() {
                     <div className="lg:col-span-2 relative grid grid-cols-1 md:grid-cols-2 gap-6">
                         {loading ? (
                             Array.from({ length: 4 }).map((_, i) => (
-                                <Skeleton key={i} className="h-[200px] rounded-2xl" />
+                                <Skeleton key={i} className="h-[200px] rounded-2xl bg-gray-200/50" />
                             ))
                         ) : (
                             <>
@@ -308,8 +308,8 @@ export default function DashboardHomePage() {
                                 {loadingCat && categories.length === 0 ? (
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <div key={i} className="flex items-center justify-between py-2">
-                                            <Skeleton className="h-4 w-[60%]" />
-                                            <Skeleton className="h-6 w-8 rounded-full" />
+                                            <Skeleton className="h-4 w-[60%] bg-gray-200/50" />
+                                            <Skeleton className="h-6 w-8 rounded-full bg-gray-200/50" />
                                         </div>
                                     ))
                                 ) : (
@@ -377,11 +377,11 @@ export default function DashboardHomePage() {
                                     {loadingTraffic ? (
                                         Array.from({ length: 5 }).map((_, i) => (
                                             <tr key={i} className="border-b border-gray-50 last:border-0">
-                                                <td className="py-4"><Skeleton className="h-4 w-32" /></td>
-                                                <td className="py-4"><Skeleton className="h-4 w-12 ml-auto" /></td>
-                                                <td className="py-4"><Skeleton className="h-4 w-12 ml-auto" /></td>
-                                                <td className="py-4"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                                                <td className="py-4"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-32 bg-gray-200/50" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-12 ml-auto bg-gray-200/50" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-12 ml-auto bg-gray-200/50" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-16 ml-auto bg-gray-200/50" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-16 ml-auto bg-gray-200/50" /></td>
                                             </tr>
                                         ))
                                     ) : (
@@ -415,7 +415,7 @@ export default function DashboardHomePage() {
 
                         <div className="flex-1 flex items-center justify-center relative">
                             {loadingDevices ? (
-                                <Skeleton className="w-48 h-48 rounded-full" />
+                                <Skeleton className="w-48 h-48 rounded-full bg-gray-200/50" />
                             ) : (
                                 /* CSS Conic Gradient Donut */
                                 <div className="w-48 h-48 rounded-full relative" style={{
