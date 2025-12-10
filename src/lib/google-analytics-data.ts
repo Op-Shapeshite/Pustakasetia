@@ -49,7 +49,6 @@ class GoogleAnalyticsDataService {
     }
 
     private getAuth(): GoogleAuth {
-        console.log('[step:auth_init] Initializing GoogleAuth credentials');
         if (!this.auth) {
             const proxyAgent = getProxyAgent();
             // GoogleAuth supports transporterOptions at runtime but types don't include it
@@ -76,9 +75,6 @@ class GoogleAnalyticsDataService {
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                console.log(`[step:get_token_start] Getting access token... (attempt ${attempt}/${maxRetries})`);
-                console.log(`[GA Data API] Getting access token... (attempt ${attempt}/${maxRetries})`);
-
                 // Create timeout promise (30 seconds)
                 const timeoutPromise = new Promise<never>((_, reject) => {
                     setTimeout(() => reject(new Error('OAuth request timeout after 30s')), 30000);
@@ -94,8 +90,6 @@ class GoogleAnalyticsDataService {
 
                 const accessToken = await Promise.race([tokenPromise, timeoutPromise]);
 
-                console.log('[step:get_token_success] Access token obtained successfully');
-                console.log('[GA Data API] Access token obtained successfully');
                 return accessToken;
             } catch (error: unknown) {
                 lastError = error instanceof Error ? error : new Error(String(error));
@@ -127,10 +121,7 @@ class GoogleAnalyticsDataService {
         }
 
         try {
-            console.log('[step:run_report_start] Preparing report request', JSON.stringify({ dimensions: request.dimensions, metrics: request.metrics }));
             const accessToken = await this.getAccessToken();
-
-            console.log(`[step:api_fetch] Fetching data from analyticsdata.googleapis.com`);
 
             const response = await fetch(
                 `https://analyticsdata.googleapis.com/v1beta/${this.propertyId}:runReport`,
@@ -146,11 +137,9 @@ class GoogleAnalyticsDataService {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('[step:api_error] API request failed', JSON.stringify(errorData));
                 throw new Error(errorData.error?.message || 'Failed to fetch analytics data');
             }
 
-            console.log('[step:api_success] Report data received successfully');
             return await response.json();
         } catch (error) {
             console.error('[GA Data API] Request failed:', error);

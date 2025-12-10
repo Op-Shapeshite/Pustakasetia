@@ -10,10 +10,7 @@ export async function register() {
 
         // Initialize custom DNS resolver to bypass VPS DNS issues
         const { initializeCustomDns } = await import('@/lib/custom-dns');
-        console.log('----------------------------------------');
-        console.log('[Instrumentation] Initializing Custom DNS Patch...');
         initializeCustomDns();
-        console.log('[Instrumentation] Custom DNS Patch Applied Successfully');
         console.log('----------------------------------------');
 
         console.log('[Instrumentation] Server initialization complete');
