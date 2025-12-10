@@ -6,14 +6,23 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { usePathname } from 'next/navigation';
 
+import { DateRange } from 'react-day-picker';
+
 interface AdminHeaderProps {
     title: string;
     onMenuClick?: () => void;
     isScrolled?: boolean;
+    dateRange?: DateRange;
+    setDateRange?: (range: DateRange | undefined) => void;
 }
 
-export default function AdminHeader({ title, onMenuClick, isScrolled = false }: AdminHeaderProps) {
-    const [date, setDate] = useState<Date | undefined>(new Date());
+export default function AdminHeader({
+    title,
+    onMenuClick,
+    isScrolled = false,
+    dateRange,
+    setDateRange
+}: AdminHeaderProps) {
     const pathname = usePathname();
     const isDashboardPage = pathname === '/dashboard';
 
@@ -40,7 +49,7 @@ export default function AdminHeader({ title, onMenuClick, isScrolled = false }: 
                     {/* Right Side: Modern Date Filter */}
                     <div className="flex items-end gap-4">
                         {/* Only show calendar filter on /dashboard page */}
-                        {isDashboardPage && (
+                        {isDashboardPage && setDateRange && (
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <div className="hidden md:flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2.5 rounded-xl shadow-lg hover:bg-white/20 transition-all cursor-pointer group relative z-50">
@@ -50,18 +59,27 @@ export default function AdminHeader({ title, onMenuClick, isScrolled = false }: 
                                         <div className="flex flex-col">
                                             <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium leading-none mb-0.5">Filter Date</span>
                                             <span className="text-sm font-semibold text-white leading-none">
-                                                {date ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pick a date'}
+                                                {dateRange?.from ? (
+                                                    dateRange.to ? (
+                                                        <>
+                                                            {dateRange.from.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} - {dateRange.to.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                        </>
+                                                    ) : (
+                                                        dateRange.from.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                                                    )
+                                                ) : 'Pick dates'}
                                             </span>
                                         </div>
                                     </div>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0 bg-white border-none shadow-xl z-[60]" align="end">
                                     <Calendar
-                                        mode="single"
-                                        selected={date}
-                                        onSelect={setDate}
+                                        mode="range"
+                                        selected={dateRange}
+                                        onSelect={setDateRange}
                                         initialFocus
                                         className="bg-white rounded-md border"
+                                        numberOfMonths={2}
                                     />
                                 </PopoverContent>
                             </Popover>

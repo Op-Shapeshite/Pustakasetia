@@ -30,8 +30,16 @@ export async function GET(request: NextRequest) {
             }
         }
 
+        // Helper to get date filter
+        const { searchParams } = new URL(request.url);
+        const startDateParam = searchParams.get('startDate');
+        const endDateParam = searchParams.get('endDate');
+
+        const start = startDateParam ? new Date(startDateParam) : undefined;
+        const end = endDateParam ? new Date(endDateParam) : undefined;
+
         // Fallback to database
-        return await getDevicesFromDatabase();
+        return await getDevicesFromDatabase(start, end);
 
     } catch (error) {
         console.error('Analytics devices error:', error);
@@ -48,10 +56,18 @@ export async function GET(request: NextRequest) {
 }
 
 // Fallback function to get devices from local database
-async function getDevicesFromDatabase() {
+async function getDevicesFromDatabase(startDate?: Date, endDate?: Date) {
+    const whereClause: any = {};
+    if (startDate || endDate) {
+        whereClause.createdAt = {};
+        if (startDate) whereClause.createdAt.gte = startDate;
+        if (endDate) whereClause.createdAt.lte = endDate;
+    }
+
     const deviceStats = await prisma.pageView.groupBy({
         by: ['deviceType'],
-        _count: { id: true }
+        _count: { id: true },
+        where: whereClause
     });
 
     let mobile = 0;

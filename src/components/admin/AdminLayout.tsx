@@ -6,12 +6,18 @@ import { Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 
+import { DateRange } from 'react-day-picker';
+
 export default function AdminLayout({
     children,
-    title = 'Dashboard'
+    title = 'Dashboard',
+    dateRange,
+    setDateRange
 }: {
     children: React.ReactNode;
     title?: string;
+    dateRange?: DateRange;
+    setDateRange?: (range: DateRange | undefined) => void;
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -94,6 +100,8 @@ export default function AdminLayout({
                         title={title}
                         onMenuClick={() => setIsSidebarOpen(true)}
                         isScrolled={isScrolled}
+                        dateRange={dateRange}
+                        setDateRange={setDateRange}
                     />
                 </div>
 

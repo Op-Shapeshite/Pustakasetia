@@ -5,6 +5,7 @@ import { Book, Users, RefreshCw, ShoppingBag, Activity, ArrowDown, TrendingUp, L
 import { useState, useEffect } from 'react';
 import { bookService, userService, categoryService } from '@/utils/adminData';
 import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Category {
     id: number;
@@ -13,6 +14,8 @@ interface Category {
         books: number;
     };
 }
+
+import { DateRange } from 'react-day-picker';
 
 export default function DashboardHomePage() {
     const [stats, setStats] = useState({
@@ -27,11 +30,32 @@ export default function DashboardHomePage() {
     });
 
     const [trafficData, setTrafficData] = useState<any[]>([]);
+    const [loadingTraffic, setLoadingTraffic] = useState(true);
     const [deviceData, setDeviceData] = useState({
         mobile: 0,
         desktop: 0,
         mobilePercentage: 0
     });
+    const [loadingDevices, setLoadingDevices] = useState(true);
+
+    // Date Filter State (Default: Last 30 Days)
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(new Date().setDate(new Date().getDate() - 30)),
+        to: new Date()
+    });
+
+    // Helper to format date params
+    const getDateParams = () => {
+        if (!dateRange?.from) return '';
+        const params = new URLSearchParams();
+        params.append('startDate', dateRange.from.toISOString());
+        if (dateRange.to) {
+            params.append('endDate', dateRange.to.toISOString());
+        } else {
+            params.append('endDate', dateRange.from.toISOString()); // Single day fallback
+        }
+        return `?${params.toString()}`;
+    };
 
     // Category Widget State
     const [categories, setCategories] = useState<Category[]>([]);
@@ -47,7 +71,8 @@ export default function DashboardHomePage() {
         async function fetchAnalyticsStats() {
             try {
                 setLoading(true);
-                const response = await fetch('/api/analytics/stats');
+                const query = getDateParams();
+                const response = await fetch(`/api/analytics/stats${query}`);
                 const data = await response.json();
 
                 setStats({
@@ -67,27 +92,33 @@ export default function DashboardHomePage() {
             }
         }
         fetchAnalyticsStats();
-    }, []);
+    }, [dateRange]);
 
     // Fetch Traffic Data
     useEffect(() => {
         async function fetchTrafficData() {
             try {
-                const response = await fetch('/api/analytics/traffic');
+                setLoadingTraffic(true);
+                const query = getDateParams();
+                const response = await fetch(`/api/analytics/traffic${query}`);
                 const result = await response.json();
                 setTrafficData(result.data || []);
             } catch (error) {
                 console.error('Failed to fetch traffic data', error);
+            } finally {
+                setLoadingTraffic(false);
             }
         }
         fetchTrafficData();
-    }, []);
+    }, [dateRange]);
 
     // Fetch Device Statistics
     useEffect(() => {
         async function fetchDeviceStats() {
             try {
-                const response = await fetch('/api/analytics/devices');
+                setLoadingDevices(true);
+                const query = getDateParams();
+                const response = await fetch(`/api/analytics/devices${query}`);
                 const data = await response.json();
                 setDeviceData({
                     mobile: data.mobile || 0,
@@ -96,17 +127,21 @@ export default function DashboardHomePage() {
                 });
             } catch (error) {
                 console.error('Failed to fetch device stats', error);
+            } finally {
+                setLoadingDevices(false);
             }
         }
         fetchDeviceStats();
-    }, []);
+    }, [dateRange]);
 
     // Fetch Categories for Widget with Pagination
     useEffect(() => {
         async function fetchCategories() {
             setLoadingCat(true);
             try {
-                // Ensure api supports include for counts if available, otherwise just list
+                // Determine if we should filter categories by date logic (likely not supported yet, but passed just in case)
+                // const query = getDateParams(); 
+                // Using existing pagination logic
                 const res = await categoryService.getAll({ page: catPage, limit: CAT_LIMIT });
                 setCategories(res.data as any);
                 setCatTotal(res.pagination?.total ?? 0);
@@ -117,7 +152,7 @@ export default function DashboardHomePage() {
             }
         }
         fetchCategories();
-    }, [catPage]);
+    }, [catPage, dateRange]); // Refetch if needed, though likely static
 
     const handleNextCat = () => {
         if (catPage * CAT_LIMIT < catTotal) {
@@ -132,7 +167,11 @@ export default function DashboardHomePage() {
     };
 
     return (
-        <AdminLayout title="Ringkasan Analisis">
+        <AdminLayout
+            title="Ringkasan Analisis"
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+        >
             {/* Main Content Area */}
             <div className="relative pb-12 px-6">
 
@@ -145,106 +184,114 @@ export default function DashboardHomePage() {
 
                     {/* Left Column (2/3) - 4 Cards Grid */}
                     <div className="lg:col-span-2 relative grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Visitor Card */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.1 }}
-                            whileHover={{ scale: 1.02, y: -4 }}
-                            className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
-                        >
-                            <div className="flex justify-between items-start">
-                                <span className="font-semibold text-gray-700 text-lg">Total Pengunjung</span>
-                                <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                    <Users className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.visitors.toLocaleString('id-ID')}</h3>
-                                <p className="text-sm">
-                                    <span className={stats.visitorChange < 0 ? "text-red-500" : "text-green-500"}>
-                                        {stats.visitorChange >= 0 ? '+' : ''}{stats.visitorChange.toFixed(2)}%
-                                    </span>{' '}
-                                    <span className="text-gray-500">
-                                        {stats.visitorChange < 0 ? 'Pengunjung lebih sedikit dari biasanya' : 'Pengunjung lebih banyak dari biasanya'}
-                                    </span>
-                                </p>
-                            </div>
-                        </motion.div>
+                        {loading ? (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <Skeleton key={i} className="h-[200px] rounded-2xl" />
+                            ))
+                        ) : (
+                            <>
+                                {/* Visitor Card */}
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.1 }}
+                                    whileHover={{ scale: 1.02, y: -4 }}
+                                    className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <span className="font-semibold text-gray-700 text-lg">Total Pengunjung</span>
+                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                            <Users className="w-5 h-5" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.visitors.toLocaleString('id-ID')}</h3>
+                                        <p className="text-sm">
+                                            <span className={stats.visitorChange < 0 ? "text-red-500" : "text-green-500"}>
+                                                {stats.visitorChange >= 0 ? '+' : ''}{stats.visitorChange.toFixed(2)}%
+                                            </span>{' '}
+                                            <span className="text-gray-500">
+                                                {stats.visitorChange < 0 ? 'Pengunjung lebih sedikit dari biasanya' : 'Pengunjung lebih banyak dari biasanya'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </motion.div>
 
-                        {/* Book Card */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.2 }}
-                            whileHover={{ scale: 1.02, y: -4 }}
-                            className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
-                        >
-                            <div className="flex justify-between items-start">
-                                <span className="font-semibold text-gray-700 text-lg">Total Buku</span>
-                                <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                    <Book className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.books.toLocaleString('id-ID')}</h3>
-                                <p className="text-sm text-gray-500">
-                                    Total Buku yang telah di upload
-                                </p>
-                            </div>
-                        </motion.div>
+                                {/* Book Card */}
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.2 }}
+                                    whileHover={{ scale: 1.02, y: -4 }}
+                                    className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <span className="font-semibold text-gray-700 text-lg">Total Buku</span>
+                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                            <Book className="w-5 h-5" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.books.toLocaleString('id-ID')}</h3>
+                                        <p className="text-sm text-gray-500">
+                                            Total Buku yang telah di upload
+                                        </p>
+                                    </div>
+                                </motion.div>
 
-                        {/* Activity Card */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.3 }}
-                            whileHover={{ scale: 1.02, y: -4 }}
-                            className="bg-white  rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
-                        >
-                            <div className="flex justify-between items-start">
-                                <span className="font-semibold text-gray-700 text-lg">Aktifitas Bulan Ini</span>
-                                <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                    <Activity className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.activity}</h3>
-                                <p className="text-sm">
-                                    <span className={stats.activityChange < 0 ? "text-red-500" : "text-green-500"}>
-                                        {stats.activityChange >= 0 ? '+' : ''}{stats.activityChange.toFixed(2)}%
-                                    </span>{' '}
-                                    <span className="text-gray-500">
-                                        {stats.activityChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Lebih banyak Aktifitas dari biasanya'}
-                                    </span>
-                                </p>
-                            </div>
-                        </motion.div>
+                                {/* Activity Card */}
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.3 }}
+                                    whileHover={{ scale: 1.02, y: -4 }}
+                                    className="bg-white  rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <span className="font-semibold text-gray-700 text-lg">Aktifitas Bulan Ini</span>
+                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                            <Activity className="w-5 h-5" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.activity}</h3>
+                                        <p className="text-sm">
+                                            <span className={stats.activityChange < 0 ? "text-red-500" : "text-green-500"}>
+                                                {stats.activityChange >= 0 ? '+' : ''}{stats.activityChange.toFixed(2)}%
+                                            </span>{' '}
+                                            <span className="text-gray-500">
+                                                {stats.activityChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Lebih banyak Aktifitas dari biasanya'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </motion.div>
 
-                        {/* Check Out Card */}
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                            className="bg-white  rounded-xl p-6 h-[200px] flex flex-col justify-between shadow-none border-none"
-                        >
-                            <div className="flex justify-between items-start">
-                                <span className="font-semibold text-gray-700 text-lg">Check Out</span>
-                                <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                    <ShoppingBag className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.checkout}</h3>
-                                <p className="text-sm">
-                                    <span className={stats.checkoutChange < 0 ? "text-red-500" : "text-green-500"}>
-                                        {stats.checkoutChange >= 0 ? '+' : ''}{stats.checkoutChange.toFixed(2)}%
-                                    </span>{' '}
-                                    <span className="text-gray-500">
-                                        {stats.checkoutChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Aktivitas lebih banyak dari biasanya'}
-                                    </span>
-                                </p>
-                            </div>
-                        </motion.div>
+                                {/* Check Out Card */}
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                    className="bg-white  rounded-xl p-6 h-[200px] flex flex-col justify-between shadow-none border-none"
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <span className="font-semibold text-gray-700 text-lg">Check Out</span>
+                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                            <ShoppingBag className="w-5 h-5" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.checkout}</h3>
+                                        <p className="text-sm">
+                                            <span className={stats.checkoutChange < 0 ? "text-red-500" : "text-green-500"}>
+                                                {stats.checkoutChange >= 0 ? '+' : ''}{stats.checkoutChange.toFixed(2)}%
+                                            </span>{' '}
+                                            <span className="text-gray-500">
+                                                {stats.checkoutChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Aktivitas lebih banyak dari biasanya'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
                     </div>
 
                     {/* Right Column (1/3) - Category List (Dynamic) */}
@@ -258,16 +305,25 @@ export default function DashboardHomePage() {
                                 <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" onClick={() => setCatPage(1)} />
                             </div>
                             <div className="space-y-1 flex-1">
-                                {categories.map((cat, i) => (
-                                    <div key={i} className="flex items-center justify-between py-1">
-                                        <span className="text-gray-700 font-medium truncate flex-1">{cat.name}</span>
-                                        <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-sm font-medium text-gray-600 min-w-[40px] text-center">
-                                            {(cat as any)._count?.books ?? Math.floor(Math.random() * 20) + 1}
-                                        </span>
-                                    </div>
-                                ))}
-                                {loadingCat && (
-                                    <div className="py-4 text-center text-sm text-gray-400">Loading...</div>
+                                {loadingCat && categories.length === 0 ? (
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <div key={i} className="flex items-center justify-between py-2">
+                                            <Skeleton className="h-4 w-[60%]" />
+                                            <Skeleton className="h-6 w-8 rounded-full" />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <>
+                                        {categories.map((cat, i) => (
+                                            <div key={i} className="flex items-center justify-between py-1">
+                                                <span className="text-gray-700 font-medium truncate flex-1">{cat.name}</span>
+                                                {/* Random count as placeholder logic from original */}
+                                                <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-sm font-medium text-gray-600 min-w-[40px] text-center">
+                                                    {(cat as any)._count?.books ?? Math.floor(Math.random() * 20) + 1}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </>
                                 )}
                             </div>
 
@@ -318,15 +374,27 @@ export default function DashboardHomePage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {trafficData.map((row, i) => (
-                                        <tr key={i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                                            <td className="py-4 text-gray-700">{row.source}</td>
-                                            <td className="py-4 text-right text-gray-500">{row.users}</td>
-                                            <td className="py-4 text-right text-gray-500">{row.sessions}</td>
-                                            <td className="py-4 text-right font-medium text-gray-700">{row.bounceRate}%</td>
-                                            <td className="py-4 text-right text-gray-500">{row.avgDuration}</td>
-                                        </tr>
-                                    ))}
+                                    {loadingTraffic ? (
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <tr key={i} className="border-b border-gray-50 last:border-0">
+                                                <td className="py-4"><Skeleton className="h-4 w-32" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-12 ml-auto" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-12 ml-auto" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                                                <td className="py-4"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        trafficData.map((row, i) => (
+                                            <tr key={i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                                                <td className="py-4 text-gray-700">{row.source}</td>
+                                                <td className="py-4 text-right text-gray-500">{row.users}</td>
+                                                <td className="py-4 text-right text-gray-500">{row.sessions}</td>
+                                                <td className="py-4 text-right font-medium text-gray-700">{row.bounceRate}%</td>
+                                                <td className="py-4 text-right text-gray-500">{row.avgDuration}</td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -346,14 +414,18 @@ export default function DashboardHomePage() {
                         <p className="text-gray-400 text-sm mb-8">Persentase pengguna yang menggunakan perangkat seluler dibandingkan dengan perangkat lain.</p>
 
                         <div className="flex-1 flex items-center justify-center relative">
-                            {/* CSS Conic Gradient Donut */}
-                            <div className="w-48 h-48 rounded-full relative" style={{
-                                background: `conic-gradient(#ffcc00 0% ${deviceData.mobilePercentage}%, #e5e7eb ${deviceData.mobilePercentage}% 100%)`
-                            }}>
-                                <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center flex-col">
-                                    <span className="text-4xl font-bold text-[#2f2f2f]">{deviceData.mobilePercentage.toFixed(0)}%</span>
+                            {loadingDevices ? (
+                                <Skeleton className="w-48 h-48 rounded-full" />
+                            ) : (
+                                /* CSS Conic Gradient Donut */
+                                <div className="w-48 h-48 rounded-full relative" style={{
+                                    background: `conic-gradient(#ffcc00 0% ${deviceData.mobilePercentage}%, #e5e7eb ${deviceData.mobilePercentage}% 100%)`
+                                }}>
+                                    <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center flex-col">
+                                        <span className="text-4xl font-bold text-[#2f2f2f]">{deviceData.mobilePercentage.toFixed(0)}%</span>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         <div className="flex justify-center gap-8 mt-8">

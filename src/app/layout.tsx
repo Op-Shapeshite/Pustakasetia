@@ -43,6 +43,16 @@ export const metadata: Metadata = {
             follow: true,
         },
     },
+    icons: {
+        icon: '/img/favicon/favicon.ico',
+        shortcut: '/img/favicon/favicon.ico',
+        apple: '/img/favicon/apple-touch-icon.png', // Assuming this exists based on dir list
+        other: {
+            rel: 'apple-touch-icon-precomposed',
+            url: '/img/favicon/apple-touch-icon.png',
+        },
+    },
+    manifest: '/img/favicon/site.webmanifest',
 };
 
 export default function RootLayout({
