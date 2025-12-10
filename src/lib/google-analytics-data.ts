@@ -23,9 +23,24 @@ class GoogleAnalyticsDataService {
     constructor() {
         this.propertyId = process.env.GA_PROPERTY_ID;
         this.clientEmail = process.env.GA_CLIENT_EMAIL;
-        this.privateKey = process.env.GA_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+        // Handle private key with proper newline conversion
+        let privateKey = process.env.GA_PRIVATE_KEY;
+        if (privateKey) {
+            // Replace literal \n with actual newlines
+            privateKey = privateKey.replace(/\\n/g, '\n');
+            // Also handle if someone accidentally double-escaped
+            privateKey = privateKey.replace(/\\\\n/g, '\n');
+        }
+        this.privateKey = privateKey;
 
         this.enabled = !!(this.propertyId && this.clientEmail && this.privateKey);
+
+        if (this.enabled) {
+            console.log('[GA Data API] Initialized successfully');
+        } else {
+            console.log('[GA Data API] Not enabled - missing credentials');
+        }
     }
 
     isEnabled(): boolean {
