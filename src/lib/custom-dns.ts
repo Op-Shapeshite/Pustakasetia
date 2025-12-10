@@ -328,13 +328,19 @@ export function patchGlobalDns(): void {
         const isGoogleApi = hostname.includes('googleapis.com') || hostname.includes('google.com');
 
         if (isGoogleApi) {
-            console.log(`[Custom DNS] Intercepting lookup for: ${hostname}`);
+            console.log(`[Custom DNS] Intercepting lookup for: ${hostname} options:`, JSON.stringify(opts));
 
             // Use our custom resolver
             resolveHostname(hostname)
                 .then((ip) => {
                     console.log(`[Custom DNS] Resolved ${hostname} -> ${ip}`);
-                    cb(null, ip, 4);
+
+                    if (opts.all) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (cb as any)(null, [{ address: ip, family: 4 }]);
+                    } else {
+                        cb(null, ip, 4);
+                    }
                 })
                 .catch((err) => {
                     console.error(`[Custom DNS] Failed to resolve ${hostname}:`, err);
