@@ -35,7 +35,7 @@ export function setupGlobalProxy() {
 
         // For google-auth-library and other libraries
         if (typeof global !== 'undefined') {
-            (global as any).HTTPS_PROXY = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+            (global as Record<string, unknown>).HTTPS_PROXY = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
         }
     } else {
         console.log('[Proxy] No proxy configured - using direct connection');
