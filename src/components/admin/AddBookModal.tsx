@@ -285,7 +285,15 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                                     <p className="text-sm text-gray-500">Mengupload...</p>
                                 </>
                             ) : coverPreview ? (
-                                <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
+                                <img
+                                    src={coverPreview}
+                                    alt="Cover Preview"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.src = '/img/book-cover-optimized.png';
+                                    }}
+                                />
                             ) : (
                                 <>
                                     <Upload className="w-12 h-12 text-gray-400 mb-3" />

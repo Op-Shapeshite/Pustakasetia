@@ -1,8 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { unlink } from 'fs/promises';
+import { existsSync } from 'fs';
+import path from 'path';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
+}
+
+// Helper function to delete cover image file
+async function deleteCoverImage(imageUrl: string | null) {
+    if (!imageUrl) return;
+
+    // Only delete images from our uploads directory
+    if (imageUrl.startsWith('/uploads/covers/')) {
+        const filename = imageUrl.replace('/uploads/covers/', '');
+        const filepath = path.join(process.cwd(), 'public', 'uploads', 'covers', filename);
+
+        if (existsSync(filepath)) {
+            try {
+                await unlink(filepath);
+                console.log(`Deleted old cover image: ${filename}`);
+            } catch (error) {
+                console.error(`Failed to delete cover image: ${filename}`, error);
+            }
+        }
+    }
 }
 
 // GET /api/books/:id - Get single book
@@ -30,6 +53,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     try {
         const { id } = await params;
         const body = await request.json();
+
+        // Get the current book to check for old image
+        const existingBook = await prisma.book.findUnique({
+            where: { id: parseInt(id) },
+        });
+
+        if (!existingBook) {
+            return NextResponse.json({ error: 'Book not found' }, { status: 404 });
+        }
+
+        // If a new image is being uploaded and it's different from the old one, delete the old image
+        if (body.image && body.image !== existingBook.image) {
+            await deleteCoverImage(existingBook.image);
+        }
 
         const book = await prisma.book.update({
             where: { id: parseInt(id) },
@@ -63,6 +100,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
     try {
         const { id } = await params;
+
+        // Get the book first to get the image URL
+        const book = await prisma.book.findUnique({
+            where: { id: parseInt(id) },
+        });
+
+        if (!book) {
+            return NextResponse.json({ error: 'Book not found' }, { status: 404 });
+        }
+
+        // Delete the cover image file
+        await deleteCoverImage(book.image);
+
+        // Delete the book from database
         await prisma.book.delete({
             where: { id: parseInt(id) },
         });

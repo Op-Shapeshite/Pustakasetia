@@ -13,6 +13,7 @@ const publicRoutes = [
     '/api/categories', // Allow public read for categories (for forms)
     '/api/stats', // Allow public read for homepage stats
     '/api/analytics/track', // Allow public POST for tracking page views
+    '/api/authors', // Allow public read for author suggestions
 ];
 
 // Routes that allow public GET but require auth for mutations

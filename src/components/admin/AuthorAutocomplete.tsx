@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { User } from 'lucide-react';
-import { bookService } from '@/utils/adminData';
 
 interface AuthorAutocompleteProps {
     value: string;
@@ -32,9 +31,10 @@ export default function AuthorAutocomplete({
 
     const loadAuthors = async () => {
         try {
-            const response = await bookService.getAll({ page: 1, limit: 1000 });
-            const authors = [...new Set(response.data.map(book => book.author))].sort();
-            setAllAuthors(authors);
+            const response = await fetch('/api/authors');
+            if (!response.ok) throw new Error('Failed to fetch authors');
+            const data = await response.json();
+            setAllAuthors(data.data || []);
         } catch (error) {
             console.error('Failed to load authors:', error);
         }
@@ -47,10 +47,9 @@ export default function AuthorAutocomplete({
                 author.toLowerCase().includes(value.toLowerCase())
             );
             setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
-            setIsOpen(filtered.length > 0 && value.length > 0);
         } else {
-            setSuggestions([]);
-            setIsOpen(false);
+            // When empty, prepare all authors for display on focus
+            setSuggestions(allAuthors.slice(0, 5));
         }
     }, [value, allAuthors]);
 
@@ -73,10 +72,16 @@ export default function AuthorAutocomplete({
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e.target.value);
+        // Open suggestions when typing
+        if (allAuthors.length > 0) {
+            setIsOpen(true);
+        }
     };
 
     const handleFocus = () => {
-        if (value.length > 0 && suggestions.length > 0) {
+        // Always show all authors on focus so users can see available options
+        if (allAuthors.length > 0) {
+            setSuggestions(allAuthors.slice(0, 8)); // Show more options
             setIsOpen(true);
         }
     };

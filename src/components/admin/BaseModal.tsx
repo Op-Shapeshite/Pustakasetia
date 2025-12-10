@@ -24,10 +24,32 @@ export default function BaseModal({
     maxHeight = '85vh'
 }: BaseModalProps) {
     const [mounted, setMounted] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [shouldRender, setShouldRender] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Handle animation states
+    useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true);
+            // Small delay to trigger animation after render
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    setIsAnimating(true);
+                });
+            });
+        } else {
+            setIsAnimating(false);
+            // Wait for animation to complete before unmounting
+            const timer = setTimeout(() => {
+                setShouldRender(false);
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen]);
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -41,7 +63,7 @@ export default function BaseModal({
         };
     }, [isOpen]);
 
-    if (!isOpen || !mounted) return null;
+    if (!shouldRender || !mounted) return null;
 
     const sizeClasses = {
         sm: 'max-w-md',
@@ -52,15 +74,21 @@ export default function BaseModal({
 
     const modalContent = (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Backdrop */}
+            {/* Backdrop with fade animation */}
             <div
-                className="absolute inset-0 bg-black/50"
+                className={`absolute inset-0 bg-black transition-opacity duration-300 ease-out ${isAnimating ? 'opacity-50' : 'opacity-0'
+                    }`}
                 onClick={onClose}
             />
 
-            {/* Modal Card - NO overflow-y-auto here */}
+            {/* Modal Card with slide + scale animation */}
             <div
-                className={`relative bg-[#f6f8fd] rounded-[24px] w-full ${sizeClasses[size]} shadow-xl flex flex-col`}
+                className={`relative bg-[#f6f8fd] rounded-[24px] w-full ${sizeClasses[size]} shadow-2xl flex flex-col
+                    transition-all duration-300 ease-out
+                    ${isAnimating
+                        ? 'opacity-100 translate-y-0 scale-100'
+                        : 'opacity-0 translate-y-8 scale-95'
+                    }`}
                 style={{ maxHeight }}
             >
                 {/* Sticky Header */}
@@ -70,13 +98,13 @@ export default function BaseModal({
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                        className="p-2 hover:bg-gray-200 rounded-full transition-all duration-200 hover:rotate-90"
                     >
                         <X className="w-5 h-5 text-[#2f2f2f]" />
                     </button>
                 </div>
 
-                {/* Scrollable Content - Scrollbar is HERE, inside the card */}
+                {/* Scrollable Content */}
                 <div className="overflow-y-auto flex-1 px-8 py-6">
                     {children}
                 </div>
