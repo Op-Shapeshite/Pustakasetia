@@ -8,19 +8,26 @@ export async function GET(request: NextRequest) {
     try {
         // Check if Google Analytics Data API is enabled
         if (gaDataService.isEnabled()) {
-            // Fetch from Google Analytics
-            const deviceStats = await gaDataService.getDeviceBreakdown();
+            try {
+                // Fetch from Google Analytics
+                const deviceStats = await gaDataService.getDeviceBreakdown();
 
-            const total = deviceStats.mobile + deviceStats.desktop + deviceStats.tablet;
-            const mobilePercentage = total > 0 ? (deviceStats.mobile / total) * 100 : 0;
+                console.log('[Devices API] GA Data:', deviceStats);
 
-            return NextResponse.json({
-                source: 'google_analytics',
-                mobile: deviceStats.mobile,
-                desktop: deviceStats.desktop,
-                tablet: deviceStats.tablet,
-                mobilePercentage: parseFloat(mobilePercentage.toFixed(1))
-            });
+                const total = deviceStats.mobile + deviceStats.desktop + deviceStats.tablet;
+                const mobilePercentage = total > 0 ? (deviceStats.mobile / total) * 100 : 0;
+
+                return NextResponse.json({
+                    source: 'google_analytics',
+                    mobile: deviceStats.mobile,
+                    desktop: deviceStats.desktop,
+                    tablet: deviceStats.tablet,
+                    mobilePercentage: parseFloat(mobilePercentage.toFixed(1))
+                });
+            } catch (gaError) {
+                console.error('[Devices API] GA Error, falling back to database:', gaError);
+                // Fall through to database fallback
+            }
         }
 
         // Fallback to database

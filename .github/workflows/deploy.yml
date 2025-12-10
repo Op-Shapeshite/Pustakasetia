@@ -50,9 +50,20 @@ jobs:
           cp next.config.* deploy/ 2>/dev/null || true
           cp tsconfig.json deploy/ 2>/dev/null || true
           
-          # Create .env for production
-          echo 'DATABASE_URL="file:./dev.db"' > deploy/.env
-          
+          # Create .env for production with all required variables
+          cat > deploy/.env << 'EOF'
+          DATABASE_URL="file:./dev.db"
+          JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          NEXT_PUBLIC_SITE_NAME="Pustaka Setia"
+          NEXT_PUBLIC_SITE_DESCRIPTION="Toko buku online terlengkap dengan koleksi buku berkualitas untuk semua kalangan"
+          NEXT_PUBLIC_SITE_URL="${{ secrets.SITE_URL }}"
+          NEXT_PUBLIC_GA_MEASUREMENT_ID="${{ secrets.GA_MEASUREMENT_ID }}"
+          GA_API_SECRET="${{ secrets.GA_API_SECRET }}"
+          GA_PROPERTY_ID="${{ secrets.GA_PROPERTY_ID }}"
+          GA_CLIENT_EMAIL="${{ secrets.GA_CLIENT_EMAIL }}"
+          GA_PRIVATE_KEY="${{ secrets.GA_PRIVATE_KEY }}"
+          EOF
+
           # IMPORTANT: Create separate tarball for Prisma client
           tar -czf prisma-client.tar.gz -C node_modules .prisma @prisma
           
