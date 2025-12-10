@@ -1,23 +1,24 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { User } from 'lucide-react';
+import { User, X, Plus } from 'lucide-react';
 
 interface AuthorAutocompleteProps {
-    value: string;
-    onChange: (value: string) => void;
+    value: string[];
+    onChange: (value: string[]) => void;
     placeholder?: string;
     label?: string;
     className?: string;
 }
 
 export default function AuthorAutocomplete({
-    value,
+    value = [],
     onChange,
-    placeholder = "Nama penulis",
+    placeholder = "Cari atau tambah penulis...",
     label,
     className = ""
 }: AuthorAutocompleteProps) {
+    const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [allAuthors, setAllAuthors] = useState<string[]>([]);
@@ -42,16 +43,18 @@ export default function AuthorAutocomplete({
 
     // Filter suggestions based on input
     useEffect(() => {
-        if (value.length > 0) {
-            const filtered = allAuthors.filter(author =>
-                author.toLowerCase().includes(value.toLowerCase())
+        const query = inputValue.toLowerCase();
+        const unselected = allAuthors.filter(a => !value.includes(a));
+
+        if (query.length > 0) {
+            const filtered = unselected.filter(author =>
+                author.toLowerCase().includes(query)
             );
-            setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
+            setSuggestions(filtered.slice(0, 5));
         } else {
-            // When empty, prepare all authors for display on focus
-            setSuggestions(allAuthors.slice(0, 5));
+            setSuggestions(unselected.slice(0, 5));
         }
-    }, [value, allAuthors]);
+    }, [inputValue, allAuthors, value]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -66,27 +69,41 @@ export default function AuthorAutocomplete({
     }, []);
 
     const handleSelect = (author: string) => {
-        onChange(author);
+        if (!value.includes(author)) {
+            onChange([...value, author]);
+        }
+        setInputValue('');
         setIsOpen(false);
+        inputRef.current?.focus();
+    };
+
+    const handleRemove = (authorToRemove: string) => {
+        onChange(value.filter(author => author !== authorToRemove));
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(e.target.value);
-        // Open suggestions when typing
-        if (allAuthors.length > 0) {
-            setIsOpen(true);
+        setInputValue(e.target.value);
+        if (!isOpen) setIsOpen(true);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && inputValue.trim()) {
+            e.preventDefault();
+            // Add new author if it doesn't exist in suggestions (or explicitly by user intent)
+            if (!value.includes(inputValue.trim())) {
+                onChange([...value, inputValue.trim()]);
+                setInputValue('');
+                setIsOpen(false);
+            }
+        } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
+            // Remove last tag on backspace if input is empty
+            handleRemove(value[value.length - 1]);
         }
     };
 
     const handleFocus = () => {
-        // Always show all authors on focus so users can see available options
-        if (allAuthors.length > 0) {
-            setSuggestions(allAuthors.slice(0, 8)); // Show more options
-            setIsOpen(true);
-        }
+        setIsOpen(true);
     };
-
-
 
     return (
         <div ref={containerRef} className={`relative ${className}`}>
@@ -94,22 +111,46 @@ export default function AuthorAutocomplete({
                 <label className="block text-sm text-gray-500 mb-2">{label}</label>
             )}
 
-            {/* Input Field */}
-            <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div
+                className="w-full min-h-[46px] px-3 py-2 border border-[#d9d9d9] rounded-lg text-sm bg-white focus-within:ring-2 focus-within:ring-[#ffcc00] focus-within:border-transparent flex flex-wrap gap-2 items-center cursor-text"
+                onClick={() => inputRef.current?.focus()}
+            >
+                {/* Selected Tags */}
+                {value.map((author, index) => (
+                    <div
+                        key={index}
+                        className="flex items-center gap-1 bg-yellow-50 text-gray-800 px-2 py-1 rounded-md border border-yellow-200"
+                    >
+                        <User className="w-3 h-3 text-yellow-600" />
+                        <span className="text-xs font-medium">{author}</span>
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemove(author);
+                            }}
+                            className="p-0.5 hover:bg-yellow-100 rounded-full text-gray-500 hover:text-red-500 transition-colors"
+                        >
+                            <X className="w-3 h-3" />
+                        </button>
+                    </div>
+                ))}
+
+                {/* Input Field */}
                 <input
                     ref={inputRef}
                     type="text"
-                    value={value}
+                    value={inputValue}
                     onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
                     onFocus={handleFocus}
-                    placeholder={placeholder}
-                    className="w-full pl-10 pr-4 py-3 border border-[#d9d9d9] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] bg-white"
+                    placeholder={value.length === 0 ? placeholder : ""}
+                    className="flex-1 min-w-[120px] bg-transparent outline-none text-gray-700 placeholder:text-gray-400"
                 />
             </div>
 
             {/* Suggestions Dropdown */}
-            {isOpen && suggestions.length > 0 && (
+            {isOpen && (suggestions.length > 0 || (inputValue && !value.includes(inputValue))) && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
                     <div className="max-h-48 overflow-y-auto">
                         {suggestions.map((author, index) => (
@@ -123,6 +164,18 @@ export default function AuthorAutocomplete({
                                 <span className="text-gray-700">{author}</span>
                             </button>
                         ))}
+
+                        {/* Option to create new author if typing and not in exact match */}
+                        {inputValue && !suggestions.includes(inputValue) && !value.includes(inputValue) && (
+                            <button
+                                type="button"
+                                onClick={() => handleSelect(inputValue)}
+                                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 text-[#ffcc00] font-medium"
+                            >
+                                <Plus className="w-4 h-4" />
+                                <span>Tambah "{inputValue}"</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

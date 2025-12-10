@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
-        const { title, author, pages, size, isbn, price, edition, synopsis, image, stock, categoryId } = body;
+        const { title, author, pages, size, isbn, price, edition, paper_type, synopsis, image, stock, categoryId } = body;
 
         if (!title || !author || !isbn || !categoryId) {
             return NextResponse.json(
@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
                 isbn,
                 price: parseFloat(price) || 0,
                 edition: edition || '',
+                paper_type: paper_type || 'HVS',
                 synopsis: synopsis || '',
                 image: image || '/img/book-cover-optimized.png',
                 stock: parseInt(stock) || 0,

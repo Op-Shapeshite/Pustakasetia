@@ -122,8 +122,21 @@ export default function BookManagementPage() {
         },
         {
             header: 'Nama Penulis',
-            accessor: 'author',
-            className: 'px-6 py-6 text-sm text-gray-700 whitespace-nowrap'
+            render: (book) => {
+                const authors = book.author.split(' & ');
+                const displayAuthors = authors.slice(0, 3);
+                const remaining = authors.length - 3;
+
+                return (
+                    <div className="whitespace-nowrap">
+                        {displayAuthors.map((author, index) => (
+                            <div key={index}>{author}</div>
+                        ))}
+                        {remaining > 0 && <div className="text-gray-500 italic">& dkk</div>}
+                    </div>
+                );
+            },
+            className: 'px-6 py-6 text-sm text-gray-700'
         },
         {
             header: 'Jumlah Halaman',
@@ -137,7 +150,8 @@ export default function BookManagementPage() {
         },
         {
             header: 'Jenis Kertas',
-            render: () => 'HVS',
+            accessor: 'paper_type',
+            render: (book) => book.paper_type || 'HVS',
             className: 'px-6 py-6 text-sm text-gray-700 whitespace-nowrap'
         },
         {
@@ -175,8 +189,8 @@ export default function BookManagementPage() {
                     </button>
                 </div>
             ),
-            className: 'px-6 py-6',
-            headerClassName: 'text-center px-6 py-4 font-medium text-gray-600 text-sm whitespace-nowrap'
+            className: 'px-6 py-6 sticky right-0 bg-white z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]',
+            headerClassName: 'text-center px-6 py-4 font-medium text-gray-600 text-sm whitespace-nowrap sticky right-0 bg-gray-50 z-20 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]'
         }
     ];
 

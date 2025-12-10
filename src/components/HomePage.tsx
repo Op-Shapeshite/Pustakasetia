@@ -145,12 +145,11 @@ export default function HomePage({ initialBooks = [] }: HomePageProps) {
                 {hasMoreBooks && (
                     <div className="flex justify-center mt-8 md:mt-12">
                         <button
-                            onClick={handleLoadMore}
-                            disabled={isLoadingMore}
+                            onClick={() => router.push('/products')}
                             className="group relative text-lg md:text-xl font-medium text-neutral-900 hover:text-yellow-600 transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <span className="relative">
-                                {isLoadingMore ? 'Loading...' : 'View More...'}
+                                View More...
                                 <span className="absolute bottom-0 left-0 w-full h-[2px] bg-neutral-900 group-hover:bg-yellow-600 transition-colors duration-300"></span>
                             </span>
                         </button>

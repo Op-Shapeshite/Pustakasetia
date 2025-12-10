@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, Plus, Trash2 } from 'lucide-react';
 import { bookService, categoryService, Book } from '@/utils/adminData';
 import dynamic from 'next/dynamic';
 import SearchableSelect from './SearchableSelect';
@@ -48,9 +48,10 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
 
     const [formData, setFormData] = useState({
         title: '',
-        author: '',
+        authors: [''],
         pages: '',
         size: '',
+        paper_type: '',
         isbn: '',
         price: '',
         priceDisplay: '',
@@ -78,9 +79,10 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
         if (book) {
             setFormData({
                 title: book.title,
-                author: book.author,
+                authors: book.author ? book.author.split(' & ') : [''],
                 pages: String(book.pages),
                 size: book.size,
+                paper_type: book.paper_type || 'HVS',
                 isbn: book.isbn,
                 price: String(book.price),
                 priceDisplay: formatRupiah(String(book.price)),
@@ -106,6 +108,9 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
     const handleSynopsisChange = (content: string) => {
         setFormData(prev => ({ ...prev, synopsis: content }));
     };
+
+
+
 
     // Create new category via API
     const handleCreateCategory = async (name: string): Promise<Category | null> => {
@@ -195,9 +200,10 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
         try {
             await bookService.update(book.id, {
                 title: formData.title,
-                author: formData.author,
+                author: formData.authors.filter(a => a.trim()).join(' & '),
                 pages: parseInt(formData.pages) || 0,
                 size: formData.size,
+                paper_type: formData.paper_type,
                 isbn: formData.isbn,
                 price: parseInt(formData.price) || 0,
                 categoryId: parseInt(formData.categoryId),
@@ -253,8 +259,7 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                             onClick={() => fileInputRef.current?.click()}
                             onDrop={handleDrop}
                             onDragOver={handleDragOver}
-                            className={`aspect-[3/4] bg-white border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#ffcc00] transition-colors overflow-hidden ${uploadError ? 'border-red-400' : 'border-gray-300'
-                                }`}
+                            className={`aspect-[3/4] bg-white border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#ffcc00] transition-colors overflow-hidden ${uploadError ? 'border-red-400' : 'border-gray-300'}`}
                         >
                             {isUploading ? (
                                 <>
@@ -293,33 +298,33 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                     </div>
 
                     {/* Right: Form Fields */}
-                    <div className="space-y-5">
-                        {/* Row 1 */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm text-gray-500 mb-2">Judul Buku</label>
-                                <input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    required
-                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                                />
-                            </div>
-                            <div>
-                                <AuthorAutocomplete
-                                    label="Penulis"
-                                    value={formData.author}
-                                    onChange={(value) => setFormData({ ...formData, author: value })}
-                                    placeholder="Masukkan nama penulis"
-                                />
-                            </div>
+                    <div className="space-y-6">
+                        {/* Row 1: Title */}
+                        <div>
+                            <label className="block text-sm text-gray-500 mb-2">Judul Buku</label>
+                            <input
+                                type="text"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                required
+                                className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                            />
                         </div>
 
-                        {/* Row 2 */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {/* Row 2: Authors */}
+                        <div>
+                            <AuthorAutocomplete
+                                label="Penulis"
+                                value={formData.authors}
+                                onChange={(newAuthors) => setFormData(prev => ({ ...prev, authors: newAuthors }))}
+                                placeholder="Cari atau tambah penulis..."
+                            />
+                        </div>
+
+                        {/* Row 3: Specs Grid */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label className="block text-sm text-gray-500 mb-2">Jumlah Halaman</label>
+                                <label className="block text-sm text-gray-500 mb-2">Halaman</label>
                                 <input
                                     type="number"
                                     value={formData.pages}
@@ -329,11 +334,20 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-500 mb-2">Ukuran Buku</label>
+                                <label className="block text-sm text-gray-500 mb-2">Ukuran</label>
                                 <input
                                     type="text"
                                     value={formData.size}
                                     onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">Kertas</label>
+                                <input
+                                    type="text"
+                                    value={formData.paper_type}
+                                    onChange={(e) => setFormData({ ...formData, paper_type: e.target.value })}
                                     className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                                 />
                             </div>
@@ -348,8 +362,8 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                             </div>
                         </div>
 
-                        {/* Row 3: ISBN, Price, Category */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {/* Row 4: ISBN, Price, Category */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm text-gray-500 mb-2">ISBN</label>
                                 <input

@@ -13,6 +13,7 @@ export interface Book {
     category?: string;
     categoryId: number;
     edition: string;
+    paper_type: string;
     synopsis: string;
     image: string;
     stock: number;

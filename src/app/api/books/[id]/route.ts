@@ -78,6 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
                 ...(body.isbn && { isbn: body.isbn }),
                 ...(body.price !== undefined && { price: parseFloat(body.price) }),
                 ...(body.edition && { edition: body.edition }),
+                ...(body.paper_type && { paper_type: body.paper_type }),
                 ...(body.synopsis !== undefined && { synopsis: body.synopsis }),
                 ...(body.image && { image: body.image }),
                 ...(body.stock !== undefined && { stock: parseInt(body.stock) }),

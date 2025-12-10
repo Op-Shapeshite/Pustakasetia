@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, Plus, Trash2 } from 'lucide-react';
 import { bookService, categoryService } from '@/utils/adminData';
 import dynamic from 'next/dynamic';
 import SearchableSelect from './SearchableSelect';
@@ -58,9 +58,10 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
 
     const [formData, setFormData] = useState({
         title: '',
-        author: '',
+        authors: [''],
         pages: '',
         size: '16 x 24 cm',
+        paper_type: 'HVS',
         isbn: '',
         price: '',
         priceDisplay: '',
@@ -104,6 +105,9 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
     const handleSynopsisChange = (content: string) => {
         setFormData(prev => ({ ...prev, synopsis: content }));
     };
+
+
+
 
     // Create new category via API
     const handleCreateCategory = async (name: string): Promise<Category | null> => {
@@ -194,9 +198,10 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
         try {
             await bookService.create({
                 title: formData.title,
-                author: formData.author,
+                author: formData.authors.filter(a => a.trim()).join(' & '),
                 pages: parseInt(formData.pages) || 0,
                 size: formData.size,
+                paper_type: formData.paper_type,
                 isbn: formData.isbn,
                 price: parseInt(formData.price) || 0,
                 categoryId: parseInt(formData.categoryId),
@@ -219,9 +224,10 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
     const resetForm = () => {
         setFormData({
             title: '',
-            author: '',
+            authors: [''],
             pages: '',
             size: '16 x 24 cm',
+            paper_type: 'HVS',
             isbn: '',
             price: '',
             priceDisplay: '',
@@ -316,50 +322,61 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                     </div>
 
                     {/* Right: Form Fields */}
-                    <div className="space-y-5">
-                        {/* Row 1 */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm text-gray-500 mb-2">Judul Buku</label>
-                                <input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    placeholder="Masukkan judul buku"
-                                    required
-                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
-                                />
-                            </div>
-                            <div>
-                                <AuthorAutocomplete
-                                    label="Penulis"
-                                    value={formData.author}
-                                    onChange={(value) => setFormData({ ...formData, author: value })}
-                                    placeholder="Masukkan nama penulis"
-                                />
-                            </div>
+                    <div className="space-y-6">
+                        {/* Row 1: Title */}
+                        <div>
+                            <label className="block text-sm text-gray-500 mb-2">Judul Buku</label>
+                            <input
+                                type="text"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                placeholder="Masukkan judul buku"
+                                required
+                                className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                            />
                         </div>
 
-                        {/* Row 2 */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {/* Row 2: Authors (Multi-select) */}
+                        <div>
+                            <AuthorAutocomplete
+                                label="Penulis"
+                                value={formData.authors}
+                                onChange={(newAuthors) => setFormData(prev => ({ ...prev, authors: newAuthors }))}
+                                placeholder="Cari atau tambah penulis..."
+                            />
+                        </div>
+
+                        {/* Row 3: Specs Grid - Pages, Size, Paper, Edition */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label className="block text-sm text-gray-500 mb-2">Jumlah Halaman</label>
+                                <label className="block text-sm text-gray-500 mb-2">Halaman</label>
                                 <input
                                     type="number"
                                     value={formData.pages}
                                     onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
-                                    placeholder="198"
+                                    placeholder="Total"
+                                    min="0"
                                     required
                                     className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-500 mb-2">Ukuran Buku</label>
+                                <label className="block text-sm text-gray-500 mb-2">Ukuran</label>
                                 <input
                                     type="text"
                                     value={formData.size}
                                     onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                                    placeholder="16 x 24 cm"
+                                    placeholder="16 x 24"
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-500 mb-2">Kertas</label>
+                                <input
+                                    type="text"
+                                    value={formData.paper_type}
+                                    onChange={(e) => setFormData({ ...formData, paper_type: e.target.value })}
+                                    placeholder="HVS"
                                     className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                                 />
                             </div>
@@ -369,26 +386,25 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                                     type="text"
                                     value={formData.edition}
                                     onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
-                                    placeholder="Ke-1. 2025"
+                                    placeholder="Ke-1"
                                     className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                                 />
                             </div>
                         </div>
 
-                        {/* Row 3: ISBN, Price, Category */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {/* Row 4: ISBN, Price, Category */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm text-gray-500 mb-2">ISBN</label>
                                 <input
                                     type="text"
                                     value={formData.isbn}
                                     onChange={handleISBNChange}
-                                    placeholder="978-XXX-XXX-XXX-X"
+                                    placeholder="978-..."
                                     required
                                     maxLength={17}
                                     className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] font-mono"
                                 />
-                                <p className="text-xs text-gray-400 mt-1">Format: 978-XXX-XXX-XXX-X</p>
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-500 mb-2">Harga</label>
@@ -411,7 +427,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                                     value={formData.categoryId}
                                     onChange={(value) => setFormData({ ...formData, categoryId: value })}
                                     onCreateNew={handleCreateCategory}
-                                    placeholder="Pilih kategori..."
+                                    placeholder="Pilih..."
                                 />
                             </div>
                         </div>
