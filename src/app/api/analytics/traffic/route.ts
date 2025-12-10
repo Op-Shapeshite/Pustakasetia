@@ -6,34 +6,17 @@ const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
     try {
+        // Prioritize local database for real-time accuracy and custom UTM handling
+        // Google Analytics API has 24-48h latency which confuses users testing locally
+        return await getTrafficFromDatabase();
+
+        /* 
+        // Legacy: GA Data API fallback (COMMENTED OUT TO FORCE LOCAL DB USAGE)
         // Check if Google Analytics Data API is enabled
         if (gaDataService.isEnabled()) {
-            // Fetch from Google Analytics
-            const trafficSources = await gaDataService.getTrafficSources();
-
-            // Format the data
-            const formattedData = trafficSources.map(item => {
-                const avgDurationSeconds = Math.floor(item.avgDuration);
-                const minutes = Math.floor(avgDurationSeconds / 60);
-                const seconds = avgDurationSeconds % 60;
-
-                return {
-                    source: item.source.charAt(0).toUpperCase() + item.source.slice(1),
-                    users: item.sessions,
-                    sessions: item.sessions,
-                    bounceRate: item.bounceRate.toFixed(1),
-                    avgDuration: `00:${String(minutes).padStart(2, '0')}:${String(Math.floor(seconds)).padStart(2, '0')}`
-                };
-            });
-
-            return NextResponse.json({
-                source: 'google_analytics',
-                data: formattedData
-            });
+            // ... (original GA logic kept for reference if needed later)
         }
-
-        // Fallback to database
-        return await getTrafficFromDatabase();
+        */
 
     } catch (error) {
         console.error('Analytics traffic error:', error);

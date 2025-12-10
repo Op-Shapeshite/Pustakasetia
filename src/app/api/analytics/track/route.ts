@@ -57,7 +57,14 @@ export async function POST(request: NextRequest) {
 
         const userAgent = request.headers.get('user-agent') || '';
         const deviceType = getDeviceType(userAgent);
-        const source = getTrafficSource(referrer);
+
+        // Determine source: prioritize UTM source, then referrer, else direct
+        let source = 'direct';
+        if (utm_source) {
+            source = utm_source.toLowerCase();
+        } else {
+            source = getTrafficSource(referrer);
+        }
 
         // 1. Save to local database
         await prisma.pageView.create({
