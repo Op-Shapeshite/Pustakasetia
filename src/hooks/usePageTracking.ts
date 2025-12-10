@@ -39,6 +39,14 @@ export function usePageTracking() {
         // Track page view
         const trackPageView = async () => {
             try {
+                // Extract UTM parameters from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const utmSource = urlParams.get('utm_source');
+                const utmMedium = urlParams.get('utm_medium');
+                const utmCampaign = urlParams.get('utm_campaign');
+                const utmTerm = urlParams.get('utm_term');
+                const utmContent = urlParams.get('utm_content');
+
                 await fetch('/api/analytics/track', {
                     method: 'POST',
                     headers: {
@@ -48,14 +56,29 @@ export function usePageTracking() {
                         page: pathname,
                         referrer: document.referrer || '',
                         pageTitle: document.title || pathname,
+                        // Add UTM parameters if present
+                        ...(utmSource && { utm_source: utmSource }),
+                        ...(utmMedium && { utm_medium: utmMedium }),
+                        ...(utmCampaign && { utm_campaign: utmCampaign }),
+                        ...(utmTerm && { utm_term: utmTerm }),
+                        ...(utmContent && { utm_content: utmContent }),
                     }),
                 });
 
                 // Also send to Google Analytics gtag if available
                 if ((window as any).gtag) {
-                    (window as any).gtag('config', process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, {
+                    const gaConfig: any = {
                         page_path: pathname,
-                    });
+                    };
+
+                    // Add campaign parameters to gtag
+                    if (utmSource) gaConfig.campaign_source = utmSource;
+                    if (utmMedium) gaConfig.campaign_medium = utmMedium;
+                    if (utmCampaign) gaConfig.campaign_name = utmCampaign;
+                    if (utmTerm) gaConfig.campaign_term = utmTerm;
+                    if (utmContent) gaConfig.campaign_content = utmContent;
+
+                    (window as any).gtag('config', process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, gaConfig);
                 }
             } catch (error) {
                 // Silently fail - analytics should not break the app

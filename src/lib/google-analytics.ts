@@ -12,6 +12,12 @@ interface GAPageView {
     page_title: string;
     page_referrer?: string;
     device_category?: string;
+    // Campaign/UTM parameters
+    campaign_source?: string;
+    campaign_medium?: string;
+    campaign_name?: string;
+    campaign_term?: string;
+    campaign_content?: string;
 }
 
 class GoogleAnalyticsService {
@@ -57,6 +63,12 @@ class GoogleAnalyticsService {
                         page_referrer: pageView.page_referrer || 'direct',
                         device_category: pageView.device_category || 'desktop',
                         engagement_time_msec: '100',
+                        // Add campaign parameters if present
+                        ...(pageView.campaign_source && { campaign_source: pageView.campaign_source }),
+                        ...(pageView.campaign_medium && { campaign_medium: pageView.campaign_medium }),
+                        ...(pageView.campaign_name && { campaign_name: pageView.campaign_name }),
+                        ...(pageView.campaign_term && { campaign_term: pageView.campaign_term }),
+                        ...(pageView.campaign_content && { campaign_content: pageView.campaign_content }),
                     }
                 }]
             };

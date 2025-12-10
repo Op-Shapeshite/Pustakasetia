@@ -34,7 +34,16 @@ function getTrafficSource(referrer: string | null): string {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { page, referrer, pageTitle } = body;
+        const {
+            page,
+            referrer,
+            pageTitle,
+            utm_source,
+            utm_medium,
+            utm_campaign,
+            utm_term,
+            utm_content
+        } = body;
 
         // Get or create visitor ID from cookie
         const cookieStore = await cookies();
@@ -67,47 +76,54 @@ export async function POST(request: NextRequest) {
                 page_location: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}${page}`,
                 page_title: pageTitle || page,
                 page_referrer: referrer || undefined,
-                device_category: deviceType
+                device_category: deviceType,
+                // Add campaign parameters if present
+                campaign_source: utm_source,
+                campaign_medium: utm_medium,
+                campaign_name: utm_campaign,
+                campaign_term: utm_term,
+                campaign_content: utm_content,
             });
-        }
+        });
+    }
 
         // Create or update traffic source
         const existingSource = await prisma.trafficSource.findFirst({
-            where: {
-                source,
-                visitorId
+        where: {
+            source,
+            visitorId
+        }
+    });
+
+    if (existingSource) {
+        await prisma.trafficSource.update({
+            where: { id: existingSource.id },
+            data: {
+                sessions: { increment: 1 }
             }
         });
-
-        if (existingSource) {
-            await prisma.trafficSource.update({
-                where: { id: existingSource.id },
-                data: {
-                    sessions: { increment: 1 }
-                }
-            });
-        } else {
-            await prisma.trafficSource.create({
-                data: {
-                    source,
-                    visitorId,
-                    sessions: 1,
-                    bounceRate: Math.random() * 30 + 10, // Placeholder
-                    avgDuration: Math.floor(Math.random() * 300) + 180 // 3-8 minutes
-                }
-            });
-        }
-
-        return NextResponse.json({
-            success: true,
-            visitorId
+    } else {
+        await prisma.trafficSource.create({
+            data: {
+                source,
+                visitorId,
+                sessions: 1,
+                bounceRate: Math.random() * 30 + 10, // Placeholder
+                avgDuration: Math.floor(Math.random() * 300) + 180 // 3-8 minutes
+            }
         });
-
-    } catch (error) {
-        console.error('Analytics track error:', error);
-        return NextResponse.json(
-            { error: 'Failed to track analytics' },
-            { status: 500 }
-        );
     }
+
+    return NextResponse.json({
+        success: true,
+        visitorId
+    });
+
+} catch (error) {
+    console.error('Analytics track error:', error);
+    return NextResponse.json(
+        { error: 'Failed to track analytics' },
+        { status: 500 }
+    );
+}
 }
