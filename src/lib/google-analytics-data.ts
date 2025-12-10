@@ -3,7 +3,7 @@
 
 import { GoogleAuth } from 'google-auth-library';
 import { getProxyAgent } from './proxy';
-import { getCustomDnsAgent, resolveHostname } from './custom-dns';
+import { getCustomDnsAgent, customFetch } from './custom-dns';
 
 interface GAReportRow {
     dimensionValues?: { value: string }[];
@@ -50,6 +50,7 @@ class GoogleAnalyticsDataService {
     }
 
     private getAuth(): GoogleAuth {
+        console.log('[step:auth_init] Initializing GoogleAuth credentials');
         if (!this.auth) {
             const proxyAgent = getProxyAgent();
             // Use custom DNS agent if no proxy is configured
@@ -66,6 +67,12 @@ class GoogleAnalyticsDataService {
                 // Add agent support for DNS resolution
                 transporterOptions: {
                     agent: agent,
+                },
+                // Use custom fetch implementation that handles DNS resolution
+                // This is required for google-auth-library v9+ which uses fetch by default
+                fetchImplementation: customFetch,
+                clientOptions: {
+                    fetchImplementation: customFetch, // Try both locations to be safe
                 }
             } as ConstructorParameters<typeof GoogleAuth>[0];
 
@@ -86,6 +93,7 @@ class GoogleAnalyticsDataService {
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
+                console.log(`[step:get_token_start] Getting access token... (attempt ${attempt}/${maxRetries})`);
                 console.log(`[GA Data API] Getting access token... (attempt ${attempt}/${maxRetries})`);
 
                 // Create timeout promise (30 seconds)
@@ -103,6 +111,7 @@ class GoogleAnalyticsDataService {
 
                 const accessToken = await Promise.race([tokenPromise, timeoutPromise]);
 
+                console.log('[step:get_token_success] Access token obtained successfully');
                 console.log('[GA Data API] Access token obtained successfully');
                 return accessToken;
             } catch (error: unknown) {
@@ -135,7 +144,10 @@ class GoogleAnalyticsDataService {
         }
 
         try {
+            console.log('[step:run_report_start] Preparing report request', JSON.stringify({ dimensions: request.dimensions, metrics: request.metrics }));
             const accessToken = await this.getAccessToken();
+
+            console.log(`[step:api_fetch] Fetching data from analyticsdata.googleapis.com`);
 
             const response = await fetch(
                 `https://analyticsdata.googleapis.com/v1beta/${this.propertyId}:runReport`,
@@ -150,11 +162,12 @@ class GoogleAnalyticsDataService {
             );
 
             if (!response.ok) {
-                const error = await response.text();
-                console.error('[GA Data API] Error:', error);
-                return null;
+                const errorData = await response.json();
+                console.error('[step:api_error] API request failed', JSON.stringify(errorData));
+                throw new Error(errorData.error?.message || 'Failed to fetch analytics data');
             }
 
+            console.log('[step:api_success] Report data received successfully');
             return await response.json();
         } catch (error) {
             console.error('[GA Data API] Request failed:', error);

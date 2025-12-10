@@ -149,36 +149,44 @@ export async function resolveHostname(hostname: string): Promise<string> {
     // Check cache first
     const cached = dnsCache.get(hostname);
     if (cached && cached.expires > Date.now()) {
+        console.log(`[Custom DNS] Cache hit for ${hostname} -> ${cached.ip}`);
         return cached.ip;
     }
 
-    console.log(`[Custom DNS] Resolving ${hostname}...`);
+    console.log(`[Custom DNS] Resolving ${hostname} (No cache/Expired)...`);
 
     // Try system DNS first
+    console.log(`[Custom DNS] Trying System DNS for ${hostname}...`);
     let ip = await resolveWithSystem(hostname);
     if (ip) {
         console.log(`[Custom DNS] Resolved via system: ${hostname} -> ${ip}`);
         dnsCache.set(hostname, { ip, expires: Date.now() + DNS_CACHE_TTL });
         return ip;
     }
+    console.log(`[Custom DNS] System DNS failed for ${hostname}`);
 
     // Try Google DoH
+    console.log(`[Custom DNS] Trying Google DoH for ${hostname}...`);
     ip = await resolveWithDoH(hostname);
     if (ip) {
         console.log(`[Custom DNS] Resolved via Google DoH: ${hostname} -> ${ip}`);
         dnsCache.set(hostname, { ip, expires: Date.now() + DNS_CACHE_TTL });
         return ip;
     }
+    console.log(`[Custom DNS] Google DoH failed for ${hostname}`);
 
     // Try Cloudflare DoH
+    console.log(`[Custom DNS] Trying Cloudflare DoH for ${hostname}...`);
     ip = await resolveWithCloudflareDoH(hostname);
     if (ip) {
         console.log(`[Custom DNS] Resolved via Cloudflare DoH: ${hostname} -> ${ip}`);
         dnsCache.set(hostname, { ip, expires: Date.now() + DNS_CACHE_TTL });
         return ip;
     }
+    console.log(`[Custom DNS] Cloudflare DoH failed for ${hostname}`);
 
     // Use hardcoded fallback for known Google APIs
+    console.log(`[Custom DNS] Checking hardcoded fallback for ${hostname}...`);
     const fallback = getFallbackIp(hostname);
     if (fallback) {
         console.log(`[Custom DNS] Using fallback IP: ${hostname} -> ${fallback}`);
@@ -241,14 +249,16 @@ export async function customFetch(
             });
             clearTimeout(timeout);
             return response;
-        } catch (fetchError: any) {
+        } catch (fetchError: unknown) {
             clearTimeout(timeout);
+
+            const error = fetchError as { cause?: { code?: string }; message?: string };
 
             // If DNS error, try with resolved IP
             if (
-                fetchError.cause?.code === 'EAI_AGAIN' ||
-                fetchError.cause?.code === 'ENOTFOUND' ||
-                fetchError.message?.includes('getaddrinfo')
+                error.cause?.code === 'EAI_AGAIN' ||
+                error.cause?.code === 'ENOTFOUND' ||
+                error.message?.includes('getaddrinfo')
             ) {
                 console.log(`[Custom DNS] Fetch failed with DNS error, using custom resolver for ${hostname}`);
 
@@ -275,3 +285,90 @@ export async function customFetch(
         throw error;
     }
 }
+
+// Store original dns.lookup
+const originalDnsLookup = dns.lookup;
+let dnsPatched = false;
+
+/**
+ * Patch Node.js global dns.lookup to use our custom DNS resolver
+ * This affects ALL modules including google-auth-library
+ */
+export function patchGlobalDns(): void {
+    if (dnsPatched) {
+        console.log('[Custom DNS] Global DNS already patched');
+        return;
+    }
+
+    console.log('[Custom DNS] Patching global DNS lookup...');
+
+    // Override dns.lookup globally
+    (dns as typeof dns & { lookup: typeof dns.lookup }).lookup = function (
+        hostname: string,
+        options: dns.LookupOptions | number | undefined | null | ((err: NodeJS.ErrnoException | null, address: string, family: number) => void),
+        callback?: (err: NodeJS.ErrnoException | null, address: string, family: number) => void
+    ): void {
+        // Handle different overload signatures
+        let opts: dns.LookupOptions = {};
+        let cb: (err: NodeJS.ErrnoException | null, address: string, family: number) => void;
+
+        if (typeof options === 'function') {
+            cb = options;
+        } else if (typeof options === 'number') {
+            opts = { family: options };
+            cb = callback!;
+        } else if (options) {
+            opts = options;
+            cb = callback!;
+        } else {
+            cb = callback!;
+        }
+
+        // Check if it's a Google API hostname
+        const isGoogleApi = hostname.includes('googleapis.com') || hostname.includes('google.com');
+
+        if (isGoogleApi) {
+            console.log(`[Custom DNS] Intercepting lookup for: ${hostname}`);
+
+            // Use our custom resolver
+            resolveHostname(hostname)
+                .then((ip) => {
+                    console.log(`[Custom DNS] Resolved ${hostname} -> ${ip}`);
+                    cb(null, ip, 4);
+                })
+                .catch((err) => {
+                    console.error(`[Custom DNS] Failed to resolve ${hostname}:`, err);
+                    // Fallback to original lookup
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    originalDnsLookup(hostname, opts, cb as any);
+                });
+        } else {
+            // Use original lookup for non-Google hostnames
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            originalDnsLookup(hostname, opts, cb as any);
+        }
+    } as typeof dns.lookup;
+
+    dnsPatched = true;
+    console.log('[Custom DNS] Global DNS patched successfully');
+}
+
+/**
+ * Initialize custom DNS - call this at app startup
+ */
+export function initializeCustomDns(): void {
+    // Patch global DNS for all modules
+    patchGlobalDns();
+
+    // Pre-resolve Google API hostnames
+    const hostnames = Object.keys(GOOGLE_API_FALLBACK_IPS);
+    hostnames.forEach(async (hostname) => {
+        try {
+            const ip = await resolveHostname(hostname);
+            console.log(`[Custom DNS] Pre-resolved ${hostname} -> ${ip}`);
+        } catch (err) {
+            console.error(`[Custom DNS] Failed to pre-resolve ${hostname}:`, err);
+        }
+    });
+}
+
