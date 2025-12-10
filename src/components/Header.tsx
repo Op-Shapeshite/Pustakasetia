@@ -153,7 +153,7 @@ export default function Header() {
   return (
     <>
       {/* MOBILE NAVBAR */}
-      <header className="lg:hidden sticky top-0 left-0 right-0 z-50 h-[87px] bg-neutral-50 flex items-center justify-between px-6 shadow-sm">
+      <header className="lg:hidden sticky top-0 left-0 right-0 z-50 h-[87px] bg-white flex items-center justify-between px-6 shadow-sm">
         <Link href="/" className="h-[37px] w-[40px] shrink-0">
           <img
             src="/img/logo.png"
@@ -180,7 +180,7 @@ export default function Header() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="absolute top-[87px] left-0 right-0 bg-neutral-50 border-t border-gray-200 pb-4 pt-4 px-[25px] shadow-lg">
+          <div className="absolute top-[87px] left-0 right-0 bg-white border-t border-gray-200 pb-4 pt-4 px-[25px] shadow-lg">
             <nav className="flex flex-col gap-4">
               <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex flex-col gap-1 text-left">
                 <p className="font-['Poppins',sans-serif] text-[#2f2f2f]">Beranda</p>
@@ -204,7 +204,7 @@ export default function Header() {
       </header>
 
       {/* DESKTOP NAVBAR */}
-      <header className={`hidden lg:block w-full bg-neutral-50 sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header className={`hidden lg:block w-full bg-white sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex-shrink-0">

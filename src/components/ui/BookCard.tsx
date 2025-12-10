@@ -12,10 +12,10 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
     return (
       <div
         onClick={onClick}
-        className="w-full cursor-pointer group bg-white"
+        className="w-full cursor-pointer group "
       >
         {/* Book Cover - Responsive aspect ratio */}
-        <div className="relative w-full aspect-[3/4] bg-neutral-100 rounded overflow-hidden mb-2">
+        <div className="relative w-full aspect-[3/4]  rounded overflow-hidden mb-2">
           <img
             src={book.image}
             alt={book.title}
@@ -48,7 +48,7 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
   return (
     <div
       onClick={onClick}
-      className="w-full cursor-pointer group bg-white"
+      className="w-full cursor-pointer group"
     >
       {/* Book Cover - Responsive aspect ratio */}
       <div className="relative w-full aspect-[3/4] bg-neutral-100 rounded overflow-hidden mb-2">

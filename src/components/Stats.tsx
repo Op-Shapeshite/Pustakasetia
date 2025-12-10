@@ -1,107 +1,86 @@
-import svgPaths from "../imports/svg-zx896x9umy";
+'use client';
 
-function StashTargetLight() {
-  return (
-    <div className="size-[50px] md:size-[60px] lg:size-[69px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 69 69">
-        <g>
-          <path d={svgPaths.p399d1600} fill="white" />
-          <path d={svgPaths.p1f8253c0} fill="white" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function StreamlinePlumpAiTechnologySpark() {
-  return (
-    <div className="size-[45px] md:size-[50px] lg:size-[55px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 53 53">
-        <g>
-          <path d={svgPaths.p12442280} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-          <path d={svgPaths.p220c6880} stroke="white" strokeWidth="3" />
-          <path d={svgPaths.pa117540} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ArcticonsRewards() {
-  return (
-    <div className="size-[45px] md:size-[50px] lg:size-[57px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 57 57">
-        <g>
-          <path d={svgPaths.p2dacb980} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function DotsPattern() {
-  return (
-    <div className="h-[40px] md:h-[48.354px] w-[38px] md:w-[46.599px]">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 47 49">
-        <g>
-          <ellipse cx="2.84143" cy="2.58312" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="16.4801" cy="2.58312" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="30.1188" cy="2.58312" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="43.7575" cy="2.58312" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="2.84143" cy="17.048" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="16.4801" cy="17.048" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="30.1188" cy="17.048" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="43.7575" cy="17.048" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="2.84143" cy="31.5167" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="16.4801" cy="31.5167" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="30.1188" cy="31.5167" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="43.7575" cy="31.5167" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="2.84143" cy="45.7706" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="16.4801" cy="45.7706" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="30.1188" cy="45.7706" fill="white" rx="2.84143" ry="2.58312" />
-          <ellipse cx="43.7575" cy="45.7706" fill="white" rx="2.84143" ry="2.58312" />
-        </g>
-      </svg>
-    </div>
-  );
-}
+import { useState, useEffect } from 'react';
 
 export default function Stats() {
+  const [totalBooks, setTotalBooks] = useState(0);
+  const [totalCategories, setTotalCategories] = useState(0);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        if (data.data) {
+          setTotalBooks(data.data.totalBooks || 0);
+          setTotalCategories(data.data.totalCategories || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <section className="relative w-full py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative bg-[#d9d9d9] rounded-[25px] p-6 md:p-8 lg:p-12 overflow-hidden">
-          {/* Decorative dots - hidden on mobile */}
-          <div className="absolute top-4 right-4 md:top-8 md:right-12 opacity-50 hidden md:block">
-            <DotsPattern />
-          </div>
-          <div className="absolute bottom-4 left-4 md:bottom-8 md:left-12 opacity-50 hidden md:block">
-            <DotsPattern />
-          </div>
+        {/* Dark background wrapper */}
+        <div className="bg-[#1a1a2e] rounded-[20px] p-4 md:p-6">
+          {/* White card with stats */}
+          <div className="bg-white rounded-[16px] p-6 md:p-8 lg:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 relative z-10">
-            {/* Stat 1 */}
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="bg-[#5a71fe] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] p-4 md:p-5">
-                <StashTargetLight />
+              {/* Stat 1 - Kategori Ekslusif */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[#5a4fcf] text-3xl md:text-4xl font-bold">
+                    {totalCategories > 0 ? totalCategories : 8}+
+                  </span>
+                  <span className="text-gray-800 text-lg md:text-xl font-semibold">
+                    Kategori Ekslusif
+                  </span>
+                </div>
+                <p className="text-gray-500 text-sm md:text-base">
+                  Koleksi pilihan untuk memperkaya wawasan anda
+                </p>
               </div>
-              <p className="font-['Poppins',sans-serif] text-black text-sm md:text-base">Total Kategori</p>
-            </div>
 
-            {/* Stat 2 */}
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="bg-[#ffcc00] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] p-4 md:p-5">
-                <StreamlinePlumpAiTechnologySpark />
+              {/* Stat 2 - Pengiriman Cepat & Aman */}
+              <div className="flex flex-col gap-2">
+                <h3 className="text-gray-800 text-lg md:text-xl font-semibold">
+                  Pengiriman Cepat & Aman
+                </h3>
+                <p className="text-gray-500 text-sm md:text-base">
+                  Kami menjaga setiap langkah pengiriman dengan penuh perhatian
+                </p>
               </div>
-              <p className="font-['Poppins',sans-serif] text-black text-sm md:text-base">Total buku available</p>
-            </div>
 
-            {/* Stat 3 */}
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="bg-[#ff91ab] rounded-[14px] shadow-[4px_7px_20px_0px_rgba(0,0,0,0.25)] p-4 md:p-5">
-                <ArcticonsRewards />
+              {/* Stat 3 - Mutu Terjamin */}
+              <div className="flex flex-col gap-2">
+                <h3 className="text-gray-800 text-lg md:text-xl font-semibold">
+                  Mutu Terjamin
+                </h3>
+                <p className="text-gray-500 text-sm md:text-base">
+                  Buku-buku berkualitas tinggi untuk pengalaman membaca terbaik
+                </p>
               </div>
-              <p className="font-['Poppins',sans-serif] text-black text-sm md:text-base">Total buku yang terjual</p>
+
+              {/* Stat 4 - Total Buku Tersedia */}
+              <div className="flex flex-col gap-2 lg:border-l lg:border-gray-200 lg:pl-8">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[#5a4fcf] text-3xl md:text-4xl font-bold">
+                    {totalBooks > 0 ? totalBooks : 100}+
+                  </span>
+                  <span className="text-gray-800 text-lg md:text-xl font-semibold">
+                    Total Buku Tersedia
+                  </span>
+                </div>
+                <p className="text-gray-500 text-sm md:text-base">
+                  Temukan buku-buku yang akan memperluas wawasan Anda
+                </p>
+              </div>
+
             </div>
           </div>
         </div>

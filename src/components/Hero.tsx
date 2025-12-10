@@ -1,34 +1,8 @@
 'use client';
 
-import { motion, useScroll, useTransform, useSpring, useInView, Variants } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-const CountUp = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  const springValue = useSpring(0, {
-    damping: 30,
-    stiffness: 100,
-    duration: 2
-  });
-  const [displayValue, setDisplayValue] = useState(0);
-
-  useEffect(() => {
-    if (isInView) {
-      springValue.set(value);
-    }
-  }, [isInView, value, springValue]);
-
-  useEffect(() => {
-    const unsubscribe = springValue.on("change", (latest) => {
-      setDisplayValue(Math.floor(latest));
-    });
-    return () => unsubscribe();
-  }, [springValue]);
-
-  return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
-};
 
 export default function Hero() {
   const router = useRouter();
@@ -59,7 +33,7 @@ export default function Hero() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative w-full bg-white overflow-hidden">
+      <section className="relative w-full bg-[#F5F5F5] overflow-hidden">
         <div className="relative max-w-[1440px] mx-auto">
           <div className="flex flex-col lg:flex-row">
             {/* Left Content */}
@@ -98,46 +72,74 @@ export default function Hero() {
                 transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
                 src="/img/hand-hero-section.png"
                 alt="Koleksi Buku Pustaka Setia"
-                className="w-full h-full lg:w-auto right-0 lg:h-[700px] object-contain object-bottom transform lg:translate-x-10"
+                className="w-full h-full lg:w-auto right-0 lg:h-[800px] object-contain object-bottom transform lg:translate-x-10"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section with Parallax */}
-      <section className="w-full h-[300px] relative overflow-hidden flex items-center">
-        {/* Parallax Background */}
-        <motion.div
-          style={{ y }}
-          className="absolute inset-0 bg-neutral-100 border-t border-neutral-200 z-0"
-        />
+      {/* Stats Section - Horizontal Layout */}
+      <section className="w-full z-50 relative -mt-5 pb-5 overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 w-full">
+          {/* White card with shadow */}
+          <div className="bg-white rounded-[20px] p-6 md:p-8 lg:p-12 shadow-lg">
+            {/* Horizontal flex layout */}
+            <div className="flex flex-col md:flex-row items-start justify-between gap-6 md:gap-8">
 
-        <div className="relative max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 w-full z-10">
-          <div className="flex flex-row justify-between items-start text-center divide-x divide-neutral-300">
-            <div className="flex-1 px-2 md:px-4 flex flex-col items-center">
-              <p className="font-['Poppins',sans-serif] text-2xl md:text-4xl font-bold text-neutral-800">
-                <CountUp value={stats.totalCategories > 0 ? stats.totalCategories : 8} suffix="+" />
-              </p>
-              <div className="mt-2 min-h-[40px] flex items-center justify-center">
-                <p className="font-['Poppins',sans-serif] text-[10px] md:text-sm font-medium text-neutral-600">Total Kategori</p>
+              {/* Stat 1 - Kategori Ekslusif */}
+              <div className="flex flex-col gap-2 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[#5a4fcf] text-[40px] font-bold leading-none font-['Poppins',sans-serif]">
+                    {stats.totalCategories > 0 ? stats.totalCategories : 8}+
+                  </span>
+                  <span className="text-[#5a4fcf] text-[18px] font-semibold font-['Poppins',sans-serif]">
+                    Kategori Ekslusif
+                  </span>
+                </div>
+                <p className="text-[#8a8a8a] text-[16px] font-['Poppins',sans-serif]">
+                  Koleksi pilihan untuk memperkaya wawasan anda
+                </p>
               </div>
-            </div>
-            <div className="flex-1 px-2 md:px-4 flex flex-col items-center">
-              <p className="font-['Poppins',sans-serif] text-2xl md:text-4xl font-bold text-neutral-800">
-                <CountUp value={stats.totalBooks > 0 ? stats.totalBooks : 520} suffix="+" />
-              </p>
-              <div className="mt-2 min-h-[40px] flex items-center justify-center">
-                <p className="font-['Poppins',sans-serif] text-[10px] md:text-sm font-medium text-neutral-600">Total buku available</p>
+
+              {/* Stat 2 - Pengiriman Cepat & Aman */}
+              <div className="flex flex-col gap-2 flex-1">
+                <h3 className="text-[#5a4fcf] text-[18px] font-semibold font-['Poppins',sans-serif]">
+                  Pengiriman Cepat & Aman
+                </h3>
+                <p className="text-[#8a8a8a] text-[16px] font-['Poppins',sans-serif]">
+                  Kami menjaga setiap langkah pengiriman dengan penuh perhatian
+                </p>
               </div>
-            </div>
-            <div className="flex-1 px-2 md:px-4 flex flex-col items-center">
-              <p className="font-['Poppins',sans-serif] text-2xl md:text-4xl font-bold text-neutral-800">
-                <CountUp value={stats.totalSold} suffix="+" />
-              </p>
-              <div className="mt-2 min-h-[40px] flex items-center justify-center">
-                <p className="font-['Poppins',sans-serif] text-[10px] md:text-sm font-medium text-neutral-600">Total buku yang terjual</p>
+
+              {/* Stat 3 - Mutu Terjamin */}
+              <div className="flex flex-col gap-2 flex-1">
+                <h3 className="text-[#5a4fcf] text-[18px] font-semibold font-['Poppins',sans-serif]">
+                  Mutu Terjamin
+                </h3>
+                <p className="text-[#8a8a8a] text-[16px] font-['Poppins',sans-serif]">
+                  Buku-buku berkualitas tinggi untuk pengalaman membaca terbaik
+                </p>
               </div>
+
+              {/* Vertical Separator */}
+              <div className="hidden lg:block w-[1px] h-auto bg-gray-200 self-stretch" />
+
+              {/* Stat 4 - Total Buku Tersedia */}
+              <div className="flex flex-col gap-2 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[#5a4fcf] text-[40px] font-bold leading-none font-['Poppins',sans-serif]">
+                    {stats.totalBooks > 0 ? stats.totalBooks : 100}+
+                  </span>
+                  <span className="text-[#5a4fcf] text-[18px] font-semibold font-['Poppins',sans-serif]">
+                    Total Buku Tersedia
+                  </span>
+                </div>
+                <p className="text-[#8a8a8a] text-[16px] font-['Poppins',sans-serif]">
+                  Temukan buku-buku yang akan memperluas wawasan Anda
+                </p>
+              </div>
+
             </div>
           </div>
         </div>

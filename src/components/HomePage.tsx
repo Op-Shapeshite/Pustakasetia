@@ -125,12 +125,12 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-[#F5F5F5]">
             {/* Hero Section */}
             <Hero />
 
             {/* All Books Grid */}
-            <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 py-8 md:py-12">
+            <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16  md:py-12">
                 {/* Section Header */}
                 <div className="mb-6 md:mb-8 text-center md:text-left">
                     <h2 className="text-2xl md:text-3xl font-bold text-neutral-900">
