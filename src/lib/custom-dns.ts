@@ -21,6 +21,9 @@ interface DnsResponse {
 const dnsCache = new Map<string, { ip: string; expires: number }>();
 const DNS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Store original dns.lookup immediately to prevent recursion
+const originalDnsLookup = dns.lookup;
+
 // Known Google API IPs as fallback (updated periodically)
 const GOOGLE_API_FALLBACK_IPS: Record<string, string[]> = {
     'oauth2.googleapis.com': ['142.251.12.95', '142.250.4.95', '172.217.14.95'],
@@ -120,7 +123,8 @@ async function resolveWithCloudflareDoH(hostname: string): Promise<string | null
  */
 async function resolveWithSystem(hostname: string): Promise<string | null> {
     return new Promise((resolve) => {
-        dns.lookup(hostname, { family: 4 }, (err, address) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        originalDnsLookup(hostname, { family: 4 }, (err: NodeJS.ErrnoException | null, address: string) => {
             if (err || !address) {
                 resolve(null);
             } else {
@@ -272,8 +276,6 @@ export async function customFetch(
     }
 }
 
-// Store original dns.lookup
-const originalDnsLookup = dns.lookup;
 let dnsPatched = false;
 
 /**
