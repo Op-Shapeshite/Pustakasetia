@@ -84,46 +84,45 @@ export async function POST(request: NextRequest) {
                 campaign_term: utm_term,
                 campaign_content: utm_content,
             });
-        });
-    }
+        }
 
         // Create or update traffic source
         const existingSource = await prisma.trafficSource.findFirst({
-        where: {
-            source,
-            visitorId
-        }
-    });
-
-    if (existingSource) {
-        await prisma.trafficSource.update({
-            where: { id: existingSource.id },
-            data: {
-                sessions: { increment: 1 }
-            }
-        });
-    } else {
-        await prisma.trafficSource.create({
-            data: {
+            where: {
                 source,
-                visitorId,
-                sessions: 1,
-                bounceRate: Math.random() * 30 + 10, // Placeholder
-                avgDuration: Math.floor(Math.random() * 300) + 180 // 3-8 minutes
+                visitorId
             }
         });
+
+        if (existingSource) {
+            await prisma.trafficSource.update({
+                where: { id: existingSource.id },
+                data: {
+                    sessions: { increment: 1 }
+                }
+            });
+        } else {
+            await prisma.trafficSource.create({
+                data: {
+                    source,
+                    visitorId,
+                    sessions: 1,
+                    bounceRate: Math.random() * 30 + 10, // Placeholder
+                    avgDuration: Math.floor(Math.random() * 300) + 180 // 3-8 minutes
+                }
+            });
+        }
+
+        return NextResponse.json({
+            success: true,
+            visitorId
+        });
+
+    } catch (error) {
+        console.error('Analytics track error:', error);
+        return NextResponse.json(
+            { error: 'Failed to track analytics' },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json({
-        success: true,
-        visitorId
-    });
-
-} catch (error) {
-    console.error('Analytics track error:', error);
-    return NextResponse.json(
-        { error: 'Failed to track analytics' },
-        { status: 500 }
-    );
-}
 }
