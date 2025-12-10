@@ -3,7 +3,6 @@
 
 import { GoogleAuth } from 'google-auth-library';
 import { getProxyAgent } from './proxy';
-import { getCustomDnsAgent, customFetch } from './custom-dns';
 
 interface GAReportRow {
     dimensionValues?: { value: string }[];
@@ -53,9 +52,6 @@ class GoogleAnalyticsDataService {
         console.log('[step:auth_init] Initializing GoogleAuth credentials');
         if (!this.auth) {
             const proxyAgent = getProxyAgent();
-            // Use custom DNS agent if no proxy is configured
-            const agent = proxyAgent || getCustomDnsAgent();
-
             // GoogleAuth supports transporterOptions at runtime but types don't include it
             // Using type assertion to avoid type error while keeping runtime functionality
             const authOptions = {
@@ -64,25 +60,12 @@ class GoogleAnalyticsDataService {
                     private_key: this.privateKey,
                 },
                 scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
-                // Add agent support for DNS resolution
-                transporterOptions: {
-                    agent: agent,
-                },
-                // Use custom fetch implementation that handles DNS resolution
-                // This is required for google-auth-library v9+ which uses fetch by default
-                fetchImplementation: customFetch,
-                clientOptions: {
-                    fetchImplementation: customFetch, // Try both locations to be safe
-                }
+                // removed agent and fetchImplementation to rely on Global DNS Patch
             } as ConstructorParameters<typeof GoogleAuth>[0];
 
             this.auth = new GoogleAuth(authOptions);
 
-            if (proxyAgent) {
-                console.log('[GA Data API] Using proxy for OAuth requests');
-            } else {
-                console.log('[GA Data API] Using custom DNS resolver for OAuth requests');
-            }
+            console.log('[GA Data API] Using Global DNS Patch for OAuth requests');
         }
         return this.auth;
     }
