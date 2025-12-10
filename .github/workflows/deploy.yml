@@ -49,7 +49,6 @@ jobs:
           cp package-lock.json deploy/
           cp next.config.* deploy/ 2>/dev/null || true
           cp tsconfig.json deploy/ 2>/dev/null || true
-          cp ecosystem.config.js deploy/ 2>/dev/null || true
           cp .env deploy/ 2>/dev/null || true
          
 
@@ -115,16 +114,7 @@ jobs:
             if command -v pm2 &> /dev/null; then
               pm2 stop pustakasetia 2>/dev/null || true
               pm2 delete pustakasetia 2>/dev/null || true
-              
-              # Start with ecosystem file if exists, otherwise use npm start
-              if [ -f "ecosystem.config.js" ]; then
-                echo "Using ecosystem.config.js for PM2 startup"
-                pm2 start ecosystem.config.js
-              else
-                echo "Using direct npm start for PM2"
-                pm2 start npm --name "pustakasetia" -- start
-              fi
-              
+              pm2 start npm --name "pustakasetia" -- start
               pm2 save
               
               # Wait a moment and check status
