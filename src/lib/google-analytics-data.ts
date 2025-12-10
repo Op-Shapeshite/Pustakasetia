@@ -2,6 +2,8 @@
 // Fetches analytics data directly from Google Analytics
 
 import { GoogleAuth } from 'google-auth-library';
+import { getProxyAgent } from './proxy';
+import { getCustomDnsAgent, resolveHostname } from './custom-dns';
 
 interface GAReportRow {
     dimensionValues?: { value: string }[];
@@ -49,13 +51,29 @@ class GoogleAnalyticsDataService {
 
     private getAuth(): GoogleAuth {
         if (!this.auth) {
+            const proxyAgent = getProxyAgent();
+            // Use custom DNS agent if no proxy is configured
+            const agent = proxyAgent || getCustomDnsAgent();
+
+            // GoogleAuth supports transporterOptions at runtime but types don't include it
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.auth = new GoogleAuth({
                 credentials: {
                     client_email: this.clientEmail,
                     private_key: this.privateKey,
                 },
                 scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
-            });
+                // Add agent support for DNS resolution
+                transporterOptions: {
+                    agent: agent,
+                }
+            } as any);
+
+            if (proxyAgent) {
+                console.log('[GA Data API] Using proxy for OAuth requests');
+            } else {
+                console.log('[GA Data API] Using custom DNS resolver for OAuth requests');
+            }
         }
         return this.auth;
     }
