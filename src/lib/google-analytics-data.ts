@@ -55,16 +55,50 @@ class GoogleAnalyticsDataService {
                     private_key: this.privateKey,
                 },
                 scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
+                // Add custom client options for timeout
+                clientOptions: {
+                    timeout: 30000, // 30 seconds timeout
+                    retry: true,
+                    retryConfig: {
+                        retry: 3,
+                        retryDelay: 1000,
+                        statusCodesToRetry: [[100, 199], [429, 429], [500, 599]],
+                        httpMethodsToRetry: ['GET', 'POST'],
+                    }
+                }
             });
         }
         return this.auth;
     }
 
     private async getAccessToken(): Promise<string> {
-        const auth = this.getAuth();
-        const client = await auth.getClient();
-        const token = await client.getAccessToken();
-        return token.token || '';
+        const maxRetries = 3;
+        let lastError: any;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                console.log(`[GA Data API] Getting access token... (attempt ${attempt}/${maxRetries})`);
+
+                const auth = this.getAuth();
+                const client = await auth.getClient();
+                const token = await client.getAccessToken();
+
+                console.log('[GA Data API] Access token obtained successfully');
+                return token.token || '';
+            } catch (error: any) {
+                lastError = error;
+                console.error(`[GA Data API] Token attempt ${attempt} failed:`, error.message);
+
+                // Wait before retry (exponential backoff)
+                if (attempt < maxRetries) {
+                    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                    console.log(`[GA Data API] Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        throw new Error(`Failed to get access token after ${maxRetries} attempts: ${lastError?.message}`);
     }
 
     /**
