@@ -122,7 +122,8 @@ jobs:
               else
                 echo "Using direct npm start for PM2"
                 pm2 start npm --name "pustakasetia" -- start
-              fi              pm2 save
+              fi
+              pm2 save
               
               # Wait a moment and check status
               sleep 3
