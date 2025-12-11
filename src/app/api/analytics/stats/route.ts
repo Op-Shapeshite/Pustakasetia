@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
         const endDateParam = searchParams.get('endDate');
 
         const now = new Date();
-        const start = startDateParam ? new Date(startDateParam) : new Date(now.getFullYear(), now.getMonth(), 1); // Default to this month
+        const start = startDateParam ? new Date(startDateParam) : new Date(now.getFullYear(), now.getMonth(), 1);
         const end = endDateParam ? new Date(endDateParam) : now;
 
         // Calculate previous period for comparison
@@ -20,31 +20,86 @@ export async function GET(request: NextRequest) {
         const prevStart = new Date(start.getTime() - duration);
         const prevEnd = new Date(start.getTime());
 
-        // 1. Check if GA is enabled (and no local override mandated for specific metrics yet)
-        // However, we mix local and GA data. For consistency with filter, we should prefer local or pass dates to GA.
-        // For this task, we will focus on Local DB (Fallback logic) usually, or update GA call.
-        // User asked "apply filter... to all components".
-        // GA Data Service methods support start/end date args.
+        // Format dates to YYYY-MM-DD for Google Analytics API
+        const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
+        // Check if Google Analytics Data API is enabled
         if (gaDataService.isEnabled()) {
-            // Pass dates to GA service (Need to update GA service to accept dates, currently hardcoded default)
-            // But simpler for now: Use the DB fallback logic which we have full control over, 
-            // OR assume GA service handles '30daysAgo' etc. Custom dates need YYYY-MM-DD.
-            // Given complexity of updating GA service signature, and user preference for "Real-time" (Local DB) in traffic,
-            // let's use Local DB for stats as well if parameters are present, OR handle mixed.
+            try {
+                const gaStartDate = formatDate(start);
+                const gaEndDate = formatDate(end);
+                const gaPrevStartDate = formatDate(prevStart);
+                const gaPrevEndDate = formatDate(prevEnd);
 
-            // Actually, let's use the DB fallback logic MAINLY if dates are provided, 
-            // to ensure consistency with the requested Local DB priority in previous task.
-            // OR: Update GA service usage.
-            // Let's stick to DB fallback for custom ranges for now to ensure it works immediately.
+                console.log(`[Stats API] Fetching GA data for ${gaStartDate} to ${gaEndDate}`);
+
+                // Fetch current and previous period data from Google Analytics
+                const [currentVisitors, currentPageViews, previousVisitors, previousPageViews] = await Promise.all([
+                    gaDataService.getVisitors(gaStartDate, gaEndDate),
+                    gaDataService.getPageViews(gaStartDate, gaEndDate),
+                    gaDataService.getVisitors(gaPrevStartDate, gaPrevEndDate),
+                    gaDataService.getPageViews(gaPrevStartDate, gaPrevEndDate),
+                ]);
+
+                // Calculate percentage changes
+                const visitorChange = previousVisitors === 0
+                    ? (currentVisitors > 0 ? 100 : 0)
+                    : ((currentVisitors - previousVisitors) / previousVisitors) * 100;
+
+                const activityChange = previousPageViews === 0
+                    ? (currentPageViews > 0 ? 100 : 0)
+                    : ((currentPageViews - previousPageViews) / previousPageViews) * 100;
+
+                // Books and Checkout still come from database (internal app data)
+                const totalBooks = await prisma.book.count();
+
+                const currentCheckout = await prisma.bookSale.count({
+                    where: { createdAt: { gte: start, lte: end } }
+                });
+
+                const previousCheckout = await prisma.bookSale.count({
+                    where: { createdAt: { gte: prevStart, lt: prevEnd } }
+                });
+
+                const checkoutChange = previousCheckout === 0
+                    ? (currentCheckout > 0 ? 100 : 0)
+                    : ((currentCheckout - previousCheckout) / previousCheckout) * 100;
+
+                console.log(`[Stats API] GA Data - Visitors: ${currentVisitors}, PageViews: ${currentPageViews}`);
+
+                return NextResponse.json({
+                    source: 'google_analytics',
+                    totalVisitors: currentVisitors,
+                    visitorChange: parseFloat(visitorChange.toFixed(2)),
+                    totalBooks,
+                    totalActivity: currentPageViews,
+                    activityChange: parseFloat(activityChange.toFixed(2)),
+                    totalCheckout: currentCheckout,
+                    checkoutChange: parseFloat(checkoutChange.toFixed(2))
+                });
+
+            } catch (gaError) {
+                console.error('[Stats API] GA Error, falling back to database:', gaError);
+                // Continue to database fallback
+            }
         }
 
-        // Using Database Logic for Date Filtering (Robust & Realtime)
+        // Fallback to database
         return await getStatsFromDatabase(start, end, prevStart, prevEnd);
 
     } catch (error) {
         console.error('Analytics stats error:', error);
-        return NextResponse.json({ error: 'Failed to fetch analytics stats' }, { status: 500 });
+        // Fallback to database on error
+        try {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth(), 1);
+            const duration = now.getTime() - start.getTime();
+            const prevStart = new Date(start.getTime() - duration);
+            const prevEnd = new Date(start.getTime());
+            return await getStatsFromDatabase(start, now, prevStart, prevEnd);
+        } catch {
+            return NextResponse.json({ error: 'Failed to fetch analytics stats' }, { status: 500 });
+        }
     }
 }
 
