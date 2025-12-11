@@ -2,14 +2,15 @@ import Header from "@/components/Header";
 import HomePage from "@/components/HomePage";
 import { mapAPIBookToBook } from "@/utils/bookMapper";
 
+export const dynamic = 'force-dynamic';
+
 async function getBooks() {
     try {
         // For server-side rendering, we need to use the full URL
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
-            process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
-            'http://localhost:3000';
+            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
-        const url = `${baseUrl}/api/books?limit=100`;
+        const url = `${baseUrl}/api/books?limit=8`;
 
         console.log('[Server] Fetching books from:', url);
 

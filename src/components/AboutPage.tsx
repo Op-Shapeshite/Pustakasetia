@@ -1,4 +1,5 @@
 import Footer from "./Footer";
+import SlidingContent from "./SlidingContent";
 
 const imgRectangle1304 = "/img/library-background.png";
 const imgImage = "/img/book-cover-optimized.png";
@@ -48,8 +49,14 @@ export default function AboutPage() {
               </p>
             </div>
 
-            {/* Right Box */}
-            <div className="bg-[#d9d9d9] rounded-[24px] h-[300px] md:h-[350px] lg:h-[426px] w-full" />
+            {/* Right Box - Image */}
+            <div className="w-full h-[300px] md:h-[350px] lg:h-[426px]">
+              <img
+                src="/img/aboutus-pustakasetia.png"
+                alt="Tentang Pustaka Setia"
+                className="w-full h-full object-cover rounded-[24px]"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -98,6 +105,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Sliding Content Section */}
+      <SlidingContent />
 
       {/* Footer */}
       <Footer />
