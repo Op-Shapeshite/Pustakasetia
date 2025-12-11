@@ -89,8 +89,23 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                         <input type="text" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} required className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]" />
                     </div>
                     <div>
-                        <label className="block text-sm text-gray-500 mb-2">Username</label>
-                        <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]" />
+                        <label className="block text-sm text-gray-500 mb-2">
+                            Username
+                            {user.username === 'admin' && (
+                                <span className="ml-2 text-xs text-orange-500">(tidak dapat diubah)</span>
+                            )}
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.username}
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                            required
+                            disabled={user.username === 'admin'}
+                            className={`w-full border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] ${user.username === 'admin'
+                                    ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                                    : 'bg-white'
+                                }`}
+                        />
                     </div>
                     <div>
                         <label className="block text-sm text-gray-500 mb-2">Password</label>

@@ -16,9 +16,23 @@ export async function GET(request: NextRequest) {
         const end = endDateParam ? new Date(endDateParam) : now;
 
         // Calculate previous period for comparison
-        const duration = end.getTime() - start.getTime();
-        const prevStart = new Date(start.getTime() - duration);
-        const prevEnd = new Date(start.getTime());
+        // For single day: compare with previous day
+        // For date range: compare with equal-length period immediately before
+        const actualDuration = end.getTime() - start.getTime();
+        const isSingleDay = actualDuration < 24 * 60 * 60 * 1000; // less than 1 day
+
+        let prevStart: Date;
+        let prevEnd: Date;
+
+        if (isSingleDay) {
+            // Single day selected: compare with previous day
+            prevStart = new Date(start.getTime() - 24 * 60 * 60 * 1000);
+            prevEnd = new Date(prevStart); // same day
+        } else {
+            // Date range: compare with equal-length period before
+            prevEnd = new Date(start.getTime() - 24 * 60 * 60 * 1000); // day before current start
+            prevStart = new Date(prevEnd.getTime() - actualDuration);
+        }
 
         // Format dates to YYYY-MM-DD for Google Analytics API
         const formatDate = (date: Date) => date.toISOString().split('T')[0];
@@ -41,6 +55,11 @@ export async function GET(request: NextRequest) {
                     gaDataService.getPageViews(gaPrevStartDate, gaPrevEndDate),
                 ]);
 
+                console.log(`[Stats API] Current period: ${gaStartDate} to ${gaEndDate}`);
+                console.log(`[Stats API] Previous period: ${gaPrevStartDate} to ${gaPrevEndDate}`);
+                console.log(`[Stats API] Current Visitors: ${currentVisitors}, Previous Visitors: ${previousVisitors}`);
+                console.log(`[Stats API] Current PageViews: ${currentPageViews}, Previous PageViews: ${previousPageViews}`);
+
                 // Calculate percentage changes
                 const visitorChange = previousVisitors === 0
                     ? (currentVisitors > 0 ? 100 : 0)
@@ -50,22 +69,22 @@ export async function GET(request: NextRequest) {
                     ? (currentPageViews > 0 ? 100 : 0)
                     : ((currentPageViews - previousPageViews) / previousPageViews) * 100;
 
+                console.log(`[Stats API] Calculated visitorChange: ${visitorChange}, activityChange: ${activityChange}`);
+
                 // Books and Checkout still come from database (internal app data)
                 const totalBooks = await prisma.book.count();
 
-                const currentCheckout = await prisma.bookSale.count({
-                    where: { createdAt: { gte: start, lte: end } }
+                // Checkout is now based on SUM of sold column (cumulative total)
+                const soldAggregate = await prisma.book.aggregate({
+                    _sum: { sold: true }
                 });
-
-                const previousCheckout = await prisma.bookSale.count({
-                    where: { createdAt: { gte: prevStart, lt: prevEnd } }
-                });
-
-                const checkoutChange = previousCheckout === 0
-                    ? (currentCheckout > 0 ? 100 : 0)
-                    : ((currentCheckout - previousCheckout) / previousCheckout) * 100;
+                const totalSold = soldAggregate._sum.sold || 0;
 
                 console.log(`[Stats API] GA Data - Visitors: ${currentVisitors}, PageViews: ${currentPageViews}`);
+
+                // checkoutChange: since sold is cumulative, treat previous as 0
+                // If there are sales, change is 100%, otherwise 0%
+                const checkoutChange = totalSold > 0 ? 100 : 0;
 
                 return NextResponse.json({
                     source: 'google_analytics',
@@ -74,8 +93,8 @@ export async function GET(request: NextRequest) {
                     totalBooks,
                     totalActivity: currentPageViews,
                     activityChange: parseFloat(activityChange.toFixed(2)),
-                    totalCheckout: currentCheckout,
-                    checkoutChange: parseFloat(checkoutChange.toFixed(2))
+                    totalCheckout: totalSold,
+                    checkoutChange
                 });
 
             } catch (gaError) {
@@ -151,18 +170,15 @@ async function getStatsFromDatabase(start: Date, end: Date, prevStart: Date, pre
         ? (currentActivity > 0 ? 100 : 0)
         : ((currentActivity - previousActivity) / previousActivity) * 100;
 
-    // 4. Checkout/Sales
-    const currentCheckout = await prisma.bookSale.count({
-        where: { createdAt: { gte: start, lte: end } }
+    // 4. Checkout/Sales - now based on SUM of sold column (cumulative)
+    const soldAggregate = await prisma.book.aggregate({
+        _sum: { sold: true }
     });
+    const totalSold = soldAggregate._sum.sold || 0;
 
-    const previousCheckout = await prisma.bookSale.count({
-        where: { createdAt: { gte: prevStart, lt: prevEnd } }
-    });
-
-    const checkoutChange = previousCheckout === 0
-        ? (currentCheckout > 0 ? 100 : 0)
-        : ((currentCheckout - previousCheckout) / previousCheckout) * 100;
+    // checkoutChange: since sold is cumulative, treat previous as 0
+    // If there are sales, change is 100%, otherwise 0%
+    const checkoutChange = totalSold > 0 ? 100 : 0;
 
     return NextResponse.json({
         source: 'database',
@@ -171,7 +187,7 @@ async function getStatsFromDatabase(start: Date, end: Date, prevStart: Date, pre
         totalBooks,
         totalActivity: currentActivity,
         activityChange: parseFloat(activityChange.toFixed(2)),
-        totalCheckout: currentCheckout,
-        checkoutChange: parseFloat(checkoutChange.toFixed(2))
+        totalCheckout: totalSold,
+        checkoutChange
     });
 }

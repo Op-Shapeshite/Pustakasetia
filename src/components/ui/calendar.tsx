@@ -72,13 +72,25 @@ function Calendar({
     return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
   }, [handleGlobalMouseUp]);
 
-  // Intercept onSelect to block it if we just finished dragging
+  // Intercept onSelect to block it if we just finished dragging and fix single-click behavior
   const handleOnSelect: any = (range: any, selectedDay: Date, modifiers: any, e: any) => {
     if (shouldIgnoreSelectRef.current && props.mode === 'range') {
       // Prevent the 'click' from overriding our drag selection
       return;
     }
-    if ((props as any).onSelect) {
+
+    if ((props as any).onSelect && props.mode === 'range') {
+      // Fix: If clicking the same date as the current 'from' date, keep it as single day
+      // Don't set 'to' to the same date
+      if (range?.from && range?.to &&
+        range.from.getTime() === range.to.getTime()) {
+        // Same date clicked - keep as single day selection (from only, no to)
+        (props as any).onSelect({ from: range.from, to: undefined }, selectedDay, modifiers, e);
+        return;
+      }
+
+      (props as any).onSelect(range, selectedDay, modifiers, e);
+    } else if ((props as any).onSelect) {
       (props as any).onSelect(range, selectedDay, modifiers, e);
     }
   };

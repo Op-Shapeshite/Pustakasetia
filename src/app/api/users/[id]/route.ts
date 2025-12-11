@@ -35,6 +35,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const { id } = await params;
         const body = await request.json();
 
+        // Check if user is admin and if username is being changed
+        const existingUser = await prisma.user.findUnique({
+            where: { id: parseInt(id) },
+            select: { username: true }
+        });
+
+        if (!existingUser) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        // Prevent changing username of admin user
+        if (existingUser.username === 'admin' && body.username && body.username !== 'admin') {
+            return NextResponse.json({ error: 'Username admin tidak dapat diubah' }, { status: 403 });
+        }
+
         const updateData: Record<string, unknown> = {};
 
         if (body.username) updateData.username = body.username;
@@ -68,6 +83,22 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
     try {
         const { id } = await params;
+
+        // Check if user is admin before deletion
+        const user = await prisma.user.findUnique({
+            where: { id: parseInt(id) },
+            select: { username: true }
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        // Prevent deletion of admin user
+        if (user.username === 'admin') {
+            return NextResponse.json({ error: 'User admin tidak dapat dihapus' }, { status: 403 });
+        }
+
         await prisma.user.delete({
             where: { id: parseInt(id) },
         });

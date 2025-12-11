@@ -41,16 +41,87 @@ export default function CartPage() {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  // Format phone number to Indonesian format (+62 8xx-xxxx-xxxx)
+  const formatPhoneNumber = (value: string) => {
+    // If empty, return empty
+    if (!value) return '';
+
+    // Get only digits
+    let digits = value.replace(/\D/g, '');
+
+    // If empty after removing non-digits, return empty
+    if (digits.length === 0) return '';
+
+    // Remove Indonesian prefixes only if there are digits after them
+    if (digits.startsWith('620') && digits.length > 3) {
+      digits = digits.slice(3); // 6208xxx -> 8xxx
+    } else if (digits.startsWith('62') && digits.length > 2) {
+      digits = digits.slice(2); // 628xxx -> 8xxx
+    } else if (digits.startsWith('0') && digits.length > 1) {
+      digits = digits.slice(1); // 08xxx -> 8xxx
+    } else if (digits === '62' || digits === '620') {
+      // User is still typing the prefix, show as-is
+      return digits;
+    } else if (digits === '0') {
+      // Just 0, show as-is
+      return '0';
+    }
+
+    // Limit to max 12 digits for Indonesian mobile
+    digits = digits.slice(0, 12);
+
+    // Format with +62 prefix
+    let formatted = '+62 ';
+    if (digits.length <= 3) {
+      formatted += digits;
+    } else if (digits.length <= 7) {
+      formatted += `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    } else {
+      formatted += `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+    }
+
+    return formatted;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+
+    // Allow clearing the input
+    if (inputValue === '' || inputValue.length < formData.phone.length) {
+      // If user is deleting, allow it
+      if (inputValue === '') {
+        setFormData({ ...formData, phone: '' });
+        return;
+      }
+    }
+
+    const formatted = formatPhoneNumber(inputValue);
+    setFormData({ ...formData, phone: formatted });
+  };
+
   const subtotal = calculateTotal();
   const shipping = 15000;
   const total = subtotal + shipping;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.phone || !formData.address) {
       showToast("Mohon lengkapi semua data!", "warning");
       return;
+    }
+
+    // Increment sold count for all items in cart
+    try {
+      await Promise.all(cart.map(item =>
+        fetch('/api/books/increment-sold', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookId: item.id, quantity: item.quantity })
+        })
+      ));
+    } catch (err) {
+      console.error('Failed to increment sold counts:', err);
     }
 
     let message = `*PESANAN BUKU*\\n\\n`;
@@ -231,11 +302,11 @@ export default function CartPage() {
                 <label className="text-sm text-gray-500 mb-2 block">No. Telephone</label>
                 <input
                   type="tel"
-                  placeholder="Masukkan nomber telephone"
+                  placeholder="+62 8xx-xxxx-xxxx"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={handlePhoneChange}
                   required
-                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 text-sm text-gray-500 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                  className="w-full bg-white border border-[#d9d9d9] rounded-[8px] px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
                 />
               </div>
 

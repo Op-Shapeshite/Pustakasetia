@@ -14,6 +14,7 @@ const publicRoutes = [
     '/api/stats', // Allow public read for homepage stats
     '/api/analytics/track', // Allow public POST for tracking page views
     '/api/authors', // Allow public read for author suggestions
+    '/api/books/increment-sold', // Allow public POST for incrementing sold count
 ];
 
 // Routes that allow public GET but require auth for mutations

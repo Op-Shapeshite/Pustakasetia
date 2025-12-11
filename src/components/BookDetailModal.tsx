@@ -15,6 +15,13 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
   const { showPopup } = usePopup();
 
   const handleBuy = () => {
+    // Increment sold count in database
+    fetch('/api/books/increment-sold', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookId: book.id, quantity: 1 })
+    }).catch(err => console.error('Failed to increment sold:', err));
+
     // Navigate to WhatsApp after popup closes
     const doRedirect = () => {
       // Use formatted price from book object or format it

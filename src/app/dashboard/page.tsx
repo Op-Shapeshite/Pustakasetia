@@ -63,36 +63,72 @@ export default function DashboardHomePage() {
     const [catTotal, setCatTotal] = useState(0);
     const [loadingCat, setLoadingCat] = useState(false);
     const [loading, setLoading] = useState(true);
+    // Individual refresh states for each card
+    const [refreshingVisitors, setRefreshingVisitors] = useState(false);
+    const [refreshingBooks, setRefreshingBooks] = useState(false);
+    const [refreshingActivity, setRefreshingActivity] = useState(false);
+    const [refreshingCheckout, setRefreshingCheckout] = useState(false);
+    const [refreshingCategories, setRefreshingCategories] = useState(false);
+    const [refreshingDevices, setRefreshingDevices] = useState(false);
+    const [refreshingTraffic, setRefreshingTraffic] = useState(false);
 
     const CAT_LIMIT = 5;
 
     // Fetch Analytics Stats
-    useEffect(() => {
-        async function fetchAnalyticsStats() {
-            try {
-                setLoading(true);
-                const query = getDateParams();
-                const response = await fetch(`/api/analytics/stats${query}`);
-                const data = await response.json();
+    const fetchAnalyticsStats = async (cardType?: 'visitors' | 'books' | 'activity' | 'checkout') => {
+        try {
+            // Set loading state based on which card is refreshing
+            if (cardType === 'visitors') setRefreshingVisitors(true);
+            else if (cardType === 'books') setRefreshingBooks(true);
+            else if (cardType === 'activity') setRefreshingActivity(true);
+            else if (cardType === 'checkout') setRefreshingCheckout(true);
+            else setLoading(true);
 
-                setStats({
-                    visitors: data.totalVisitors || 0,
-                    visitorChange: data.visitorChange || 0,
-                    books: data.totalBooks || 0,
-                    categories: 0, // Will be set from categories fetch
-                    activity: data.totalActivity || 0,
-                    activityChange: data.activityChange || 0,
-                    checkout: data.totalCheckout || 0,
-                    checkoutChange: data.checkoutChange || 0
-                });
-            } catch (error) {
-                console.error('Failed to fetch analytics stats', error);
-            } finally {
-                setLoading(false);
-            }
+            const query = getDateParams();
+            const response = await fetch(`/api/analytics/stats${query}`);
+            const data = await response.json();
+
+            setStats(prev => ({
+                visitors: data.totalVisitors ?? prev.visitors,
+                visitorChange: data.visitorChange ?? prev.visitorChange,
+                books: data.totalBooks ?? prev.books,
+                categories: prev.categories,
+                activity: data.totalActivity ?? prev.activity,
+                activityChange: data.activityChange ?? prev.activityChange,
+                checkout: data.totalCheckout ?? prev.checkout,
+                checkoutChange: data.checkoutChange ?? prev.checkoutChange
+            }));
+        } catch (error) {
+            console.error('Failed to fetch analytics stats', error);
+        } finally {
+            setLoading(false);
+            setRefreshingVisitors(false);
+            setRefreshingBooks(false);
+            setRefreshingActivity(false);
+            setRefreshingCheckout(false);
         }
+    };
+
+    useEffect(() => {
         fetchAnalyticsStats();
     }, [dateRange]);
+
+    const handleRefreshVisitors = () => {
+        console.log('[Dashboard] Refreshing visitors...');
+        fetchAnalyticsStats('visitors');
+    };
+    const handleRefreshBooks = () => {
+        console.log('[Dashboard] Refreshing books...');
+        fetchAnalyticsStats('books');
+    };
+    const handleRefreshActivity = () => {
+        console.log('[Dashboard] Refreshing activity...');
+        fetchAnalyticsStats('activity');
+    };
+    const handleRefreshCheckout = () => {
+        console.log('[Dashboard] Refreshing checkout...');
+        fetchAnalyticsStats('checkout');
+    };
 
     // Fetch Traffic Data
     useEffect(() => {
@@ -166,6 +202,54 @@ export default function DashboardHomePage() {
         }
     };
 
+    // Category refresh handler
+    const handleRefreshCategories = async () => {
+        setRefreshingCategories(true);
+        try {
+            const res = await categoryService.getAll({ page: catPage, limit: CAT_LIMIT });
+            setCategories(res.data as any);
+            setCatTotal(res.pagination?.total ?? 0);
+        } catch (error) {
+            console.error('Failed to refresh categories', error);
+        } finally {
+            setRefreshingCategories(false);
+        }
+    };
+
+    // Device stats refresh handler
+    const handleRefreshDevices = async () => {
+        setRefreshingDevices(true);
+        try {
+            const query = getDateParams();
+            const response = await fetch(`/api/analytics/devices${query}`);
+            const data = await response.json();
+            setDeviceData({
+                mobile: data.mobile || 0,
+                desktop: data.desktop || 0,
+                mobilePercentage: data.mobilePercentage || 0
+            });
+        } catch (error) {
+            console.error('Failed to refresh device stats', error);
+        } finally {
+            setRefreshingDevices(false);
+        }
+    };
+
+    // Traffic refresh handler
+    const handleRefreshTraffic = async () => {
+        setRefreshingTraffic(true);
+        try {
+            const query = getDateParams();
+            const response = await fetch(`/api/analytics/traffic${query}`);
+            const result = await response.json();
+            setTrafficData(result.data || []);
+        } catch (error) {
+            console.error('Failed to refresh traffic data', error);
+        } finally {
+            setRefreshingTraffic(false);
+        }
+    };
+
     return (
         <AdminLayout
             title="Ringkasan Analisis"
@@ -196,24 +280,47 @@ export default function DashboardHomePage() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3, delay: 0.1 }}
                                     whileHover={{ scale: 1.02, y: -4 }}
-                                    className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                                    className="bg-white rounded-2xl z-50 border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
                                 >
                                     <div className="flex justify-between items-start">
                                         <span className="font-semibold text-gray-700 text-lg">Total Pengunjung</span>
-                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                            <Users className="w-5 h-5" />
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRefreshVisitors();
+                                                }}
+                                                className="p-1 rounded-full hover:bg-gray-100 transition-all"
+                                            >
+                                                <RefreshCw
+                                                    className={`w-4 h-4 ${refreshingVisitors ? 'animate-spin text-[#ffcc00]' : 'text-gray-400 hover:text-gray-600'}`}
+                                                />
+                                            </button>
+                                            <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                                <Users className="w-5 h-5" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.visitors.toLocaleString('id-ID')}</h3>
-                                        <p className="text-sm">
-                                            <span className={stats.visitorChange < 0 ? "text-red-500" : "text-green-500"}>
-                                                {stats.visitorChange >= 0 ? '+' : ''}{stats.visitorChange.toFixed(2)}%
-                                            </span>{' '}
-                                            <span className="text-gray-500">
-                                                {stats.visitorChange < 0 ? 'Pengunjung lebih sedikit dari biasanya' : 'Pengunjung lebih banyak dari biasanya'}
-                                            </span>
-                                        </p>
+                                        {refreshingVisitors ? (
+                                            <>
+                                                <Skeleton className="h-10 w-24 mb-2 bg-gray-200/50" />
+                                                <Skeleton className="h-4 w-48 bg-gray-200/50" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.visitors.toLocaleString('id-ID')}</h3>
+                                                <p className="text-sm">
+                                                    <span className={stats.visitorChange < 0 ? "text-red-500" : "text-green-500"}>
+                                                        {stats.visitorChange >= 0 ? '+' : ''}{stats.visitorChange.toFixed(2)}%
+                                                    </span>{' '}
+                                                    <span className="text-gray-500">
+                                                        {stats.visitorChange < 0 ? 'Pengunjung lebih sedikit dari biasanya' : 'Pengunjung lebih banyak dari biasanya'}
+                                                    </span>
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
                                 </motion.div>
 
@@ -223,19 +330,42 @@ export default function DashboardHomePage() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3, delay: 0.2 }}
                                     whileHover={{ scale: 1.02, y: -4 }}
-                                    className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                                    className="bg-white rounded-2xl border z-50 border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
                                 >
                                     <div className="flex justify-between items-start">
                                         <span className="font-semibold text-gray-700 text-lg">Total Buku</span>
-                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                            <Book className="w-5 h-5" />
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRefreshBooks();
+                                                }}
+                                                className="p-1 rounded-full hover:bg-gray-100 transition-all"
+                                            >
+                                                <RefreshCw
+                                                    className={`w-4 h-4 ${refreshingBooks ? 'animate-spin text-[#ffcc00]' : 'text-gray-400 hover:text-gray-600'}`}
+                                                />
+                                            </button>
+                                            <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                                <Book className="w-5 h-5" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.books.toLocaleString('id-ID')}</h3>
-                                        <p className="text-sm text-gray-500">
-                                            Total Buku yang telah di upload
-                                        </p>
+                                        {refreshingBooks ? (
+                                            <>
+                                                <Skeleton className="h-10 w-24 mb-2 bg-gray-200/50" />
+                                                <Skeleton className="h-4 w-48 bg-gray-200/50" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.books.toLocaleString('id-ID')}</h3>
+                                                <p className="text-sm text-gray-500">
+                                                    Total Buku yang telah di upload
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
                                 </motion.div>
 
@@ -245,24 +375,47 @@ export default function DashboardHomePage() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3, delay: 0.3 }}
                                     whileHover={{ scale: 1.02, y: -4 }}
-                                    className="bg-white  rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
+                                    className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 h-[200px] flex flex-col justify-between"
                                 >
                                     <div className="flex justify-between items-start">
                                         <span className="font-semibold text-gray-700 text-lg">Aktifitas Bulan Ini</span>
-                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                            <Activity className="w-5 h-5" />
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRefreshActivity();
+                                                }}
+                                                className="p-1 rounded-full hover:bg-gray-100 transition-all"
+                                            >
+                                                <RefreshCw
+                                                    className={`w-4 h-4 ${refreshingActivity ? 'animate-spin text-[#ffcc00]' : 'text-gray-400 hover:text-gray-600'}`}
+                                                />
+                                            </button>
+                                            <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                                <Activity className="w-5 h-5" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.activity}</h3>
-                                        <p className="text-sm">
-                                            <span className={stats.activityChange < 0 ? "text-red-500" : "text-green-500"}>
-                                                {stats.activityChange >= 0 ? '+' : ''}{stats.activityChange.toFixed(2)}%
-                                            </span>{' '}
-                                            <span className="text-gray-500">
-                                                {stats.activityChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Lebih banyak Aktifitas dari biasanya'}
-                                            </span>
-                                        </p>
+                                        {refreshingActivity ? (
+                                            <>
+                                                <Skeleton className="h-10 w-24 mb-2 bg-gray-200/50" />
+                                                <Skeleton className="h-4 w-48 bg-gray-200/50" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.activity}</h3>
+                                                <p className="text-sm">
+                                                    <span className={stats.activityChange < 0 ? "text-red-500" : "text-green-500"}>
+                                                        {stats.activityChange >= 0 ? '+' : ''}{stats.activityChange.toFixed(2)}%
+                                                    </span>{' '}
+                                                    <span className="text-gray-500">
+                                                        {stats.activityChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Lebih banyak Aktifitas dari biasanya'}
+                                                    </span>
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
                                 </motion.div>
 
@@ -270,24 +423,47 @@ export default function DashboardHomePage() {
                                 <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     transition={{ type: "spring", stiffness: 300 }}
-                                    className="bg-white  rounded-xl p-6 h-[200px] flex flex-col justify-between shadow-none border-none"
+                                    className="bg-white rounded-xl p-6 h-[200px] flex flex-col justify-between shadow-none border-none"
                                 >
                                     <div className="flex justify-between items-start">
                                         <span className="font-semibold text-gray-700 text-lg">Check Out</span>
-                                        <div className="p-2 rounded-full bg-[#ffcc00] text-white">
-                                            <ShoppingBag className="w-5 h-5" />
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRefreshCheckout();
+                                                }}
+                                                className="p-1 rounded-full hover:bg-gray-100 transition-all"
+                                            >
+                                                <RefreshCw
+                                                    className={`w-4 h-4 ${refreshingCheckout ? 'animate-spin text-[#ffcc00]' : 'text-gray-400 hover:text-gray-600'}`}
+                                                />
+                                            </button>
+                                            <div className="p-2 rounded-full bg-[#ffcc00] text-white">
+                                                <ShoppingBag className="w-5 h-5" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.checkout}</h3>
-                                        <p className="text-sm">
-                                            <span className={stats.checkoutChange < 0 ? "text-red-500" : "text-green-500"}>
-                                                {stats.checkoutChange >= 0 ? '+' : ''}{stats.checkoutChange.toFixed(2)}%
-                                            </span>{' '}
-                                            <span className="text-gray-500">
-                                                {stats.checkoutChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Aktivitas lebih banyak dari biasanya'}
-                                            </span>
-                                        </p>
+                                        {refreshingCheckout ? (
+                                            <>
+                                                <Skeleton className="h-10 w-24 mb-2 bg-gray-200/50" />
+                                                <Skeleton className="h-4 w-48 bg-gray-200/50" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h3 className="text-4xl font-bold text-[#2f2f2f] mb-2">{stats.checkout}</h3>
+                                                <p className="text-sm">
+                                                    <span className={stats.checkoutChange < 0 ? "text-red-500" : "text-green-500"}>
+                                                        {stats.checkoutChange >= 0 ? '+' : ''}{stats.checkoutChange.toFixed(2)}%
+                                                    </span>{' '}
+                                                    <span className="text-gray-500">
+                                                        {stats.checkoutChange < 0 ? 'Aktivitas lebih sedikit dari biasanya' : 'Aktivitas lebih banyak dari biasanya'}
+                                                    </span>
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
                                 </motion.div>
                             </>
@@ -295,17 +471,28 @@ export default function DashboardHomePage() {
                     </div>
 
                     {/* Right Column (1/3) - Category List (Dynamic) */}
-                    <div className="flex  flex-col gap-6 lg:col-span-1">
+                    <div className="flex  flex-col gap-6  lg:col-span-1">
                         {/* Date Filter */}
 
 
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col">
+                        <div className="bg-white rounded-xl z-50 shadow-sm border border-gray-100 p-6 flex flex-col">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="font-semibold text-gray-700 text-lg">Kategori Buku</h3>
-                                <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" onClick={() => setCatPage(1)} />
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRefreshCategories();
+                                    }}
+                                    className="p-1 rounded-full hover:bg-gray-100 transition-all"
+                                >
+                                    <RefreshCw
+                                        className={`w-4 h-4 ${refreshingCategories ? 'animate-spin text-[#ffcc00]' : 'text-gray-400 hover:text-gray-600'}`}
+                                    />
+                                </button>
                             </div>
                             <div className="space-y-1 flex-1">
-                                {loadingCat && categories.length === 0 ? (
+                                {(loadingCat || refreshingCategories) ? (
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <div key={i} className="flex items-center justify-between py-2">
                                             <Skeleton className="h-4 w-[60%] bg-gray-200/50" />
@@ -360,7 +547,18 @@ export default function DashboardHomePage() {
                     <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="font-semibold text-gray-700 text-lg">Traffic</h3>
-                            <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer" />
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRefreshTraffic();
+                                }}
+                                className="p-1 rounded-full hover:bg-gray-100 transition-all"
+                            >
+                                <RefreshCw
+                                    className={`w-4 h-4 ${refreshingTraffic ? 'animate-spin text-[#ffcc00]' : 'text-gray-400 hover:text-gray-600'}`}
+                                />
+                            </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
@@ -374,7 +572,7 @@ export default function DashboardHomePage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {loadingTraffic ? (
+                                    {(loadingTraffic || refreshingTraffic) ? (
                                         Array.from({ length: 5 }).map((_, i) => (
                                             <tr key={i} className="border-b border-gray-50 last:border-0">
                                                 <td className="py-4"><Skeleton className="h-4 w-32 bg-gray-200/50" /></td>
@@ -410,11 +608,25 @@ export default function DashboardHomePage() {
 
                     {/* Mobile Sessions Donut */}
                     <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col">
-                        <h3 className="font-semibold text-gray-700 text-lg mb-2">Mobile Sessions</h3>
+                        <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-gray-700 text-lg">Mobile Sessions</h3>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRefreshDevices();
+                                }}
+                                className="p-1 rounded-full hover:bg-gray-100 transition-all"
+                            >
+                                <RefreshCw
+                                    className={`w-4 h-4 ${refreshingDevices ? 'animate-spin text-[#ffcc00]' : 'text-gray-400 hover:text-gray-600'}`}
+                                />
+                            </button>
+                        </div>
                         <p className="text-gray-400 text-sm mb-8">Persentase pengguna yang menggunakan perangkat seluler dibandingkan dengan perangkat lain.</p>
 
                         <div className="flex-1 flex items-center justify-center relative">
-                            {loadingDevices ? (
+                            {(loadingDevices || refreshingDevices) ? (
                                 <Skeleton className="w-48 h-48 rounded-full bg-gray-200/50" />
                             ) : (
                                 /* CSS Conic Gradient Donut */

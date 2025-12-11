@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Pencil, Trash2 } from 'lucide-react';
 import { userService, User } from '@/utils/adminData';
 import { useDebounce } from '@/hooks/useDebounce';
 import AddUserModal from './AddUserModal';
@@ -64,6 +64,11 @@ export default function UserManagementPage() {
     };
 
     const handleDelete = (user: User) => {
+        // Prevent deletion of admin user
+        if (user.username === 'admin') {
+            setError('User admin tidak dapat dihapus');
+            return;
+        }
         setSelectedUser(user);
         setIsDeleteModalOpen(true);
     };
@@ -120,6 +125,33 @@ export default function UserManagementPage() {
                 </span>
             ),
             className: 'px-6 py-4'
+        },
+        {
+            header: 'Aksi',
+            headerClassName: 'text-center px-6 py-4 font-medium text-gray-600 text-sm whitespace-nowrap sticky right-0 bg-gray-50',
+            render: (user) => (
+                <div className="flex items-center justify-center gap-2">
+                    <button
+                        onClick={() => handleEdit(user)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit"
+                    >
+                        <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => handleDelete(user)}
+                        className={`p-2 rounded-lg transition-colors ${user.username === 'admin'
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-red-600 hover:bg-red-50'
+                            }`}
+                        title={user.username === 'admin' ? 'Admin tidak dapat dihapus' : 'Hapus'}
+                        disabled={user.username === 'admin'}
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
+            ),
+            className: 'px-6 py-4 sticky right-0 bg-white'
         }
     ];
 
