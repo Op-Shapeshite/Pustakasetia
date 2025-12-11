@@ -161,7 +161,8 @@ export default function AdminSidebar({ isOpen = true, onClose, isScrolled = fals
                                 console.log('Logout clicked!');
                                 logout();
                                 localStorage.clear();
-                                window.location.href = '/';
+                                // Use replace instead of href to force full reload and prevent back button issues
+                                window.location.replace('/');
                             }}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors w-full cursor-pointer"
                         >

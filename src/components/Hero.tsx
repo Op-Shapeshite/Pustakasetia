@@ -89,7 +89,7 @@ export default function Hero() {
       </section>
 
       {/* Stats Section - Horizontal Layout */}
-      <section className="w-full z-50 relative -mt-5 pb-5 overflow-hidden">
+      <section className="w-full relative -mt-5 pb-5 overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-16 w-full">
           {/* White card with shadow */}
           <div className="bg-white rounded-[20px] p-6 md:p-8 lg:p-12 shadow-lg">
