@@ -7,6 +7,127 @@ if (!process.env.JWT_SECRET) {
 }
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-in-production';
 
+// ============== RATE LIMITING (THROTTLE MODE) ==============
+// In-memory rate limiter with throttling (use Redis for production with multiple instances)
+// Instead of rejecting, requests will be delayed/queued
+const rateLimitMap = new Map<string, { count: number; resetTime: number; lastRequest: number }>();
+
+// Rate limit configuration - Optimized for VPS (2 CPU, 4GB RAM, 50GB Disk)
+const RATE_LIMIT_CONFIG = {
+    // Public read endpoints (books, categories, stats) - High limits for catalog browsing
+    public: { requests: 500, windowMs: 60 * 1000, minDelayMs: 20 }, // 500 req/min, min 20ms delay
+    // General API rate limit
+    default: { requests: 300, windowMs: 60 * 1000, minDelayMs: 50 }, // 300 req/min, min 50ms delay
+    // Analytics endpoints - moderate limits
+    analytics: { requests: 120, windowMs: 60 * 1000, minDelayMs: 100 }, // 120 req/min
+    // Stricter limits for sensitive endpoints
+    auth: { requests: 15, windowMs: 60 * 1000, minDelayMs: 500 }, // 15 req/min (security)
+    upload: { requests: 30, windowMs: 60 * 1000, minDelayMs: 300 }, // 30 req/min
+};
+
+// Max delay to prevent connection timeout (Edge Runtime has limits)
+const MAX_DELAY_MS = 10000; // 10 seconds max wait
+
+function getRateLimitConfig(pathname: string) {
+    // Auth endpoints - strict security
+    if (pathname.startsWith('/api/auth')) {
+        return RATE_LIMIT_CONFIG.auth;
+    }
+    // Upload endpoints
+    if (pathname.startsWith('/api/upload')) {
+        return RATE_LIMIT_CONFIG.upload;
+    }
+    // Analytics endpoints
+    if (pathname.startsWith('/api/analytics')) {
+        return RATE_LIMIT_CONFIG.analytics;
+    }
+    // Public read endpoints - highest limits for browsing
+    if (pathname.startsWith('/api/books') ||
+        pathname.startsWith('/api/categories') ||
+        pathname.startsWith('/api/stats') ||
+        pathname.startsWith('/api/authors')) {
+        return RATE_LIMIT_CONFIG.public;
+    }
+    return RATE_LIMIT_CONFIG.default;
+}
+
+// Check if IP is localhost/local
+function isLocalhost(ip: string): boolean {
+    const localIPs = [
+        'localhost',
+        '127.0.0.1',
+        '::1',
+        '::ffff:127.0.0.1',
+        '0.0.0.0',
+        '',
+        'unknown',
+    ];
+    return localIPs.includes(ip) || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.');
+}
+
+// Sleep function for Edge Runtime
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function throttleRequest(ip: string, pathname: string): Promise<{ delayed: boolean; delayMs: number }> {
+    // Skip throttling for localhost/local development
+    if (isLocalhost(ip)) {
+        return { delayed: false, delayMs: 0 };
+    }
+
+    const config = getRateLimitConfig(pathname);
+    const key = `${ip}:${pathname.split('/').slice(0, 3).join('/')}`; // Group by /api/endpoint
+    const now = Date.now();
+
+    const record = rateLimitMap.get(key);
+
+    // Clean up old entries periodically
+    if (rateLimitMap.size > 10000) {
+        for (const [k, v] of rateLimitMap.entries()) {
+            if (v.resetTime < now) rateLimitMap.delete(k);
+        }
+    }
+
+    if (!record || record.resetTime < now) {
+        // New window - no delay needed
+        rateLimitMap.set(key, { count: 1, resetTime: now + config.windowMs, lastRequest: now });
+        return { delayed: false, delayMs: 0 };
+    }
+
+    // Calculate delay based on request rate
+    const timeSinceLastRequest = now - record.lastRequest;
+    const idealInterval = config.windowMs / config.requests; // Ideal time between requests
+
+    let delayMs = 0;
+
+    if (record.count >= config.requests) {
+        // Over limit - calculate delay until reset or use minimum delay
+        delayMs = Math.min(record.resetTime - now, MAX_DELAY_MS);
+    } else if (timeSinceLastRequest < config.minDelayMs) {
+        // Too fast - apply minimum delay
+        delayMs = config.minDelayMs - timeSinceLastRequest;
+    } else if (timeSinceLastRequest < idealInterval) {
+        // Slightly fast - apply small delay to smooth traffic
+        delayMs = Math.min(idealInterval - timeSinceLastRequest, config.minDelayMs);
+    }
+
+    // Cap delay to prevent timeout
+    delayMs = Math.min(delayMs, MAX_DELAY_MS);
+
+    if (delayMs > 0) {
+        await sleep(delayMs);
+    }
+
+    // Update record after delay
+    record.count++;
+    record.lastRequest = Date.now();
+
+    return { delayed: delayMs > 0, delayMs };
+}
+
+// ============== END RATE LIMITING ==============
+
 // Public routes that don't require authentication
 const publicRoutes = [
     '/api/auth/login',
@@ -47,11 +168,26 @@ function getClientInfo(request: NextRequest) {
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const method = request.method;
+    const { ip, userAgent } = getClientInfo(request);
 
     // Skip non-API routes
     if (!pathname.startsWith('/api/')) {
         return NextResponse.next();
     }
+
+    // ============== THROTTLE CHECK ==============
+    const throttleResult = await throttleRequest(ip, pathname);
+
+    if (throttleResult.delayed) {
+        logSecurityEvent('REQUEST_THROTTLED', {
+            resource: pathname,
+            method,
+            ip,
+            userAgent,
+            delayMs: throttleResult.delayMs,
+        });
+    }
+    // ============== END THROTTLE CHECK ==============
 
     // Allow public routes
     if (publicRoutes.some(route => pathname.startsWith(route))) {

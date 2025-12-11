@@ -135,12 +135,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Default Credentials Info */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg text-center">
-          <p className="text-sm text-gray-600">
-            Default: <strong>admin</strong> / <strong>admin123</strong>
-          </p>
-        </div>
+
 
         {/* Back to Home Link */}
         <button
