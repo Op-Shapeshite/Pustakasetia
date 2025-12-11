@@ -45,7 +45,7 @@ export default function AboutPage() {
                 CV. Pustaka Setia
               </h2>
               <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg lg:text-xl leading-relaxed text-justify">
-                Pustaka Setia merupakan penerbit buku yang menghadirkan karya-karya bermutu dari berbagai bidang, mulai dari agama, sastra, bahasa asing, cerita rakyat, hingga pembangunan politik. Dengan dedikasi pada kualitas dan ketelitian editorial, kami berupaya menyediakan literatur yang informatif, edukatif, dan relevan bagi pembaca dari berbagai kalangan. Melalui semangat "pustaka" sebagai sumber pengetahuan dan "setia" sebagai bentuk komitmen, Pustaka Setia terus berperan dalam memperkaya khazanah literasi dan mendukung pengembangan wawasan masyarakat.
+                PUSTAKA SETIA adalah perusahaan penerbitan dan percetakan yang berdiri sejak 1993, berbadan hukum CV dan terdaftar di IKAPI Jawa Barat. Berawal dari penerbitan buku pelajaran, perusahaan ini berkembang menerbitkan buku penunjang pendidikan untuk berbagai jenjang serta buku umum seperti cerita rakyat, kamus, filsafat, dan dakwah, dengan lebih dari 2.500 judul terbit hingga 2012. Didukung lebih dari 60 karyawan dan perwakilan di berbagai daerah, PUSTAKA SETIA terus memperluas jangkauan pemasaran dan meningkatkan fasilitas produksi, termasuk pembangunan dua gedung baru agar seluruh proses pracetak hingga finishing dapat berlangsung dalam satu lokasi.
               </p>
             </div>
 
@@ -79,8 +79,7 @@ export default function AboutPage() {
                   Legal dan Tercatat
                 </h3>
                 <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg lg:text-xl leading-relaxed text-justify md:text-justify">
-                  CV. Pustaka Setia tercatat dengan legal dan memiliki akte resmi di Notaris .................................................................................
-                </p>
+                  CV. Pustaka Setia tercatat dengan legal dan memiliki akte resmi di Notaris Gina Riswara Koswara, S.H. Nomor 29/1993</p>
               </div>
             </div>
 
@@ -98,8 +97,7 @@ export default function AboutPage() {
                   Kantor Pustaka Setia
                 </h3>
                 <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-base md:text-lg lg:text-xl leading-relaxed text-justify md:text-justify">
-                  CV. Pustaka Setia aktif berkantor di Jl. BKR No.162-164, Cigereleng, Kec. Regol, Kota Bandung, Jawa Barat 40253
-                </p>
+                  CV. Pustaka Setia aktif berkantor di Jl. BKR No.162-164, Cigereleng, Kec. Regol, Kota Bandung, Jawa Barat 40253</p>
               </div>
             </div>
           </div>
