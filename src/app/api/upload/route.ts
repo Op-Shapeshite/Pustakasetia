@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
 
         // Sanitize folder name to prevent directory traversal
         const safeFolder = folder.replace(/[^a-zA-Z0-9-_]/g, '');
-        const uploadDir = path.join(process.cwd(), 'uploads', safeFolder);
+
+        // Use persistent uploads directory from environment, or default to project uploads
+        const uploadsBaseDir = process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads');
+        const uploadDir = path.join(uploadsBaseDir, safeFolder);
 
         // Ensure upload directory exists
         if (!existsSync(uploadDir)) {

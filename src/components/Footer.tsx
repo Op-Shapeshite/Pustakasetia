@@ -86,7 +86,7 @@ export default function Footer() {
                 Jl. BKR No.162-164, Cigereleng, Kec. Regol, Kota Bandung, Jawa Barat 40253
               </p>
               <p className="font-['Poppins',sans-serif] text-[#2f2f2f] text-xs md:text-sm">
-                pustakasetia@gmail.com
+                pustakasetia1@gmail.com
               </p>
             </div>
           </div>

@@ -81,7 +81,27 @@ jobs:
           script: |
             cd ${{ secrets.VPS_DIR }}
             
-            echo "📦 Step 1: Extracting deployment..."
+            echo "📦 Step 1: Setup persistent storage directories..."
+            # Create persistent storage directory if it doesn't exist
+            PERSISTENT_DIR="/var/app-data/pustakasetia"
+            sudo mkdir -p "$PERSISTENT_DIR/database"
+            sudo mkdir -p "$PERSISTENT_DIR/uploads"
+            sudo chown -R $USER:$USER "$PERSISTENT_DIR"
+            
+            echo "📦 Step 2: Backup existing data..."
+            # Backup current database if it exists
+            if [ -f "dev.db" ]; then
+              cp dev.db "$PERSISTENT_DIR/database/dev.db.backup-$(date +%Y%m%d-%H%M%S)"
+              echo "✓ Database backed up"
+            fi
+            
+            # Backup current uploads if directory exists
+            if [ -d "uploads" ] && [ "$(ls -A uploads)" ]; then
+              rsync -av --ignore-existing uploads/ "$PERSISTENT_DIR/uploads/"
+              echo "✓ Uploads backed up"
+            fi
+            
+            echo "📦 Step 3: Extracting deployment..."
             # Backup current deployment
             if [ -d ".next" ]; then
               rm -rf .next.backup
@@ -92,25 +112,55 @@ jobs:
             tar -xzf deploy.tar.gz
             rm -f deploy.tar.gz
             
-            echo "📦 Step 2: Installing production dependencies..."
+            echo "📦 Step 4: Installing production dependencies..."
             npm ci --omit=dev --ignore-scripts
             
-            echo "📦 Step 3: Installing pre-built Prisma client..."
-            # Extract pre-built Prisma client AFTER npm ci (this is the fix!)
+            echo "📦 Step 5: Installing pre-built Prisma client..."
+            # Extract pre-built Prisma client AFTER npm ci
             tar -xzf prisma-client.tar.gz -C node_modules
             rm -f prisma-client.tar.gz
             
             echo "✓ Prisma client installed from pre-built package"
             
-            echo "🗄️ Step 4: Running database migrations..."
-            npx prisma db push 2>/dev/null || echo "No migrations to run"
+            echo "📦 Step 6: Setting up persistent storage symlinks..."
+            # Remove old database file if it exists in deployment
+            rm -f dev.db
             
-            echo "🔧 Step 5: Checking environment..."
+            # Create symlink to persistent database
+            ln -sf "$PERSISTENT_DIR/database/dev.db" dev.db
+            echo "✓ Database symlink created"
+            
+            # Remove old uploads directory if it exists
+            rm -rf uploads
+            
+            # Create symlink to persistent uploads
+            ln -sf "$PERSISTENT_DIR/uploads" uploads
+            echo "✓ Uploads symlink created"
+            
+            echo "🗄️ Step 7: Running database migrations..."
+            # Run migrations safely (doesn't reset data)
+            npx prisma migrate deploy 2>/dev/null || npx prisma db push 2>/dev/null || echo "No migrations to run"
+            
+            echo "🔧 Step 8: Checking environment..."
             if ! grep -q "JWT_SECRET" .env 2>/dev/null; then
               echo "⚠️ JWT_SECRET not found in .env - please add it manually!"
             fi
             
-            echo "🚀 Step 6: Restarting application..."
+            # Set environment variable for uploads directory
+            if ! grep -q "UPLOADS_DIR" .env 2>/dev/null; then
+              echo "" >> .env
+              echo "# Persistent uploads directory" >> .env
+              echo "UPLOADS_DIR=\"$PERSISTENT_DIR/uploads\"" >> .env
+              echo "✓ UPLOADS_DIR added to .env"
+            fi
+            
+            # Set environment variable for database URL if not exists
+            if ! grep -q "DATABASE_URL" .env 2>/dev/null; then
+              echo "DATABASE_URL=\"file:$PERSISTENT_DIR/database/dev.db\"" >> .env
+              echo "✓ DATABASE_URL added to .env"
+            fi
+            
+            echo "🚀 Step 9: Restarting application..."
             if command -v pm2 &> /dev/null; then
               pm2 stop pustakasetia 2>/dev/null || true
               pm2 delete pustakasetia 2>/dev/null || true
@@ -135,4 +185,7 @@ jobs:
             
             echo ""
             echo "✅ Deployment completed successfully!"
+            echo "📂 Persistent data location: $PERSISTENT_DIR"
+            echo "🗄️ Database: $PERSISTENT_DIR/database/dev.db"
+            echo "🖼️ Uploads: $PERSISTENT_DIR/uploads"
             echo "🌐 App running at: http://localhost:3000"
