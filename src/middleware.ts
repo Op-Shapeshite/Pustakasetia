@@ -7,6 +7,24 @@ if (!process.env.JWT_SECRET) {
 }
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-in-production';
 
+// ============== SECURITY CONSTANTS ==============
+// Maximum request body size (10MB)
+const MAX_BODY_SIZE = 10 * 1024 * 1024;
+
+// SQL Injection detection patterns (for logging/monitoring, not blocking - Prisma handles actual protection)
+const SQL_INJECTION_PATTERNS = [
+    /('\s*(OR|AND)\s*'\d*'\s*=\s*'\d*)/gi,
+    /(;\s*(DROP|DELETE|UPDATE|INSERT|ALTER|CREATE|TRUNCATE))/gi,
+    /(UNION\s+(ALL\s+)?SELECT)/gi,
+    /(-{2}|#|\/*\*)/g, // SQL comments
+];
+
+// Check if input contains potential SQL injection patterns (for logging purposes)
+function containsSuspiciousInput(input: string): boolean {
+    if (!input || typeof input !== 'string') return false;
+    return SQL_INJECTION_PATTERNS.some(pattern => pattern.test(input));
+}
+
 // ============== RATE LIMITING (THROTTLE MODE) ==============
 // In-memory rate limiter with throttling (use Redis for production with multiple instances)
 // Instead of rejecting, requests will be delayed/queued
@@ -70,7 +88,7 @@ function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function throttleRequest(ip: string, pathname: string): Promise<{ delayed: boolean; delayMs: number }> {
+async function throttleRequest(ip: string, pathname: string): Promise<{ delayed: boolean; delayMs: number; record?: { count: number; resetTime: number } }> {
     // Skip throttling for localhost/local development
     if (isLocalhost(ip)) {
         return { delayed: false, delayMs: 0 };
@@ -123,7 +141,20 @@ async function throttleRequest(ip: string, pathname: string): Promise<{ delayed:
     record.count++;
     record.lastRequest = Date.now();
 
-    return { delayed: delayMs > 0, delayMs };
+    return { delayed: delayMs > 0, delayMs, record };
+}
+
+// Add rate limit headers to response
+function addRateLimitHeaders(response: NextResponse, pathname: string, record: { count: number; resetTime: number } | undefined): NextResponse {
+    const config = getRateLimitConfig(pathname);
+    const remaining = record ? Math.max(0, config.requests - record.count) : config.requests;
+    const reset = record ? Math.ceil((record.resetTime - Date.now()) / 1000) : Math.ceil(config.windowMs / 1000);
+
+    response.headers.set('X-RateLimit-Limit', String(config.requests));
+    response.headers.set('X-RateLimit-Remaining', String(remaining));
+    response.headers.set('X-RateLimit-Reset', String(reset));
+
+    return response;
 }
 
 // ============== END RATE LIMITING ==============
@@ -175,6 +206,40 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // ============== REQUEST SIZE LIMIT CHECK ==============
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > MAX_BODY_SIZE) {
+        logSecurityEvent('OVERSIZED_REQUEST', {
+            resource: pathname,
+            method,
+            ip,
+            userAgent,
+            contentLength,
+        });
+        return NextResponse.json(
+            { error: 'Request body too large' },
+            { status: 413 }
+        );
+    }
+
+    // ============== SUSPICIOUS INPUT DETECTION ==============
+    // Log suspicious patterns in URL (Prisma ORM protects against actual SQL injection)
+    const searchParams = request.nextUrl.searchParams;
+    for (const [key, value] of searchParams.entries()) {
+        if (containsSuspiciousInput(value)) {
+            logSecurityEvent('SUSPICIOUS_INPUT_DETECTED', {
+                resource: pathname,
+                method,
+                ip,
+                userAgent,
+                parameter: key,
+                // Don't log actual value to avoid log injection
+            });
+            // Note: We don't block because Prisma ORM handles parameterized queries
+            // This is just for monitoring/alerting purposes
+        }
+    }
+
     // ============== THROTTLE CHECK ==============
     const throttleResult = await throttleRequest(ip, pathname);
 
@@ -189,14 +254,16 @@ export async function middleware(request: NextRequest) {
     }
     // ============== END THROTTLE CHECK ==============
 
-    // Allow public routes
+    // Allow public routes with rate limit headers
     if (publicRoutes.some(route => pathname.startsWith(route))) {
-        return NextResponse.next();
+        const response = NextResponse.next();
+        return addRateLimitHeaders(response, pathname, throttleResult.record);
     }
 
     // Allow public GET for specific routes (including /api/books with any limit)
     if (method === 'GET' && publicGetRoutes.some(route => pathname.startsWith(route))) {
-        return NextResponse.next();
+        const response = NextResponse.next();
+        return addRateLimitHeaders(response, pathname, throttleResult.record);
     }
 
     // Check for auth token
@@ -254,11 +321,12 @@ export async function middleware(request: NextRequest) {
         requestHeaders.set('x-username', username);
         requestHeaders.set('x-user-role', userRole);
 
-        return NextResponse.next({
+        const response = NextResponse.next({
             request: {
                 headers: requestHeaders,
             },
         });
+        return addRateLimitHeaders(response, pathname, throttleResult.record);
     } catch {
         const { ip, userAgent } = getClientInfo(request);
         logSecurityEvent('TOKEN_INVALID', {

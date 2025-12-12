@@ -9,3 +9,5 @@ node_modules
 dev.db
 prisma/dev.db
 *.webp
+security_report_full_*.txt
+.pentest_state
