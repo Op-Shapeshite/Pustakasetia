@@ -90,8 +90,8 @@ jobs:
             
             echo "📦 Step 2: Backup existing data..."
             # Backup current database if it exists
-            if [ -f "dev.db" ]; then
-              cp dev.db "$PERSISTENT_DIR/database/dev.db.backup-$(date +%Y%m%d-%H%M%S)"
+            if [ -f "prisma/dev.db" ]; then
+              cp prisma/dev.db "$PERSISTENT_DIR/database/dev.db.backup-$(date +%Y%m%d-%H%M%S)"
               echo "✓ Database backed up"
             fi
             
@@ -124,10 +124,10 @@ jobs:
             
             echo "📦 Step 6: Setting up persistent storage symlinks..."
             # Remove old database file if it exists in deployment
-            rm -f dev.db
+            rm -f prisma/dev.db
             
             # Create symlink to persistent database
-            ln -sf "$PERSISTENT_DIR/database/dev.db" dev.db
+            ln -sf "$PERSISTENT_DIR/database/dev.db" prisma/dev.db
             echo "✓ Database symlink created"
             
             # Remove old uploads directory if it exists
