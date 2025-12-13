@@ -1,11 +1,29 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Footer from "./Footer";
 import SlidingContent from "./SlidingContent";
+import { AboutPageSkeleton } from './ui';
 
 const imgRectangle1304 = "/img/library-background.png";
 const imgImage = "/img/book-cover-optimized.png";
 const imgImage6 = "/img/book-cover-optimized.png";
 
 export default function AboutPage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time for images
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <AboutPageSkeleton />;
+  }
+
   return (
     <div className="w-full">
       {/* Hero Section */}

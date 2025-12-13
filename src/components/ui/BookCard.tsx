@@ -23,6 +23,8 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
             fill
             sizes="(max-width: 768px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            placeholder="empty"
           />
         </div>
 
@@ -61,6 +63,8 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
           fill
           sizes="(max-width: 768px) 50vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+          placeholder="empty"
         />
       </div>
 

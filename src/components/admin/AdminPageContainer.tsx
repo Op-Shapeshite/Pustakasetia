@@ -61,7 +61,7 @@ export default function AdminPageContainer({
     }, []);
 
     return (
-        <div className="mx-6 bg-white rounded-2xl shadow-sm -mt-[65px]">
+        <div className="mx-3 md:mx-6 bg-white rounded-2xl shadow-sm -mt-[65px]">
             {error && (
                 <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                     {error}
@@ -73,15 +73,16 @@ export default function AdminPageContainer({
                 </div>
             )}
 
-            {/* Header Actions */}
-            <div className="flex pt-7 px-8 items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
+            {/* Header Actions - Stack on mobile, row on desktop */}
+            <div className="flex flex-col md:flex-row pt-5 md:pt-7 px-4 md:px-8 gap-4 md:items-center md:justify-between mb-6">
+                {/* Top row on mobile: Limit + Search */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4 w-full md:w-auto">
                     {/* Limit Selector - SearchableSelect Style */}
                     <div ref={limitRef} className="relative">
                         <button
                             type="button"
                             onClick={() => setIsLimitOpen(!isLimitOpen)}
-                            className="bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ffcc00] focus:border-[#ffcc00] flex items-center justify-between min-w-[160px] hover:border-[#ffcc00] transition-colors"
+                            className="bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ffcc00] focus:border-[#ffcc00] flex items-center justify-between w-full sm:min-w-[160px] hover:border-[#ffcc00] transition-colors"
                         >
                             <span>{selectedOption?.label || '10 per halaman'}</span>
                             <ChevronDown className={`w-4 h-4 text-gray-400 ml-2 transition-transform ${isLimitOpen ? 'rotate-180' : ''}`} />
@@ -114,22 +115,22 @@ export default function AdminPageContainer({
                     </div>
 
                     {/* Search */}
-                    <div className="relative">
+                    <div className="relative flex-1 sm:flex-none">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder={searchPlaceholder}
                             value={searchValue}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] focus:border-[#ffcc00] bg-white"
+                            className="w-full sm:w-[200px] md:w-[280px] pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] focus:border-[#ffcc00] bg-white"
                         />
                     </div>
                 </div>
 
-                {/* Add Button */}
+                {/* Add Button - Full width on mobile */}
                 <button
                     onClick={onAddClick}
-                    className="flex items-center gap-2 bg-[#ffcc00] z-50 text-gray-900 px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-[#ffdb4d] transition-colors shadow-sm"
+                    className="flex items-center justify-center gap-2 bg-[#ffcc00] z-40 text-gray-900 px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-[#ffdb4d] transition-colors shadow-sm w-full md:w-auto"
                 >
                     <Plus className="w-4 h-4" />
                     {addButtonText}

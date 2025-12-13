@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import {
   BookCard,
   SearchBar,
-  PaginationControls
+  PaginationControls,
+  ProductsMobileSkeleton,
+  ProductsDesktopSkeleton
 } from './ui';
 import BookDetailModal from './BookDetailModal';
 import { Book, BookCategory } from '../types/book';
 import Footer from './Footer';
-import { Loader2, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 // API Book type from database
 interface APIBook {
@@ -222,12 +224,7 @@ export default function ProductsPage({
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
-        <span className="ml-2 text-gray-500">Memuat produk...</span>
-      </div>
-    );
+    return isMobile ? <ProductsMobileSkeleton /> : <ProductsDesktopSkeleton />;
   }
 
   // Mobile Layout - Category Grouped View

@@ -95,9 +95,9 @@ export default function AdminDataTable<T extends { id: string | number }>({
                 </table>
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                <p className="text-sm text-gray-500">
+            {/* Pagination - Stack on mobile */}
+            <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-100 gap-3">
+                <p className="text-sm text-gray-500 text-center sm:text-left">
                     Menampilkan {startItem}-{endItem} dari {totalItems} data
                 </p>
                 {totalPages > 1 && (

@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookCard } from './ui';
+import { BookCard, HomePageSkeleton } from './ui';
 import { Book } from '../types/book';
 import Hero from './Hero';
 import Footer from './Footer';
-import { Loader2 } from 'lucide-react';
 import BookDetailModal from './BookDetailModal';
 import { mapAPIBookToBook } from '@/utils/bookMapper';
 
@@ -83,12 +82,7 @@ export default function HomePage({ initialBooks = [] }: HomePageProps) {
     const hasMoreBooks = visibleBooks < books.length;
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
-                <span className="ml-2 text-gray-500">Memuat buku...</span>
-            </div>
-        );
+        return <HomePageSkeleton />;
     }
 
     return (
