@@ -58,7 +58,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
 
     const [formData, setFormData] = useState({
         title: '',
-        authors: [''],
+        authors: [] as string[],
         pages: '',
         size: '16 x 24 cm',
         paper_type: 'HVS',
