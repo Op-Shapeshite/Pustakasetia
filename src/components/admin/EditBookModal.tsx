@@ -38,6 +38,16 @@ const parseRupiah = (value: string): string => {
     return value.replace(/\D/g, '');
 };
 
+// Format ISBN with dashes (978-XXX-XXX-XXX-X)
+const formatISBN = (value: string): string => {
+    const digits = value.replace(/\D/g, '').slice(0, 13);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+    if (digits.length <= 12) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 9)}-${digits.slice(9)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 9)}-${digits.slice(9, 12)}-${digits.slice(12)}`;
+};
+
 export default function EditBookModal({ isOpen, onClose, onSuccess, book }: EditBookModalProps) {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isUploading, setIsUploading] = useState(false);
@@ -77,13 +87,17 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
     // Load book data when book changes
     useEffect(() => {
         if (book) {
+            // Format ISBN: remove existing dashes first, then reformat
+            const cleanIsbn = book.isbn ? book.isbn.replace(/\D/g, '') : '';
+            const formattedIsbn = formatISBN(cleanIsbn);
+
             setFormData({
                 title: book.title,
                 authors: book.author ? book.author.split(' & ') : [''],
                 pages: String(book.pages),
                 size: book.size,
                 paper_type: book.paper_type || 'HVS',
-                isbn: book.isbn,
+                isbn: formattedIsbn,
                 price: String(book.price),
                 priceDisplay: formatRupiah(String(book.price)),
                 categoryId: book.categoryId?.toString() || '',
@@ -107,6 +121,11 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
 
     const handleSynopsisChange = (content: string) => {
         setFormData(prev => ({ ...prev, synopsis: content }));
+    };
+
+    const handleISBNChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatISBN(e.target.value);
+        setFormData(prev => ({ ...prev, isbn: formatted }));
     };
 
 
@@ -369,9 +388,11 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                                 <input
                                     type="text"
                                     value={formData.isbn}
-                                    onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+                                    onChange={handleISBNChange}
+                                    placeholder="978-..."
                                     required
-                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]"
+                                    maxLength={17}
+                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] font-mono"
                                 />
                             </div>
                             <div>

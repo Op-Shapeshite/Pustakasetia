@@ -39,14 +39,14 @@ export default function Hero() {
         <div className="relative max-w-[1440px] mx-auto">
           <div className="flex flex-col lg:flex-row">
             {/* Left Content */}
-            <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left space-y-6 md:space-y-8 px-4 md:px-8 lg:px-16 pt-12 pb-2 md:py-16 lg:py-20 w-full lg:w-1/2 z-10 relative bg-white lg:bg-transparent">
+            <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left space-y-6 md:space-y-8 px-4 md:px-8 lg:px-16 pt-12 pb-2 md:py-16 lg:py-20 w-full lg:w-1/2 z-10 relative lg:bg-transparent">
               {/* Heading with Slide Animation */}
               <div className="flex justify-center lg:justify-start w-full">
                 <motion.h1
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="font-['Poppins',sans-serif] font-semibold text-3xl md:text-5xl lg:text-[64px] md:leading-[1.2] text-neutral-900 text-left"
+                  className="font-['Poppins',sans-serif] font-semibold text-3xl md:text-5xl lg:text-[64px] md:leading-[1.2] text-neutral-900 text-center lg:text-left"
                 >
                   Jelajahi koleksi buku terbaik kami untuk Anda
                 </motion.h1>

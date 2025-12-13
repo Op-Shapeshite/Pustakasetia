@@ -63,6 +63,54 @@ interface ProductsPageProps {
   initialCategory?: BookCategory | 'all';
 }
 
+// Mobile Category Section Component
+function MobileCategorySection({
+  category,
+  books,
+  onBookClick,
+}: {
+  category: Category;
+  books: Book[];
+  onBookClick: (book: Book) => void;
+}) {
+  const router = useRouter();
+  const displayBooks = books.slice(0, 5); // Max 5 cards
+
+  if (displayBooks.length === 0) return null;
+
+  return (
+    <div className="mb-8">
+      {/* Category Header */}
+      <div className="flex justify-between items-center mb-4 px-4">
+        <h2 className="font-['Poppins',sans-serif] font-semibold text-lg text-[#2f2f2f]">
+          {category.name}
+        </h2>
+        <button
+          onClick={() => router.push(`/products/category/${encodeURIComponent(category.name)}`)}
+          className="text-[#5a4fcf] text-sm font-['Poppins',sans-serif] hover:underline"
+        >
+          Lihat Semua
+        </button>
+      </div>
+
+      {/* Horizontal Scrolling Cards */}
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex gap-3 px-4 pb-2" style={{ width: 'max-content' }}>
+          {displayBooks.map((book) => (
+            <div key={book.id} className="w-[140px] flex-shrink-0">
+              <BookCard
+                book={book}
+                onClick={() => onBookClick(book)}
+                variant="mobile"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductsPage({
   initialCategory = 'all'
 }: ProductsPageProps) {
@@ -123,6 +171,19 @@ export default function ProductsPage({
     setCurrentPage(1);
   }, [selectedCategory, searchQuery]);
 
+  // Group books by category for mobile view
+  const getBooksByCategory = useCallback(() => {
+    const grouped: { [key: string]: Book[] } = {};
+    books.forEach((book) => {
+      const categoryName = book.category;
+      if (!grouped[categoryName]) {
+        grouped[categoryName] = [];
+      }
+      grouped[categoryName].push(book);
+    });
+    return grouped;
+  }, [books]);
+
   const getFilteredBooks = () => {
     let filtered = books;
 
@@ -150,6 +211,7 @@ export default function ProductsPage({
   };
 
   const { books: displayBooks, totalPages, totalItems } = getFilteredBooks();
+  const booksByCategory = getBooksByCategory();
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);
@@ -168,6 +230,43 @@ export default function ProductsPage({
     );
   }
 
+  // Mobile Layout - Category Grouped View
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-[1440px] mx-auto py-6">
+          {/* Mobile Category Sections */}
+          {categories.map((category) => (
+            <MobileCategorySection
+              key={category.id}
+              category={category}
+              books={booksByCategory[category.name] || []}
+              onBookClick={handleBookClick}
+            />
+          ))}
+
+          {categories.length === 0 && (
+            <div className="text-center py-16 px-4">
+              <p className="text-xl text-neutral-600 mb-2 font-['Poppins',sans-serif]">
+                Tidak ada kategori ditemukan
+              </p>
+            </div>
+          )}
+        </div>
+
+        {selectedBook && (
+          <BookDetailModal
+            book={selectedBook}
+            onClose={handleCloseModal}
+          />
+        )}
+
+        <Footer />
+      </div>
+    );
+  }
+
+  // Desktop Layout - Original Grid View
   return (
     <div className="min-h-screen bg-white">
       {/* Page Header */}
@@ -231,7 +330,7 @@ export default function ProductsPage({
               key={book.id}
               book={book}
               onClick={() => handleBookClick(book)}
-              variant={isMobile ? 'mobile' : 'default'}
+              variant="default"
             />
           ))}
         </div>
@@ -243,7 +342,7 @@ export default function ProductsPage({
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
-              variant={isMobile ? 'mobile' : 'default'}
+              variant="default"
             />
           </div>
         )}
@@ -270,3 +369,4 @@ export default function ProductsPage({
     </div>
   );
 }
+
