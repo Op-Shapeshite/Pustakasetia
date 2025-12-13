@@ -2,6 +2,13 @@
 const nextConfig = {
     // Disable X-Powered-By header for security
     poweredByHeader: false,
+
+    // Enable compression for better performance
+    compress: true,
+
+    // Optimize package imports
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+
     // Externalize server-only packages to prevent webpack bundling issues
     serverExternalPackages: [
         'https-proxy-agent',
@@ -9,6 +16,8 @@ const nextConfig = {
         'google-auth-library',
         'gaxios',
     ],
+
+    // Image optimization settings
     images: {
         remotePatterns: [
             {
@@ -20,12 +29,41 @@ const nextConfig = {
                 hostname: '**',
             },
         ],
+        // Use modern formats for smaller file sizes
+        formats: ['image/avif', 'image/webp'],
+        // Optimize image quality (default is 75)
+        quality: 80,
+        // Define device sizes for responsive images
+        deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+        // Define image sizes for srcset
+        imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+        // Minimize layout shift with placeholder
+        minimumCacheTTL: 60,
     },
+
     // Support for asset imports
-    webpack: (config) => {
+    webpack: (config, { dev, isServer }) => {
         config.resolve.alias = {
             ...config.resolve.alias,
         };
+
+        // Optimize bundle in production
+        if (!dev && !isServer) {
+            config.optimization = {
+                ...config.optimization,
+                splitChunks: {
+                    chunks: 'all',
+                    cacheGroups: {
+                        vendor: {
+                            test: /[\\/]node_modules[\\/]/,
+                            name: 'vendors',
+                            chunks: 'all',
+                        },
+                    },
+                },
+            };
+        }
+
         return config;
     },
     // Security Headers
