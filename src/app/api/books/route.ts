@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
             prisma.book.count({ where }),
         ]);
 
-        return NextResponse.json({
+        // Add cache headers for performance
+        const response = NextResponse.json({
             data: books,
             pagination: {
                 page,
@@ -45,6 +46,11 @@ export async function GET(request: NextRequest) {
                 totalPages: Math.ceil(total / limit),
             },
         });
+
+        // Cache for 60 seconds, stale-while-revalidate for 300 seconds
+        response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+
+        return response;
     } catch (error) {
         console.error('Error fetching books:', error);
         return NextResponse.json({ error: 'Failed to fetch books' }, { status: 500 });

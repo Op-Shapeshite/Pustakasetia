@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Book } from '../../types/book';
 import Image from 'next/image';
 
@@ -7,7 +8,7 @@ interface BookCardProps {
   variant?: 'default' | 'mobile';
 }
 
-export default function BookCard({ book, onClick, variant = 'default' }: BookCardProps) {
+function BookCard({ book, onClick, variant = 'default' }: BookCardProps) {
   // Mobile variant - Grid layout (same as desktop, responsive)
   if (variant === 'mobile') {
     return (
@@ -88,3 +89,6 @@ export default function BookCard({ book, onClick, variant = 'default' }: BookCar
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export default memo(BookCard);

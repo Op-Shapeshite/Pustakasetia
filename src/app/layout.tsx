@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AppStateProvider } from "@/contexts/AppStateContext";
@@ -14,7 +14,17 @@ const poppins = Poppins({
     subsets: ['latin'],
     weight: ['300', '400', '500', '600', '700', '800'],
     variable: '--font-poppins',
+    display: 'swap', // Improve font loading performance
+    preload: true,
 });
+
+// Viewport configuration for mobile optimization
+export const viewport: Viewport = {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    themeColor: '#ffcc00',
+};
 
 export const metadata: Metadata = {
     title: {
@@ -46,7 +56,7 @@ export const metadata: Metadata = {
     icons: {
         icon: '/img/favicon/favicon.ico',
         shortcut: '/img/favicon/favicon.ico',
-        apple: '/img/favicon/apple-touch-icon.png', // Assuming this exists based on dir list
+        apple: '/img/favicon/apple-touch-icon.png',
         other: {
             rel: 'apple-touch-icon-precomposed',
             url: '/img/favicon/apple-touch-icon.png',
