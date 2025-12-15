@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { sanitizeSearchQuery, validateInput, sanitizeString } from '@/lib/sanitize';
 
 // GET /api/books - Get all books with pagination, search, and filter
 export async function GET(request: NextRequest) {
@@ -7,7 +8,8 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
-        const search = searchParams.get('search') || '';
+        // Sanitize search input to prevent SQL injection
+        const search = sanitizeSearchQuery(searchParams.get('search') || '');
         const categoryId = searchParams.get('categoryId');
 
         const skip = (page - 1) * limit;
@@ -69,6 +71,17 @@ export async function POST(request: NextRequest) {
                 { error: 'Missing required fields: title, author, isbn, categoryId' },
                 { status: 400 }
             );
+        }
+
+        // Validate inputs for SQL injection and XSS
+        const fieldsToValidate = { title, author, isbn, edition, paper_type, synopsis };
+        for (const [fieldName, value] of Object.entries(fieldsToValidate)) {
+            if (value) {
+                const error = validateInput(String(value), fieldName);
+                if (error) {
+                    return NextResponse.json({ error }, { status: 400 });
+                }
+            }
         }
 
         const book = await prisma.book.create({
