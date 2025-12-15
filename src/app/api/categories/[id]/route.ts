@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
 
 interface RouteParams {
     params: Promise<{ id: string }>;
+}
+
+// Helper function to check authentication
+function checkAuth(request: NextRequest) {
+    const authHeader = request.headers.get('authorization');
+    const token = extractTokenFromHeader(authHeader);
+    if (!token) return null;
+    return verifyToken(token);
 }
 
 // GET /api/categories/:id - Get single category
@@ -27,6 +36,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT /api/categories/:id - Update category
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+    // Require authentication for updates
+    const user = checkAuth(request);
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const { id } = await params;
         const body = await request.json();
@@ -51,6 +66,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/categories/:id - Delete category
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+    // Require authentication for deletion
+    const user = checkAuth(request);
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const { id } = await params;
 
