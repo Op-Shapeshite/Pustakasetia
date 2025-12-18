@@ -207,10 +207,11 @@ export const roleService = {
 
 // Category Service
 export const categoryService = {
-    getAll: async (params?: { page?: number; limit?: number }) => {
+    getAll: async (params?: { page?: number; limit?: number; sortBy?: string }) => {
         const searchParams = new URLSearchParams();
         if (params?.page) searchParams.set('page', params.page.toString());
         if (params?.limit) searchParams.set('limit', (params.limit || 100).toString());
+        if (params?.sortBy) searchParams.set('sort', params.sortBy);
 
         const url = `/api/categories${searchParams.toString() ? `?${searchParams}` : ''}`;
         return apiCall<PaginatedResponse<Category>>(url);

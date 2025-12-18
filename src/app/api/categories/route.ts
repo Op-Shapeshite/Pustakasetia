@@ -10,12 +10,16 @@ export async function GET(request: NextRequest) {
 
         const skip = (page - 1) * limit;
 
+        const sort = searchParams.get('sort');
+
         const [categories, total] = await Promise.all([
             prisma.category.findMany({
                 skip,
                 take: limit,
                 include: { _count: { select: { books: true } } },
-                orderBy: { name: 'asc' },
+                orderBy: sort === 'popular'
+                    ? { books: { _count: 'desc' } }
+                    : { name: 'asc' },
             }),
             prisma.category.count(),
         ]);

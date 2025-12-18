@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { userService, roleService, Role, User } from '@/utils/adminData';
+import SearchableSelect from './SearchableSelect';
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -20,9 +21,14 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
         fullName: '',
         username: '',
         password: '',
-        role: '',
+        roleId: '',
         status: 'active' as 'active' | 'inactive',
     });
+
+    const statusOptions = [
+        { id: 'active' as any, name: 'Aktif' },
+        { id: 'inactive' as any, name: 'Tidak Aktif' }
+    ];
 
     useEffect(() => {
         setMounted(true);
@@ -44,7 +50,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                 fullName: user.fullName,
                 username: user.username,
                 password: '', // Password is not returned from API for security
-                role: user.role.name,
+                roleId: user.roleId.toString(),
                 status: user.status,
             });
         }
@@ -54,10 +60,19 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
         e.preventDefault();
         try {
             // Only include password if it was changed
+            if (formData.password) {
+                // Password validation
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                if (!passwordRegex.test(formData.password)) {
+                    alert('Password harus memiliki minimal 8 karakter, huruf besar, huruf kecil, angka, dan simbol');
+                    return;
+                }
+            }
+
             const updateData: Record<string, unknown> = {
                 fullName: formData.fullName,
                 username: formData.username,
-                roleId: roles.find(r => r.name === formData.role)?.id,
+                roleId: parseInt(formData.roleId),
                 status: formData.status,
             };
             if (formData.password) {
@@ -102,8 +117,8 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                             required
                             disabled={user.username === 'admin'}
                             className={`w-full border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] ${user.username === 'admin'
-                                    ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                                    : 'bg-white'
+                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                                : 'bg-white'
                                 }`}
                         />
                     </div>
@@ -116,18 +131,25 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                             </button>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-sm text-gray-500 mb-2">Role</label>
-                        <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]">
-                            {roles.map(role => (<option key={role.id} value={role.name}>{role.name}</option>))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm text-gray-500 mb-2">Status</label>
-                        <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })} className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]">
-                            <option value="active">Aktif</option>
-                            <option value="inactive">Tidak Aktif</option>
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <SearchableSelect
+                                label="Role"
+                                options={roles}
+                                value={formData.roleId}
+                                onChange={(value) => setFormData({ ...formData, roleId: value })}
+                                placeholder="Pilih Role"
+                            />
+                        </div>
+                        <div>
+                            <SearchableSelect
+                                label="Status"
+                                options={statusOptions}
+                                value={formData.status}
+                                onChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}
+                                placeholder="Pilih Status"
+                            />
+                        </div>
                     </div>
                     <div className="flex gap-4 pt-4">
                         <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-[#2f2f2f] rounded-lg font-medium text-[#2f2f2f] hover:bg-gray-100 transition-colors">Cancel</button>

@@ -178,7 +178,7 @@ export default function DashboardHomePage() {
                 // Determine if we should filter categories by date logic (likely not supported yet, but passed just in case)
                 // const query = getDateParams(); 
                 // Using existing pagination logic
-                const res = await categoryService.getAll({ page: catPage, limit: CAT_LIMIT });
+                const res = await categoryService.getAll({ page: catPage, limit: CAT_LIMIT, sortBy: 'popular' });
                 setCategories(res.data as any);
                 setCatTotal(res.pagination?.total ?? 0);
             } catch (error) {
@@ -206,7 +206,7 @@ export default function DashboardHomePage() {
     const handleRefreshCategories = async () => {
         setRefreshingCategories(true);
         try {
-            const res = await categoryService.getAll({ page: catPage, limit: CAT_LIMIT });
+            const res = await categoryService.getAll({ page: catPage, limit: CAT_LIMIT, sortBy: 'popular' });
             setCategories(res.data as any);
             setCatTotal(res.pagination?.total ?? 0);
         } catch (error) {

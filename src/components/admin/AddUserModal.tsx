@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { userService, roleService, Role } from '@/utils/adminData';
+import SearchableSelect from './SearchableSelect';
 
 interface AddUserModalProps {
     isOpen: boolean;
@@ -19,9 +20,14 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
         fullName: '',
         username: '',
         password: '',
-        role: 'Admin',
+        roleId: '',
         status: 'active' as 'active' | 'inactive',
     });
+
+    const statusOptions = [
+        { id: 'active' as any, name: 'Aktif' },
+        { id: 'inactive' as any, name: 'Tidak Aktif' }
+    ];
 
     useEffect(() => {
         setMounted(true);
@@ -30,6 +36,9 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
             try {
                 const response = await roleService.getAll({ limit: 100 });
                 setRoles(response.data);
+                if (response.data.length > 0) {
+                    setFormData(prev => ({ ...prev, roleId: response.data[0].id.toString() }));
+                }
             } catch (err) {
                 console.error('Failed to load roles:', err);
             }
@@ -40,13 +49,19 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Password validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(formData.password)) {
+            alert('Password harus memiliki minimal 8 karakter, huruf besar, huruf kecil, angka, dan simbol');
+            return;
+        }
+
         try {
-            const roleId = roles.find(r => r.name === formData.role)?.id;
             await userService.create({
                 fullName: formData.fullName,
                 username: formData.username,
                 password: formData.password,
-                roleId: roleId || 1,
+                roleId: parseInt(formData.roleId),
                 status: formData.status,
             });
 
@@ -55,6 +70,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
             resetForm();
         } catch (err) {
             console.error('Failed to create user:', err);
+            alert('Gagal membuat user');
         }
     };
 
@@ -63,7 +79,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
             fullName: '',
             username: '',
             password: '',
-            role: 'Admin',
+            roleId: roles[0]?.id.toString() || '',
             status: 'active',
         });
     };
@@ -100,18 +116,25 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                             </button>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-sm text-gray-500 mb-2">Role</label>
-                        <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]">
-                            {roles.map(role => (<option key={role.id} value={role.name}>{role.name}</option>))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm text-gray-500 mb-2">Status</label>
-                        <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })} className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]">
-                            <option value="active">Aktif</option>
-                            <option value="inactive">Tidak Aktif</option>
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <SearchableSelect
+                                label="Role"
+                                options={roles}
+                                value={formData.roleId}
+                                onChange={(value) => setFormData({ ...formData, roleId: value })}
+                                placeholder="Pilih Role"
+                            />
+                        </div>
+                        <div>
+                            <SearchableSelect
+                                label="Status"
+                                options={statusOptions}
+                                value={formData.status}
+                                onChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}
+                                placeholder="Pilih Status"
+                            />
+                        </div>
                     </div>
                     <div className="flex gap-4 pt-4">
                         <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-[#2f2f2f] rounded-lg font-medium text-[#2f2f2f] hover:bg-gray-100 transition-colors">Cancel</button>

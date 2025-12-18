@@ -57,6 +57,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         if (body.roleId) updateData.roleId = parseInt(body.roleId);
         if (body.status) updateData.status = body.status;
         if (body.password) {
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!passwordRegex.test(body.password as string)) {
+                return NextResponse.json(
+                    { error: 'Password must be at least 8 characters with uppercase, lowercase, number, and symbol' },
+                    { status: 400 }
+                );
+            }
             updateData.password = await hashPassword(body.password);
         }
 
