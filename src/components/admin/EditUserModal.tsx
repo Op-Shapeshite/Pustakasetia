@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { userService, roleService, Role, User } from '@/utils/adminData';
 import SearchableSelect from './SearchableSelect';
+import { useToast } from '@/contexts/ToastContext';
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
     const [mounted, setMounted] = useState(false);
     const [roles, setRoles] = useState<Role[]>([]);
     const [showPassword, setShowPassword] = useState(false);
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
@@ -64,7 +66,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                 // Password validation
                 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
                 if (!passwordRegex.test(formData.password)) {
-                    alert('Password harus memiliki minimal 8 karakter, huruf besar, huruf kecil, angka, dan simbol');
+                    showToast('Password harus memiliki minimal 8 karakter, huruf besar, huruf kecil, angka, dan simbol', 'error');
                     return;
                 }
             }
@@ -125,11 +127,28 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                     <div>
                         <label className="block text-sm text-gray-500 mb-2">Password</label>
                         <div className="relative">
-                            <input type={showPassword ? 'text' : 'password'} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]" />
+                            <input type={showPassword ? 'text' : 'password'} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="Kosongkan jika tidak diubah" className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00]" />
                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 {showPassword ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </button>
                         </div>
+                        <ul className="text-xs mt-2 space-y-1">
+                            <li className={formData.password.length >= 8 ? 'text-green-500' : 'text-gray-400'}>
+                                • Min. 8 karakter
+                            </li>
+                            <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Huruf besar (A-Z)
+                            </li>
+                            <li className={/[a-z]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Huruf kecil (a-z)
+                            </li>
+                            <li className={/\d/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Angka (0-9)
+                            </li>
+                            <li className={/[@$!%*?&]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Simbol (@$!%*?&)
+                            </li>
+                        </ul>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { userService, roleService, Role } from '@/utils/adminData';
 import SearchableSelect from './SearchableSelect';
+import { useToast } from '@/contexts/ToastContext';
 
 interface AddUserModalProps {
     isOpen: boolean;
@@ -16,6 +17,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     const [mounted, setMounted] = useState(false);
     const [roles, setRoles] = useState<Role[]>([]);
     const [showPassword, setShowPassword] = useState(false);
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
@@ -52,7 +54,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
         // Password validation
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         if (!passwordRegex.test(formData.password)) {
-            alert('Password harus memiliki minimal 8 karakter, huruf besar, huruf kecil, angka, dan simbol');
+            showToast('Password harus memiliki minimal 8 karakter, huruf besar, huruf kecil, angka, dan simbol', 'error');
             return;
         }
 
@@ -70,7 +72,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
             resetForm();
         } catch (err) {
             console.error('Failed to create user:', err);
-            alert('Gagal membuat user');
+            showToast('Gagal membuat user', 'error');
         }
     };
 
@@ -115,6 +117,23 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                                 {showPassword ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </button>
                         </div>
+                        <ul className="text-xs mt-2 space-y-1">
+                            <li className={formData.password.length >= 8 ? 'text-green-500' : 'text-gray-400'}>
+                                • Min. 8 karakter
+                            </li>
+                            <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Huruf besar (A-Z)
+                            </li>
+                            <li className={/[a-z]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Huruf kecil (a-z)
+                            </li>
+                            <li className={/\d/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Angka (0-9)
+                            </li>
+                            <li className={/[@$!%*?&]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}>
+                                • Simbol (@$!%*?&)
+                            </li>
+                        </ul>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
