@@ -1,31 +1,31 @@
+'use client';
+
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { addToCart } from "../utils/cartStorage";
+
 import { useToast } from "../contexts/ToastContext";
+import { useRouter } from 'next/navigation';
+import { Book } from "@/types/book";
 
 const imgRectangle1304 = "/img/library-background.png";
 
-interface Book {
-  id: number;
-  image: string;
-  title: string;
-  author: string;
-  price: string;
-  pages?: number;
-  size?: string;
-  edition?: string;
-  isbn?: string;
-  paperType?: string;
-  synopsis?: string;
-}
-
 interface BookDetailPageProps {
   book: Book;
-  onBack: () => void;
+  onBack?: () => void;
   isModal?: boolean;
 }
 
 export default function BookDetailPage({ book, onBack, isModal = false }: BookDetailPageProps) {
   const { showToast } = useToast();
+  const router = useRouter();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.back();
+    }
+  };
 
   const handleBuy = async () => {
     try {
@@ -40,7 +40,7 @@ export default function BookDetailPage({ book, onBack, isModal = false }: BookDe
       // Continue to WhatsApp even if tracking fails
     }
 
-    const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${book.price}`;
+    const message = `Halo, saya ingin membeli buku "${book.title}" dengan harga ${book.priceFormatted}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -80,13 +80,13 @@ export default function BookDetailPage({ book, onBack, isModal = false }: BookDe
         {/* Close/Back Button */}
         {/* Modal: Top Right of the card */}
         {isModal && (
-          <button onClick={onBack} className="absolute top-4 right-4 z-50 p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-md transition-colors">
+          <button onClick={handleBack} className="absolute top-4 right-4 z-50 p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-md transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </button>
         )}
         {/* Page: Top Left fixed */}
         {!isModal && (
-          <button onClick={onBack} className="fixed top-[30px] left-[30px] z-50 p-2 bg-white rounded-full shadow-lg hover:bg-neutral-100 transition-colors">
+          <button onClick={handleBack} className="fixed top-[30px] left-[30px] z-50 p-2 bg-white rounded-full shadow-lg hover:bg-neutral-100 transition-colors">
             <ArrowLeft className="w-6 h-6 text-[#2f2f2f]" />
           </button>
         )}
@@ -150,7 +150,7 @@ export default function BookDetailPage({ book, onBack, isModal = false }: BookDe
                       className="flex-1 bg-[#22c55e] text-white font-bold px-6 py-3.5 rounded-lg hover:bg-[#16a34a] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
                     >
                       <span className="text-lg">BELI</span>
-                      <span className="text-lg opacity-90">{book.price}</span>
+                      <span className="text-lg opacity-90">{book.priceFormatted}</span>
                     </button>
 
                     <button

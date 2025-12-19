@@ -118,7 +118,7 @@ export default function Header() {
   return (
     <>
       {/* MOBILE NAVBAR */}
-      <header className="lg:hidden sticky top-0 left-0 right-0 z-50 h-[87px] bg-white flex items-center justify-between px-6 shadow-sm">
+      <header role="banner" aria-label="Header navigasi mobile" className="lg:hidden sticky top-0 left-0 right-0 z-50 h-[87px] bg-white flex items-center justify-between px-6 shadow-sm">
         <Link href="/" className="relative h-[37px] w-[40px] shrink-0">
           <Image
             src="/img/logo.png"
@@ -130,7 +130,7 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link href="/cart" className="relative size-[24px]">
+          <Link href="/cart" className="relative size-[24px]" aria-label="Keranjang belanja">
             <CartIcon />
             {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -172,7 +172,7 @@ export default function Header() {
       </header>
 
       {/* DESKTOP NAVBAR */}
-      <header className={`hidden lg:block w-full bg-white sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header role="banner" aria-label="Header navigasi utama" className={`hidden lg:block w-full bg-white sticky top-0 z-50 border-b border-gray-200 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex-shrink-0 relative h-12 w-32">
@@ -333,7 +333,7 @@ export default function Header() {
                 </AnimatePresence>
               </div>
 
-              <Link href="/cart" className="hover:opacity-70 transition-opacity relative">
+              <Link href="/cart" className="hover:opacity-70 transition-opacity relative" aria-label="Keranjang belanja">
                 <CartIcon />
                 {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -341,7 +341,7 @@ export default function Header() {
                   </span>
                 )}
               </Link>
-              <Link href={isLoggedIn ? "/dashboard" : "/login"} className="hover:opacity-70 transition-opacity">
+              <Link href={isLoggedIn ? "/dashboard" : "/login"} className="hover:opacity-70 transition-opacity" aria-label={isLoggedIn ? "Dashboard akun" : "Login"}>
                 <UserIcon />
               </Link>
             </div>

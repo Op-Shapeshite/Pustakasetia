@@ -9,6 +9,38 @@ import { AnnouncementPopup } from "@/components/ui/AnnouncementPopup";
 import NextTopLoader from 'nextjs-toploader';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import PageTracker from '@/components/PageTracker';
+import SkipToMain from '@/components/ui/SkipToMain';
+
+// JSON-LD Structured Data for Organization
+const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Pustaka Setia',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://pustakasetia.id',
+    logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://pustakasetia.id'}/img/favicon/apple-touch-icon.png`,
+    description: 'Toko Buku Online Terlengkap di Indonesia',
+    address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'ID',
+    },
+    sameAs: [],
+};
+
+// JSON-LD for WebSite with SearchAction (for sitelinks search box)
+const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Pustaka Setia',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://pustakasetia.id',
+    potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://pustakasetia.id'}/products?search={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+    },
+};
 
 const poppins = Poppins({
     subsets: ['latin'],
@@ -72,7 +104,24 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="id" suppressHydrationWarning>
+            <head>
+                {/* JSON-LD Structured Data for SEO */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+                />
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+                />
+                {/* Preconnect for performance */}
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                <link rel="preconnect" href="https://www.google-analytics.com" />
+            </head>
             <body className={`${poppins.variable} font-sans bg-neutral-50 min-h-screen w-full overflow-x-hidden`} suppressHydrationWarning>
+                {/* Skip to main content link for accessibility */}
+                <SkipToMain />
                 <GoogleAnalytics />
                 <PageTracker />
                 <NextTopLoader
@@ -89,7 +138,9 @@ export default function RootLayout({
                 <AppStateProvider>
                     <ToastProvider>
                         <PopupProvider>
-                            {children}
+                            <main id="main-content" role="main">
+                                {children}
+                            </main>
                             <AnnouncementPopup />
                             <Toaster />
                         </PopupProvider>
