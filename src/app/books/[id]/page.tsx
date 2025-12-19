@@ -5,7 +5,7 @@ import BookDetailPage from "@/components/BookDetailPage";
 import { mapAPIBookToBook } from "@/utils/bookMapper";
 
 interface Props {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 async function getBook(id: string) {
@@ -26,7 +26,8 @@ async function getBook(id: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const book = await getBook(params.id);
+    const { id } = await params;
+    const book = await getBook(id);
 
     if (!book) {
         return {
@@ -47,7 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BookDetail({ params }: Props) {
-    const book = await getBook(params.id);
+    const { id } = await params;
+    const book = await getBook(id);
 
     if (!book) {
         notFound();
