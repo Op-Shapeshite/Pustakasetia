@@ -171,7 +171,7 @@ export default function BookDetailPage({ book, onBack, isModal = false }: BookDe
                 Sinopsis
               </h2>
               <div className="text-[#4a4a4a] text-[16px] leading-relaxed text-justify whitespace-pre-line">
-                {book.synopsis || "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}
+                {book.synopsis || "-"}
               </div>
             </div>
           </div>

@@ -129,35 +129,76 @@ export default function ProductsPage({
   const itemsPerPage = 16;
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories?limit=50');
+      if (!res.ok) throw new Error('Failed to fetch categories');
+      const data = await res.json();
+      setCategories(data.data);
+    } catch (err) {
+      console.error('Failed to fetch categories:', err);
+    }
+  }, []);
+
   const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch books and categories in parallel
-      const [booksRes, categoriesRes] = await Promise.all([
-        fetch('/api/books?limit=100'),
-        fetch('/api/categories?limit=50')
-      ]);
+      const params = new URLSearchParams();
+      params.set('page', currentPage.toString());
+      params.set('limit', itemsPerPage.toString());
+      if (searchQuery) params.set('search', searchQuery);
 
-      if (!booksRes.ok) throw new Error('Failed to fetch books');
-      if (!categoriesRes.ok) throw new Error('Failed to fetch categories');
+      if (selectedCategory !== 'all') {
+        // We need to find the category ID from the name since API expects ID
+        // If categories aren't loaded yet, this might be an issue. 
+        // Ideally we should store selectedCategoryID.
+        // For now, let's try to find it from the categories state.
+        const cat = categories.find(c => c.name === selectedCategory);
+        if (cat) {
+          params.set('categoryId', cat.id.toString());
+        } else if (categories.length > 0) {
+          // If categories are loaded but we can't find the name, maybe it's invalid?
+          // Or maybe we should wait? 
+          // For simplicity in this refactor, if we can't find ID, we don't send it (fetch all) or we could block.
+          // However, to ensure smooth UX, let's assume if user selected a category, it exists in our list.
+        }
+      }
 
-      const booksData = await booksRes.json();
-      const categoriesData = await categoriesRes.json();
+      const res = await fetch(`/api/books?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch books');
 
-      setBooks(booksData.data.map(mapAPIBookToBook));
-      setCategories(categoriesData.data);
+      const data = await res.json();
+      setBooks(data.data.map(mapAPIBookToBook));
+
+      // Update pagination info from API response
+      if (data.pagination) {
+        setTotalItems(data.pagination.total);
+        setTotalPages(data.pagination.totalPages);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
+      setError(err instanceof Error ? err.message : 'Failed to load books');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, itemsPerPage, searchQuery, selectedCategory, categories]);
 
+  // Initial load of categories
   useEffect(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // Fetch books when dependencies change
+  useEffect(() => {
+    // Only fetch books if categories are loaded OR if we don't need category ID (all)
+    if (selectedCategory === 'all' || categories.length > 0) {
+      fetchBooks();
+    }
+  }, [fetchBooks]); // fetchBooks depends on categories
 
   useEffect(() => {
     const checkMobile = () => {
@@ -173,7 +214,7 @@ export default function ProductsPage({
     setCurrentPage(1);
   }, [selectedCategory, searchQuery]);
 
-  // Group books by category for mobile view
+  // Group books by category for mobile view (Client side grouping of the FETCHED page)
   const getBooksByCategory = useCallback(() => {
     const grouped: { [key: string]: Book[] } = {};
     books.forEach((book) => {
@@ -186,33 +227,8 @@ export default function ProductsPage({
     return grouped;
   }, [books]);
 
-  const getFilteredBooks = () => {
-    let filtered = books;
-
-    // Filter by search
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(book =>
-        book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query) ||
-        book.isbn.includes(query)
-      );
-    }
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(book => book.category === selectedCategory);
-    }
-
-    const totalItems = filtered.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedBooks = filtered.slice(startIndex, startIndex + itemsPerPage);
-
-    return { books: paginatedBooks, totalPages, totalItems };
-  };
-
-  const { books: displayBooks, totalPages, totalItems } = getFilteredBooks();
+  // We no longer slice locally, use full books array as displayBooks
+  const displayBooks = books;
   const booksByCategory = getBooksByCategory();
 
   const handleBookClick = (book: Book) => {
