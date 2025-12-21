@@ -123,22 +123,22 @@ export default function CartPage() {
       console.error('Failed to increment sold counts:', err);
     }
 
-    let message = `*PESANAN BUKU*\\n\\n`;
-    message += `*Data Penerima:*\\n`;
-    message += `Nama: ${formData.name}\\n`;
-    message += `Telepon: ${formData.phone}\\n`;
-    message += `Alamat: ${formData.address}\\n\\n`;
-    message += `*Detail Pesanan:*\\n`;
+    let message = `*PESANAN BUKU*\n\n`;
+    message += `*Data Penerima:*\n`;
+    message += `Nama: ${formData.name}\n`;
+    message += `Telepon: ${formData.phone}\n`;
+    message += `Alamat: ${formData.address}\n\n`;
+    message += `*Detail Pesanan:*\n`;
 
     cart.forEach((item, index) => {
-      message += `\\n${index + 1}. ${item.title}\\n`;
-      message += `   Harga: Rp${item.price.toLocaleString('id-ID')}\\n`;
-      message += `   Jumlah: ${item.quantity}\\n`;
+      message += `\n${index + 1}. ${item.title}\n`;
+      message += `   Harga: Rp${item.price.toLocaleString('id-ID')}\n`;
+      message += `   Jumlah: ${item.quantity}\n`;
     });
 
-    message += `\\n*Ringkasan:*\\n`;
-    message += `Sub Total: Rp${subtotal.toLocaleString('id-ID')}\\n`;
-    message += `Ongkos Kirim: Rp.\\n`;
+    message += `\n*Ringkasan:*\n`;
+    message += `Sub Total: Rp${subtotal.toLocaleString('id-ID')}\n`;
+    message += `Ongkos Kirim: Rp.\n`;
     message += `*Total: Rp.*`;
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
