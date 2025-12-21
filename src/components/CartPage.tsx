@@ -100,8 +100,7 @@ export default function CartPage() {
   };
 
   const subtotal = calculateTotal();
-  const shipping = 15000;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,8 +138,8 @@ export default function CartPage() {
 
     message += `\\n*Ringkasan:*\\n`;
     message += `Sub Total: Rp${subtotal.toLocaleString('id-ID')}\\n`;
-    message += `Ongkos Kirim: Rp${shipping.toLocaleString('id-ID')}\\n`;
-    message += `*Total: Rp${total.toLocaleString('id-ID')}*`;
+    message += `Ongkos Kirim: Rp.\\n`;
+    message += `*Total: Rp.*`;
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=6282116109258&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -327,11 +326,6 @@ export default function CartPage() {
                 <div className="flex justify-between items-center">
                   <p className="text-black text-base md:text-lg">Sub Harga</p>
                   <p className="text-black text-base md:text-lg">Rp{subtotal.toLocaleString('id-ID')}</p>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <p className="text-black text-base md:text-lg">Ongkos Kirim</p>
-                  <p className="text-black text-base md:text-lg">Rp{shipping.toLocaleString('id-ID')}</p>
                 </div>
 
                 <div className="flex justify-between items-center pt-3 border-t border-gray-200 text-[#2f2f2f]">
