@@ -79,7 +79,7 @@ export default function HomePage({ initialBooks = [] }: HomePageProps) {
     };
 
     const displayBooks = books.slice(0, visibleBooks);
-    const hasMoreBooks = visibleBooks < books.length;
+    const hasMoreBooks = visibleBooks <= books.length;
 
     if (loading) {
         return <HomePageSkeleton />;
