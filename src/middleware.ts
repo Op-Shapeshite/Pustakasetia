@@ -35,16 +35,16 @@ const RATE_LIMIT_CONFIG = {
     // Public read endpoints (books, categories, stats) - High limits for catalog browsing
     public: { requests: 500, windowMs: 60 * 1000, minDelayMs: 20 }, // 500 req/min, min 20ms delay
     // General API rate limit
-    default: { requests: 300, windowMs: 60 * 1000, minDelayMs: 50 }, // 300 req/min, min 50ms delay
+    default: { requests: 300, windowMs: 60 * 1000, minDelayMs: 0 }, // 300 req/min, min 50ms delay
     // Analytics endpoints - moderate limits
-    analytics: { requests: 120, windowMs: 60 * 1000, minDelayMs: 100 }, // 120 req/min
+    analytics: { requests: 120, windowMs: 60 * 1000, minDelayMs: 0 }, // 120 req/min
     // Stricter limits for sensitive endpoints
     auth: { requests: 15, windowMs: 60 * 1000, minDelayMs: 500 }, // 15 req/min (security)
-    upload: { requests: 30, windowMs: 60 * 1000, minDelayMs: 300 }, // 30 req/min
+    upload: { requests: 30, windowMs: 60 * 1000, minDelayMs: 0 }, // 30 req/min
 };
 
 // Max delay to prevent connection timeout (Edge Runtime has limits)
-const MAX_DELAY_MS = 10000; // 10 seconds max wait
+const MAX_DELAY_MS = 1; // 10 seconds max wait
 
 function getRateLimitConfig(pathname: string) {
     // Auth endpoints - strict security
@@ -91,6 +91,11 @@ function sleep(ms: number): Promise<void> {
 async function throttleRequest(ip: string, pathname: string): Promise<{ delayed: boolean; delayMs: number; record?: { count: number; resetTime: number } }> {
     // Skip throttling for localhost/local development
     if (isLocalhost(ip)) {
+        return { delayed: false, delayMs: 0 };
+    }
+
+    // Skip throttling for upload and books endpoints
+    if (pathname.startsWith('/api/upload') || pathname.startsWith('/api/books')) {
         return { delayed: false, delayMs: 0 };
     }
 
