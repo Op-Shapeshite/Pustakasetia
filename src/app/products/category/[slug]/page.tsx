@@ -60,6 +60,8 @@ export default function CategoryPage() {
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const itemsPerPage = 8;
 
     const fetchBooks = useCallback(async () => {
@@ -67,32 +69,51 @@ export default function CategoryPage() {
             setLoading(true);
             setError(null);
 
-            const res = await fetch('/api/books?limit=100');
+            // First, get all categories to find the matching category ID
+            const categoriesRes = await fetch('/api/categories?limit=50');
+            if (!categoriesRes.ok) throw new Error('Failed to fetch categories');
+            const categoriesData = await categoriesRes.json();
+
+            // Find category by name (case-insensitive comparison)
+            const matchedCategory = categoriesData.data.find(
+                (cat: { id: number; name: string }) =>
+                    cat.name.toLowerCase().trim() === categorySlug.toLowerCase().trim()
+            );
+
+            if (!matchedCategory) {
+                setBooks([]);
+                setLoading(false);
+                return;
+            }
+
+            // Fetch books by category ID with pagination
+            const params = new URLSearchParams();
+            params.set('categoryId', matchedCategory.id.toString());
+            params.set('page', currentPage.toString());
+            params.set('limit', itemsPerPage.toString());
+
+            const res = await fetch(`/api/books?${params.toString()}`);
             if (!res.ok) throw new Error('Failed to fetch books');
 
             const data = await res.json();
-            const allBooks = data.data.map(mapAPIBookToBook);
+            setBooks(data.data.map(mapAPIBookToBook));
 
-            // Filter by category
-            const categoryBooks = allBooks.filter(
-                (book: Book) => book.category === categorySlug
-            );
-
-            setBooks(categoryBooks);
+            if (data.pagination) {
+                setTotalItems(data.pagination.total);
+                setTotalPages(data.pagination.totalPages);
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load data');
         } finally {
             setLoading(false);
         }
-    }, [categorySlug]);
+    }, [categorySlug, currentPage, itemsPerPage]);
 
     useEffect(() => {
         fetchBooks();
     }, [fetchBooks]);
 
-    const totalPages = Math.ceil(books.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const displayBooks = books.slice(startIndex, startIndex + itemsPerPage);
+    const displayBooks = books;
 
     const handleBookClick = (book: Book) => {
         setSelectedBook(book);
