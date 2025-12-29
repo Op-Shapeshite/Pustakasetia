@@ -115,6 +115,24 @@ export default function Header() {
     setSelectedBook(null);
   };
 
+  // Highlight matching text in search results
+  const highlightText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} className="bg-[#ffcc00] text-[#2f2f2f] rounded px-0.5">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
+
   return (
     <>
       {/* MOBILE NAVBAR */}
@@ -130,6 +148,15 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
+          {/* Search Icon for Mobile */}
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            className="flex items-center justify-center size-[24px]"
+            aria-label="Toggle search"
+          >
+            <SearchIcon />
+          </button>
+
           <Link href="/cart" className="relative size-[24px]" aria-label="Keranjang belanja">
             <CartIcon />
             {cart.reduce((acc, item) => acc + item.quantity, 0) > 0 && (
@@ -146,6 +173,88 @@ export default function Header() {
             <Menu className="h-[20px] w-[20px] text-[#2f2f2f]" />
           </button>
         </div>
+
+        {/* Mobile Search Overlay */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-[87px] left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50"
+            >
+              <div className="relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari buku..."
+                  className="w-full px-4 py-3 border-2 border-[#ffcc00] rounded-full outline-none text-sm font-['Poppins',sans-serif] text-neutral-800 placeholder:text-neutral-400"
+                  autoFocus
+                />
+                <button
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setSearchQuery("");
+                    setSearchResults([]);
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  aria-label="Close search"
+                >
+                  <X className="size-[18px] text-[#2f2f2f]" />
+                </button>
+              </div>
+
+              {/* Mobile Search Results */}
+              {(isSearching || searchResults.length > 0) && (
+                <div className="mt-3 max-h-[300px] overflow-y-auto bg-white rounded-xl border border-neutral-200 shadow-lg">
+                  {isSearching ? (
+                    <div className="p-4 flex justify-center">
+                      <Loader2 className="animate-spin h-5 w-5 text-[#ffcc00]" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="px-4 py-2 bg-neutral-50 border-b border-neutral-100">
+                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-['Poppins',sans-serif]">Hasil Pencarian</p>
+                      </div>
+                      {searchResults.map((book) => (
+                        <button
+                          key={book.id}
+                          onClick={() => {
+                            setSelectedBook(book);
+                            setIsSearchOpen(false);
+                            setSearchQuery("");
+                            setSearchResults([]);
+                          }}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 text-left border-b last:border-0 border-neutral-100 transition-colors"
+                        >
+                          <div className="relative h-12 w-9 rounded overflow-hidden shadow-sm">
+                            <Image
+                              src={book.image}
+                              alt={book.title}
+                              fill
+                              className="object-cover"
+                              sizes="36px"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-semibold text-neutral-900 truncate font-['Poppins',sans-serif]">
+                              {highlightText(book.title, searchQuery)}
+                            </h4>
+                            <p className="text-xs text-neutral-500 truncate font-['Poppins',sans-serif]">
+                              {highlightText(book.author, searchQuery)}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {mobileMenuOpen && (
           <div className="absolute top-[87px] left-0 right-0 bg-white border-t border-gray-200 pb-4 pt-4 px-[25px] shadow-lg">
@@ -318,10 +427,10 @@ export default function Header() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-sm font-semibold text-neutral-900 truncate font-['Poppins',sans-serif] group-hover:text-[#ffcc00] transition-colors">
-                                  {book.title}
+                                  {highlightText(book.title, searchQuery)}
                                 </h4>
                                 <p className="text-xs text-neutral-500 truncate font-['Poppins',sans-serif]">
-                                  {book.author}
+                                  {highlightText(book.author, searchQuery)}
                                 </p>
                               </div>
                             </button>

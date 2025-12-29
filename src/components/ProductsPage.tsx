@@ -76,7 +76,7 @@ function MobileCategorySection({
   onBookClick: (book: Book) => void;
 }) {
   const router = useRouter();
-  const displayBooks = books.slice(0, 5); // Max 5 cards
+  const displayBooks = books.slice(0, 10); // Max 10 cards per category
 
   if (displayBooks.length === 0) return null;
 
@@ -132,17 +132,56 @@ export default function ProductsPage({
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
+  // State for mobile: books grouped by category ID
+  const [mobileBooksByCategory, setMobileBooksByCategory] = useState<{ [categoryId: number]: Book[] }>({});
+
   const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch('/api/categories?limit=50');
       if (!res.ok) throw new Error('Failed to fetch categories');
       const data = await res.json();
       setCategories(data.data);
+      return data.data as Category[];
     } catch (err) {
       console.error('Failed to fetch categories:', err);
+      return [];
     }
   }, []);
 
+  // Fetch books for mobile view - Single optimized endpoint
+  const fetchBooksForMobile = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Single API call to get all categories with their books
+      const res = await fetch('/api/books/by-categories?limit=10');
+      if (!res.ok) throw new Error('Failed to fetch books by categories');
+
+      const data = await res.json();
+
+      // Set categories from response
+      const cats: Category[] = data.data.map((item: { categoryId: number; categoryName: string }) => ({
+        id: item.categoryId,
+        name: item.categoryName,
+      }));
+      setCategories(cats);
+
+      // Group books by category ID
+      const booksByCategory: { [categoryId: number]: Book[] } = {};
+      data.data.forEach((item: { categoryId: number; books: APIBook[] }) => {
+        booksByCategory[item.categoryId] = item.books.map(mapAPIBookToBook);
+      });
+
+      setMobileBooksByCategory(booksByCategory);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load books');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch books for desktop view - paginated
   const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
@@ -187,19 +226,7 @@ export default function ProductsPage({
     }
   }, [currentPage, itemsPerPage, searchQuery, selectedCategory, categories]);
 
-  // Initial load of categories
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
-  // Fetch books when dependencies change
-  useEffect(() => {
-    // Only fetch books if categories are loaded OR if we don't need category ID (all)
-    if (selectedCategory === 'all' || categories.length > 0) {
-      fetchBooks();
-    }
-  }, [fetchBooks]); // fetchBooks depends on categories
-
+  // Check mobile on mount
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -209,6 +236,35 @@ export default function ProductsPage({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Initial load - fetch based on view type
+  useEffect(() => {
+    const initFetch = async () => {
+      const isMobileView = window.innerWidth < 768;
+
+      if (isMobileView) {
+        // Mobile: single optimized endpoint that returns categories + books
+        await fetchBooksForMobile();
+      } else {
+        // Desktop: fetch categories first, then books
+        await fetchCategories();
+      }
+    };
+
+    initFetch();
+  }, [fetchCategories, fetchBooksForMobile]);
+
+  // Desktop: fetch books when dependencies change (not for mobile)
+  useEffect(() => {
+    if (!isMobile && categories.length > 0) {
+      // Only fetch books for desktop if categories are loaded OR if we don't need category ID (all)
+      if (selectedCategory === 'all' || categories.length > 0) {
+        fetchBooks();
+      }
+    }
+  }, [fetchBooks, isMobile, categories.length, selectedCategory]);
+
+
 
   useEffect(() => {
     setCurrentPage(1);
@@ -253,7 +309,7 @@ export default function ProductsPage({
             <MobileCategorySection
               key={category.id}
               category={category}
-              books={booksByCategory[category.name] || []}
+              books={mobileBooksByCategory[category.id] || []}
               onBookClick={handleBookClick}
             />
           ))}
