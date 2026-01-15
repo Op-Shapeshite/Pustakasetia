@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Pencil, Trash2, Loader2 } from 'lucide-react';
 import { bookService, Book } from '@/utils/adminData';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/contexts/ToastContext';
 import AddBookModal from './AddBookModal';
 import EditBookModal from './EditBookModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -29,6 +30,7 @@ export default function BookManagementPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const { showToast } = useToast();
 
     const loadBooks = useCallback(async () => {
         try {
@@ -73,11 +75,13 @@ export default function BookManagementPage() {
             try {
                 setIsDeleting(true);
                 await bookService.delete(selectedBook.id);
+                showToast('Buku berhasil dihapus', 'success');
                 await loadBooks();
                 setSelectedBook(null);
                 setIsDeleteModalOpen(false);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to delete book');
+                const errorMessage = err instanceof Error ? err.message : 'Gagal menghapus buku';
+                showToast(errorMessage, 'error');
             } finally {
                 setIsDeleting(false);
             }

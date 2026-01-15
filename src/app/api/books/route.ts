@@ -105,9 +105,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(book, { status: 201 });
     } catch (error) {
         console.error('Error creating book:', error);
-        if ((error as { code?: string }).code === 'P2002') {
-            return NextResponse.json({ error: 'ISBN already exists' }, { status: 409 });
-        }
         return NextResponse.json({ error: 'Failed to create book' }, { status: 500 });
     }
 }

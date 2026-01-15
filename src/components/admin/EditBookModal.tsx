@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import SearchableSelect from './SearchableSelect';
 import AuthorAutocomplete from './AuthorAutocomplete';
 import BaseModal from './BaseModal';
+import { useToast } from '@/contexts/ToastContext';
 
 // Dynamically import RichTextEditor to prevent SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
@@ -212,6 +213,8 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
         e.preventDefault();
     };
 
+    const { showToast } = useToast();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -231,9 +234,12 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                 image: formData.image,
             });
 
+            showToast('Buku berhasil diperbarui', 'success');
             onSuccess();
             onClose();
         } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Gagal memperbarui buku';
+            showToast(errorMessage, 'error');
             console.error('Failed to update book:', err);
         } finally {
             setIsSubmitting(false);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { roleService, Role } from '@/utils/adminData';
 import BaseModal from './BaseModal';
+import { useToast } from '@/contexts/ToastContext';
 
 interface EditRoleModalProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface EditRoleModalProps {
 
 export default function EditRoleModal({ isOpen, onClose, onSuccess, role }: EditRoleModalProps) {
     const [formData, setFormData] = useState({ name: '', description: '' });
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (role) {
@@ -20,11 +22,18 @@ export default function EditRoleModal({ isOpen, onClose, onSuccess, role }: Edit
         }
     }, [role]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        roleService.update(role.id, formData);
-        onSuccess();
-        onClose();
+        try {
+            await roleService.update(role.id, formData);
+            showToast('Role berhasil diperbarui', 'success');
+            onSuccess();
+            onClose();
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Gagal memperbarui role';
+            showToast(errorMessage, 'error');
+            console.error('Failed to update role:', err);
+        }
     };
 
     const footer = (

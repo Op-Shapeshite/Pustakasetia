@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { roleService } from '@/utils/adminData';
 import BaseModal from './BaseModal';
+import { useToast } from '@/contexts/ToastContext';
 
 interface AddRoleModalProps {
     isOpen: boolean;
@@ -12,13 +13,21 @@ interface AddRoleModalProps {
 
 export default function AddRoleModal({ isOpen, onClose, onSuccess }: AddRoleModalProps) {
     const [formData, setFormData] = useState({ name: '', description: '' });
+    const { showToast } = useToast();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        roleService.create(formData);
-        onSuccess();
-        onClose();
-        setFormData({ name: '', description: '' });
+        try {
+            await roleService.create(formData);
+            showToast('Role berhasil ditambahkan', 'success');
+            onSuccess();
+            onClose();
+            setFormData({ name: '', description: '' });
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Gagal menambahkan role';
+            showToast(errorMessage, 'error');
+            console.error('Failed to create role:', err);
+        }
     };
 
     const footer = (

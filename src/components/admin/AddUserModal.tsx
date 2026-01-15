@@ -71,8 +71,9 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
             onClose();
             resetForm();
         } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Gagal membuat user';
+            showToast(errorMessage, 'error');
             console.error('Failed to create user:', err);
-            showToast('Gagal membuat user', 'error');
         }
     };
 

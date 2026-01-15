@@ -81,9 +81,12 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user }: Edit
                 updateData.password = formData.password;
             }
             await userService.update(user.id, updateData);
+            showToast('User berhasil diperbarui', 'success');
             onSuccess();
             onClose();
         } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Gagal memperbarui user';
+            showToast(errorMessage, 'error');
             console.error('Failed to update user:', err);
         }
     };

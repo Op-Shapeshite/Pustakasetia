@@ -25,7 +25,7 @@ model Book {
   author     String
   pages      Int
   size       String
-  isbn       String     @unique
+  isbn       String
   price      Float
   edition    String
   paper_type String     @default("HVS")

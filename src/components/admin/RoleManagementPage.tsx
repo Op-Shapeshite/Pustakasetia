@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import { roleService, Role } from '@/utils/adminData';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/contexts/ToastContext';
 import AddRoleModal from './AddRoleModal';
 import EditRoleModal from './EditRoleModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -54,6 +55,7 @@ export default function RoleManagementPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const { showToast } = useToast();
 
     const loadRoles = useCallback(async () => {
         try {
@@ -112,11 +114,13 @@ export default function RoleManagementPage() {
             try {
                 setIsDeleting(true);
                 await roleService.delete(selectedRole.id);
+                showToast('Role berhasil dihapus', 'success');
                 await loadRoles();
                 setSelectedRole(null);
                 setIsDeleteModalOpen(false);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to delete role');
+                const errorMessage = err instanceof Error ? err.message : 'Gagal menghapus role';
+                showToast(errorMessage, 'error');
             } finally {
                 setIsDeleting(false);
             }

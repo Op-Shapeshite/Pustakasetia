@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Pencil, Trash2 } from 'lucide-react';
 import { userService, User } from '@/utils/adminData';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/contexts/ToastContext';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -29,6 +30,7 @@ export default function UserManagementPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const { showToast } = useToast();
 
     const loadUsers = useCallback(async () => {
         try {
@@ -66,7 +68,7 @@ export default function UserManagementPage() {
     const handleDelete = (user: User) => {
         // Prevent deletion of admin user
         if (user.username === 'admin') {
-            setError('User admin tidak dapat dihapus');
+            showToast('User admin tidak dapat dihapus', 'error');
             return;
         }
         setSelectedUser(user);
@@ -78,11 +80,13 @@ export default function UserManagementPage() {
             try {
                 setIsDeleting(true);
                 await userService.delete(selectedUser.id);
+                showToast('User berhasil dihapus', 'success');
                 await loadUsers();
                 setSelectedUser(null);
                 setIsDeleteModalOpen(false);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to delete user');
+                const errorMessage = err instanceof Error ? err.message : 'Gagal menghapus user';
+                showToast(errorMessage, 'error');
             } finally {
                 setIsDeleting(false);
             }
@@ -141,8 +145,8 @@ export default function UserManagementPage() {
                     <button
                         onClick={() => handleDelete(user)}
                         className={`p-2 rounded-lg transition-colors ${user.username === 'admin'
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-red-600 hover:bg-red-50'
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : 'text-red-600 hover:bg-red-50'
                             }`}
                         title={user.username === 'admin' ? 'Admin tidak dapat dihapus' : 'Hapus'}
                         disabled={user.username === 'admin'}
