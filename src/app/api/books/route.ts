@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
         const { title, author, pages, size, isbn, price, edition, paper_type, synopsis, image, stock, categoryId } = body;
 
-        if (!title || !author || !isbn || !categoryId) {
+        if (!title || !author  || !categoryId) {
             return NextResponse.json(
                 { error: 'Missing required fields: title, author, isbn, categoryId' },
                 { status: 400 }
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
                 author,
                 pages: parseInt(pages) || 0,
                 size: size || '',
-                isbn,
+                isbn : isbn ||'',
                 price: parseFloat(price) || 0,
                 edition: edition || '',
                 paper_type: paper_type || 'HVS',
