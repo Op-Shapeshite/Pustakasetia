@@ -42,7 +42,9 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
   });
 
   const text = (template.content.textContent || '').replace(/\s+/g, ' ').trim();
-  const sanitizedHtml = template.innerHTML.trim();
+  const container = document.createElement('div');
+  container.appendChild(template.content.cloneNode(true));
+  const sanitizedHtml = container.innerHTML.trim();
 
   if (!text) {
     return { html: '', text: '' };
