@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
 
         const { title, author, pages, size, isbn, price, edition, paper_type, synopsis, image, stock, categoryId } = body;
 
-        if (!title || !author  || !categoryId) {
+        if (!title || !author || !categoryId) {
             return NextResponse.json(
-                { error: 'Missing required fields: title, author, isbn, categoryId' },
+                { error: 'Missing required fields: title, author, categoryId' },
                 { status: 400 }
             );
         }
@@ -84,13 +84,16 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        const normalizedIsbn = typeof isbn === 'string' ? isbn.trim() : isbn;
+        const isbnValue = normalizedIsbn === '' || normalizedIsbn === undefined ? null : normalizedIsbn;
+
         const book = await prisma.book.create({
             data: {
                 title,
                 author,
                 pages: parseInt(pages) || 0,
                 size: size || '',
-                isbn : isbn ||'',
+                isbn: isbnValue,
                 price: parseFloat(price) || 0,
                 edition: edition || '',
                 paper_type: paper_type || 'HVS',

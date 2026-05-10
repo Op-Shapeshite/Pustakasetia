@@ -8,6 +8,7 @@ import SearchableSelect from './SearchableSelect';
 import AuthorAutocomplete from './AuthorAutocomplete';
 import BaseModal from './BaseModal';
 import { useToast } from '@/contexts/ToastContext';
+import { normalizeSynopsisHtml } from '@/utils/synopsis';
 
 // Dynamically import RichTextEditor to prevent SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
@@ -104,7 +105,8 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
     };
 
     const handleSynopsisChange = (content: string) => {
-        setFormData(prev => ({ ...prev, synopsis: content }));
+        const { html } = normalizeSynopsisHtml(content);
+        setFormData(prev => ({ ...prev, synopsis: html }));
     };
 
 
@@ -407,7 +409,6 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                                     value={formData.isbn}
                                     onChange={handleISBNChange}
                                     placeholder="978-..."
-                                    required
                                     maxLength={17}
                                     className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] font-mono"
                                 />

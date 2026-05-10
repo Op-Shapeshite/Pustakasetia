@@ -68,6 +68,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             await deleteCoverImage(existingBook.image);
         }
 
+        const normalizedIsbn = typeof body.isbn === 'string' ? body.isbn.trim() : body.isbn;
+
         const book = await prisma.book.update({
             where: { id: parseInt(id) },
             data: {
@@ -75,7 +77,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
                 ...(body.author && { author: body.author }),
                 ...(body.pages !== undefined && { pages: parseInt(body.pages) }),
                 ...(body.size && { size: body.size }),
-                ...(body.isbn && { isbn: body.isbn }),
+                ...(body.isbn !== undefined && { isbn: normalizedIsbn === '' ? null : normalizedIsbn }),
                 ...(body.price !== undefined && { price: parseFloat(body.price) }),
                 ...(body.edition && { edition: body.edition }),
                 ...(body.paper_type && { paper_type: body.paper_type }),
