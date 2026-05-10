@@ -6,6 +6,7 @@ import { addToCart } from "../utils/cartStorage";
 import { useToast } from "../contexts/ToastContext";
 import { useRouter } from 'next/navigation';
 import { Book } from "@/types/book";
+import { normalizeSynopsisHtml } from "@/utils/synopsis";
 
 const imgRectangle1304 = "/img/library-background.png";
 
@@ -18,6 +19,8 @@ interface BookDetailPageProps {
 export default function BookDetailPage({ book, onBack, isModal = false }: BookDetailPageProps) {
   const { showToast } = useToast();
   const router = useRouter();
+  const { html: synopsisHtml, text: synopsisText } = normalizeSynopsisHtml(book.synopsis);
+  const hasSynopsis = synopsisText.length > 0;
 
   const handleBack = () => {
     if (onBack) {
@@ -170,9 +173,16 @@ export default function BookDetailPage({ book, onBack, isModal = false }: BookDe
               <h2 className="font-bold text-[#2f2f2f] text-[24px] mb-4">
                 Sinopsis
               </h2>
-              <div className="text-[#4a4a4a] text-[16px] leading-relaxed text-justify whitespace-pre-line">
-                {book.synopsis || "-"}
-              </div>
+              {hasSynopsis ? (
+                <div
+                  className="text-[#4a4a4a] text-[16px] leading-relaxed text-justify prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: synopsisHtml }}
+                />
+              ) : (
+                <div className="text-[#4a4a4a] text-[16px] leading-relaxed text-justify">
+                  -
+                </div>
+              )}
             </div>
           </div>
         </div>

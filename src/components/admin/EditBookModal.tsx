@@ -8,6 +8,7 @@ import SearchableSelect from './SearchableSelect';
 import AuthorAutocomplete from './AuthorAutocomplete';
 import BaseModal from './BaseModal';
 import { useToast } from '@/contexts/ToastContext';
+import { normalizeSynopsisHtml } from '@/utils/synopsis';
 
 // Dynamically import RichTextEditor to prevent SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
@@ -91,6 +92,7 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
             // Format ISBN: remove existing dashes first, then reformat
             const cleanIsbn = book.isbn ? book.isbn.replace(/\D/g, '') : '';
             const formattedIsbn = formatISBN(cleanIsbn);
+            const { html: normalizedSynopsis } = normalizeSynopsisHtml(book.synopsis);
 
             setFormData({
                 title: book.title,
@@ -103,7 +105,7 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                 priceDisplay: formatRupiah(String(book.price)),
                 categoryId: book.categoryId?.toString() || '',
                 edition: book.edition,
-                synopsis: book.synopsis,
+                synopsis: normalizedSynopsis,
                 image: book.image || '',
             });
             setCoverPreview(book.image || null);
@@ -121,7 +123,8 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
     };
 
     const handleSynopsisChange = (content: string) => {
-        setFormData(prev => ({ ...prev, synopsis: content }));
+        const { html } = normalizeSynopsisHtml(content);
+        setFormData(prev => ({ ...prev, synopsis: html }));
     };
 
     const handleISBNChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -391,15 +394,14 @@ export default function EditBookModal({ isOpen, onClose, onSuccess, book }: Edit
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm text-gray-500 mb-2">ISBN</label>
-                                <input
-                                    type="text"
-                                    value={formData.isbn}
-                                    onChange={handleISBNChange}
-                                    placeholder="978-..."
-                                    required
-                                    maxLength={17}
-                                    className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] font-mono"
-                                />
+                                    <input
+                                        type="text"
+                                        value={formData.isbn}
+                                        onChange={handleISBNChange}
+                                        placeholder="978-..."
+                                        maxLength={17}
+                                        className="w-full bg-white border border-[#d9d9d9] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffcc00] font-mono"
+                                    />
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-500 mb-2">Harga</label>
