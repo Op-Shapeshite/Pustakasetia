@@ -52,7 +52,7 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
         node.removeAttribute(attr.name);
         return;
       }
-      if ((name === 'href' || name === 'src') && /^\s*(javascript|data|vbscript|file|blob):/i.test(value)) {
+      if ((name === 'href' || name === 'src') && /^\s*(javascript|data|vbscript|file):/i.test(value)) {
         node.removeAttribute(attr.name);
       }
     });

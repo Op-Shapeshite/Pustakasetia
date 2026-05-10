@@ -13,12 +13,13 @@ interface BookDetailModalProps {
   onAddToCart?: () => void;
 }
 
+const SHARE_REDIRECT_DELAY_MS = 400;
+
 export default function BookDetailModal({ book, onClose, onAddToCart }: BookDetailModalProps) {
   const { addToCart } = useAppState();
   const { showPopup } = usePopup();
   const { showToast } = useToast();
   const router = useRouter();
-  const redirectDelayMs = 400;
 
   const handleBuy = () => {
     // Increment sold count in database
@@ -56,7 +57,7 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
       console.error('Failed to copy link:', error);
       showToast("Gagal menyalin tautan. Mengalihkan ke detail buku.", "info");
     } finally {
-      setTimeout(doRedirect, redirectDelayMs);
+      setTimeout(doRedirect, SHARE_REDIRECT_DELAY_MS);
     }
   };
 
