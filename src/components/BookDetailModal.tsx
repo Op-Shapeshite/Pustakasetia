@@ -55,7 +55,7 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
       console.error('Failed to copy link:', error);
       showToast("Gagal menyalin tautan. Mengalihkan ke detail buku.", "info");
     } finally {
-      doRedirect();
+      setTimeout(doRedirect, 400);
     }
   };
 

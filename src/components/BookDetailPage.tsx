@@ -174,6 +174,7 @@ export default function BookDetailPage({ book, onBack, isModal = false }: BookDe
                 Sinopsis
               </h2>
               {hasSynopsis ? (
+                // HTML sanitized via normalizeSynopsisHtml.
                 <div
                   className="text-[#4a4a4a] text-[16px] leading-relaxed text-justify prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: synopsisHtml }}

@@ -6,7 +6,7 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
 
   if (typeof window === 'undefined') {
     const text = raw
-      .replace(/<br\s*\/?>/gi, '')
+      .replace(/<br\s*\/?>/gi, ' ')
       .replace(/&nbsp;/gi, ' ')
       .replace(/<[^>]+>/g, '')
       .replace(/\s+/g, ' ')
@@ -22,7 +22,7 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
   const template = document.createElement('template');
   template.innerHTML = raw;
 
-  const blockedTags = ['script', 'style', 'iframe', 'object', 'embed', 'link'];
+  const blockedTags = ['script', 'style', 'iframe', 'object', 'embed', 'link', 'form', 'input', 'base'];
   blockedTags.forEach((tag) => {
     template.content.querySelectorAll(tag).forEach((node) => node.remove());
   });
