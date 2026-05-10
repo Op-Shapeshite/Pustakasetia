@@ -1,4 +1,4 @@
-import { X, ShoppingCart, ArrowLeft } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Share2 } from "lucide-react";
 // Image is hardcoded in the component
 import { useAppState } from "../contexts/AppStateContext";
 import { usePopup } from "../contexts/PopupContext";
@@ -37,6 +37,21 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
     showPopup("Mengarahkan ke WhatsApp...", "info", doRedirect);
   };
 
+  const handleShare = async () => {
+    const detailUrl = `${window.location.origin}/books/${book.id}`;
+    const doRedirect = () => {
+      window.location.href = detailUrl;
+    };
+
+    try {
+      await navigator.clipboard.writeText(detailUrl);
+      showPopup("Link detail buku berhasil disalin.", "success", doRedirect);
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+      showPopup("Gagal menyalin link. Mengarahkan ke detail buku...", "info", doRedirect);
+    }
+  };
+
   const getDisplayPrice = () => {
     return book.priceFormatted || `Rp${book.price.toLocaleString('id-ID')}`;
   };
@@ -61,6 +76,13 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
     }
   };
 
+  const synopsisHtml = book.synopsis?.trim() || '';
+  const synopsisText = synopsisHtml
+    .replace(/<br\s*\/?>/gi, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .trim();
+  const hasSynopsis = synopsisText.length > 0;
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm overflow-y-auto">
@@ -155,16 +177,23 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={handleBuy}
-                    className="w-full bg-[#22C55E] hover:bg-[#1ea850] text-white font-['Poppins',sans-serif] font-bold text-base md:text-lg px-6 py-3 rounded-[8px] transition-colors shadow-lg hover:shadow-xl uppercase"
+                    className="w-full bg-[#22C55E] hover:bg-[#1ea850] text-white font-['Poppins',sans-serif] font-bold text-base md:text-lg px-6 py-3 rounded-[8px] transition-colors shadow-lg hov[...]
                   >
                     BELI {getDisplayPrice()}
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    className="w-full bg-[#ffcc00] hover:bg-[#ffdb4d] text-neutral-900 font-['Poppins',sans-serif] font-medium text-base md:text-lg px-6 py-3 rounded-[8px] transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    className="w-full bg-[#ffcc00] hover:bg-[#ffdb4d] text-neutral-900 font-['Poppins',sans-serif] font-medium text-base md:text-lg px-6 py-3 rounded-[8px] transition-colors shado[...]
                   >
                     <ShoppingCart className="h-5 w-5" />
                     Masukkan Keranjang
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="w-full border border-[#2f2f2f] text-[#2f2f2f] font-['Poppins',sans-serif] font-medium text-base md:text-lg px-6 py-3 rounded-[8px] hover:bg-neutral-100 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Share2 className="h-5 w-5" />
+                    Share
                   </button>
                 </div>
 
@@ -173,10 +202,10 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
                   <h2 className="font-['Poppins',sans-serif] font-bold text-[#2f2f2f] text-xl md:text-2xl mb-3">
                     Sinopsis
                   </h2>
-                  {book.synopsis ? (
+                  {hasSynopsis ? (
                     <div
                       className="font-['Poppins',sans-serif] text-gray-600 text-sm md:text-base leading-relaxed text-justify prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: book.synopsis }}
+                      dangerouslySetInnerHTML={{ __html: synopsisHtml }}
                     />
                   ) : (
                     <div className="font-['Poppins',sans-serif] text-gray-600 text-sm md:text-base leading-relaxed text-justify">
