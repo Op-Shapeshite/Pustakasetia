@@ -44,6 +44,8 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
     template.content.querySelectorAll(tag).forEach((node) => node.remove());
   });
 
+  const urlAttributes = new Set(['href', 'src', 'action', 'formaction']);
+
   template.content.querySelectorAll('*').forEach((node) => {
     Array.from(node.attributes).forEach((attr) => {
       const name = attr.name.toLowerCase();
@@ -52,7 +54,7 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
         node.removeAttribute(attr.name);
         return;
       }
-      if ((name === 'href' || name === 'src') && /^\s*(javascript|data|vbscript|file):/i.test(value)) {
+      if (urlAttributes.has(name) && /^\s*(javascript|data|vbscript|file):/i.test(value)) {
         node.removeAttribute(attr.name);
       }
     });
