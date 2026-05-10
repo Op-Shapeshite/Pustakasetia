@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         }
 
         const normalizedIsbn = typeof isbn === 'string' ? isbn.trim() : isbn;
-        const isbnValue = normalizedIsbn === '' ? null : normalizedIsbn ?? null;
+        const isbnValue = normalizedIsbn === '' || normalizedIsbn === undefined ? null : normalizedIsbn;
 
         const book = await prisma.book.create({
             data: {

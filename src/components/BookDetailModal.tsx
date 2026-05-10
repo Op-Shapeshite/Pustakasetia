@@ -18,6 +18,7 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
   const { showPopup } = usePopup();
   const { showToast } = useToast();
   const router = useRouter();
+  const redirectDelayMs = 400;
 
   const handleBuy = () => {
     // Increment sold count in database
@@ -55,7 +56,7 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
       console.error('Failed to copy link:', error);
       showToast("Gagal menyalin tautan. Mengalihkan ke detail buku.", "info");
     } finally {
-      setTimeout(doRedirect, 400);
+      setTimeout(doRedirect, redirectDelayMs);
     }
   };
 
