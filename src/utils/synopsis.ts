@@ -40,9 +40,9 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
     'audio',
     'svg',
   ];
-  blockedTags.forEach((tag) => {
-    template.content.querySelectorAll(tag).forEach((node) => node.remove());
-  });
+  template.content
+    .querySelectorAll(blockedTags.join(','))
+    .forEach((node) => node.remove());
 
   const urlAttributes = new Set(['href', 'src', 'action', 'formaction']);
 

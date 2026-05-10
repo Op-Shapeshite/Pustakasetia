@@ -14,6 +14,10 @@ interface BookDetailModalProps {
 }
 
 const SHARE_REDIRECT_DELAY_MS = 400;
+const ACTION_BUTTON_BASE =
+  "w-full font-['Poppins',sans-serif] text-base md:text-lg px-6 py-3 rounded-[8px] transition-colors shadow-lg hover:shadow-xl";
+const BUY_BUTTON_CLASS = `${ACTION_BUTTON_BASE} bg-[#22C55E] hover:bg-[#1ea850] text-white font-bold`;
+const CART_BUTTON_CLASS = `${ACTION_BUTTON_BASE} bg-[#ffcc00] hover:bg-[#ffdb4d] text-neutral-900 font-medium flex items-center justify-center gap-2`;
 
 export default function BookDetailModal({ book, onClose, onAddToCart }: BookDetailModalProps) {
   const { addToCart } = useAppState();
@@ -181,13 +185,13 @@ export default function BookDetailModal({ book, onClose, onAddToCart }: BookDeta
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={handleBuy}
-                    className="w-full bg-[#22C55E] hover:bg-[#1ea850] text-white font-['Poppins',sans-serif] font-bold text-base md:text-lg px-6 py-3 rounded-[8px] transition-colors shadow-lg hover:shadow-xl"
+                    className={BUY_BUTTON_CLASS}
                   >
                     BELI {getDisplayPrice()}
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    className="w-full bg-[#ffcc00] hover:bg-[#ffdb4d] text-neutral-900 font-['Poppins',sans-serif] font-medium text-base md:text-lg px-6 py-3 rounded-[8px] transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    className={CART_BUTTON_CLASS}
                   >
                     <ShoppingCart className="h-5 w-5" />
                     Masukkan Keranjang
