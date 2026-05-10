@@ -22,7 +22,24 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
   const template = document.createElement('template');
   template.innerHTML = raw;
 
-  const blockedTags = ['script', 'style', 'iframe', 'object', 'embed', 'link', 'form', 'input', 'base'];
+  const blockedTags = [
+    'script',
+    'style',
+    'iframe',
+    'object',
+    'embed',
+    'link',
+    'form',
+    'input',
+    'base',
+    'meta',
+    'frame',
+    'frameset',
+    'applet',
+    'video',
+    'audio',
+    'svg',
+  ];
   blockedTags.forEach((tag) => {
     template.content.querySelectorAll(tag).forEach((node) => node.remove());
   });
@@ -35,7 +52,7 @@ export const normalizeSynopsisHtml = (html?: string | null) => {
         node.removeAttribute(attr.name);
         return;
       }
-      if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) {
+      if ((name === 'href' || name === 'src') && /^\s*(javascript|data|vbscript|file):/i.test(value)) {
         node.removeAttribute(attr.name);
       }
     });
