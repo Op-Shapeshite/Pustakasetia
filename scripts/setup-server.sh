@@ -50,16 +50,23 @@ for label in "${labels[@]}"; do
 done
 read -r -p 'Email untuk sertifikat SSL: ' EMAIL
 [[ $EMAIL =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] || die 'Email tidak valid.'
-read -r -p 'Port SSH aktif [2314]: ' SSH_PORT
-SSH_PORT=${SSH_PORT:-2314}
+SSH_DEFAULT=22
+if [[ -n ${SSH_CONNECTION:-} ]]; then SSH_DEFAULT=${SSH_CONNECTION##* }; fi
+read -r -p "Port SSH aktif [$SSH_DEFAULT]: " SSH_PORT
+SSH_PORT=${SSH_PORT:-$SSH_DEFAULT}
 [[ $SSH_PORT =~ ^[0-9]{1,5}$ ]] && ((10#$SSH_PORT >= 1 && 10#$SSH_PORT <= 65535)) || die 'Port SSH tidak valid.'
 SSH_PORT=$((10#$SSH_PORT))
 if [[ -n ${SSH_CONNECTION:-} ]]; then
   [[ ${SSH_CONNECTION##* } == "$SSH_PORT" ]] || die 'Port berbeda dari sesi SSH aktif.'
 fi
 /usr/sbin/sshd -t
-/usr/sbin/sshd -T | grep -qx "port $SSH_PORT" || die "Konfigurasi sshd belum memakai port $SSH_PORT. Sesuaikan SSH dahulu sebelum menjalankan setup."
-ss -H -lnt "sport = :$SSH_PORT" | grep -q . || die "SSH belum mendengarkan pada port $SSH_PORT."
+SSHD_CONFIG=$(/usr/sbin/sshd -T)
+SSH_LISTENERS=$(ss -H -lnt "sport = :$SSH_PORT")
+[[ -n $SSH_LISTENERS ]] || die "SSH belum mendengarkan pada port $SSH_PORT."
+if ! grep -qx "port $SSH_PORT" <<< "$SSHD_CONFIG"; then
+  printf '%s\n' "Port $SSH_PORT aktif tetapi berbeda dari konfigurasi sshd; mungkin memakai socket activation. Port aktif tetap dibuka di firewall."
+fi
+unset SSHD_CONFIG SSH_LISTENERS
 read -r -p 'Username admin [admin]: ' ADMIN_USER
 ADMIN_USER=${ADMIN_USER:-admin}
 [[ $ADMIN_USER =~ ^[a-zA-Z0-9_-]{3,32}$ ]] || die 'Username harus 3-32 huruf, angka, _ atau -.'

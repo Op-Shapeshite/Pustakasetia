@@ -6,8 +6,9 @@ Siapkan minimal 2 vCPU dan RAM 4 GB untuk proses build.
 
 1. Atur DNS `A` domain ke IPv4 VPS. Jika memakai `AAAA`, IPv6 harus menuju VPS yang
    sama dan dapat diakses. Untuk Cloudflare, gunakan DNS only selama setup.
-2. Pastikan SSH sudah berjalan pada port **2314**. Buka port TCP 2314, 80, dan 443
-   pada firewall provider. Skrip memeriksa konfigurasi dan listener SSH sebelum
+2. Pastikan SSH sudah berjalan pada port **22**. Buka port TCP 22, 80, dan 443
+   pada firewall provider. Jika SSH memakai port lain, buka dan masukkan port itu.
+   Skrip memeriksa konfigurasi dan listener SSH sebelum
    mengaktifkan UFW. Skrip tidak mengganti port atau metode login SSH.
 3. Upload source proyek ke server, misalnya `/root/Pustakasetia`. Tidak perlu
    mengunggah `.env`, database SQLite, `node_modules`, atau `.next`.
@@ -18,7 +19,8 @@ Siapkan minimal 2 vCPU dan RAM 4 GB untuk proses build.
    sudo bash scripts/setup-server.sh
    ```
 
-Masukkan domain tanpa `https://`, email sertifikat, port SSH (default 2314), serta
+Masukkan domain tanpa `https://`, email sertifikat, port SSH (mengikuti sesi aktif,
+atau default 22 jika informasi sesi tidak tersedia), serta
 username dan password admin. Password minimal 16 karakter, maksimal 72 byte.
 Periksa hasil DNS yang ditampilkan, lalu ketik `YA` jika sudah benar.
 Sertifikat diterbitkan untuk domain yang dimasukkan saja; `www` tidak otomatis ditambahkan.
