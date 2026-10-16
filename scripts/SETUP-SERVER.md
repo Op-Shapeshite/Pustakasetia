@@ -21,7 +21,7 @@ Siapkan minimal 2 vCPU dan RAM 4 GB untuk proses build.
 
 Masukkan domain tanpa `https://`, email sertifikat, port SSH (mengikuti sesi aktif,
 atau default 22 jika informasi sesi tidak tersedia), serta
-username dan password admin. Password minimal 16 karakter, maksimal 72 byte.
+username dan password admin web. Password minimal 8 karakter, maksimal 72 byte.
 Periksa hasil DNS yang ditampilkan, lalu ketik `YA` jika sudah benar.
 Sertifikat diterbitkan untuk domain yang dimasukkan saja; `www` tidak otomatis ditambahkan.
 

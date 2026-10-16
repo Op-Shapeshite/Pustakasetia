@@ -70,9 +70,9 @@ unset SSHD_CONFIG SSH_LISTENERS
 read -r -p 'Username admin [admin]: ' ADMIN_USER
 ADMIN_USER=${ADMIN_USER:-admin}
 [[ $ADMIN_USER =~ ^[a-zA-Z0-9_-]{3,32}$ ]] || die 'Username harus 3-32 huruf, angka, _ atau -.'
-read -r -s -p 'Password admin (minimal 16 karakter, maksimal 72 byte): ' ADMIN_PASSWORD
+read -r -s -p 'Password admin web (minimal 8 karakter, maksimal 72 byte): ' ADMIN_PASSWORD
 printf '\n'
-[[ ${#ADMIN_PASSWORD} -ge 16 && $(printf %s "$ADMIN_PASSWORD" | wc -c) -le 72 ]] || die 'Panjang password tidak sesuai.'
+[[ ${#ADMIN_PASSWORD} -ge 8 && $(printf %s "$ADMIN_PASSWORD" | wc -c) -le 72 ]] || die 'Password admin web harus minimal 8 karakter dan maksimal 72 byte.'
 read -r -s -p 'Ulangi password admin: ' CONFIRM
 printf '\n'
 [[ $ADMIN_PASSWORD == "$CONFIRM" ]] || die 'Password tidak sama.'
