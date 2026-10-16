@@ -23,10 +23,17 @@ validate_service_user() {
 }
 if [[ ${1:-} == --help ]]; then
   printf '%s\n' 'sudo bash scripts/setup-server.sh' \
+    'sudo bash scripts/setup-server.sh --resume-build (lanjutkan kegagalan build awal)' \
     'Interaktif: domain, email SSL, port SSH, username dan password admin.' \
     'Khusus instalasi baru Ubuntu 22.04; DNS A/AAAA harus menuju server.'
   exit 0
 fi
+RESUME_BUILD=0
+case ${1:-} in
+  '') ;;
+  --resume-build) RESUME_BUILD=1 ;;
+  *) die 'Argumen tidak dikenal. Gunakan --help atau --resume-build.' ;;
+esac
 [[ $EUID == 0 ]] || die 'Jalankan dengan sudo bash scripts/setup-server.sh'
 source /etc/os-release
 [[ $ID == ubuntu && $VERSION_ID == 22.04 ]] || die 'Skrip khusus Ubuntu 22.04 LTS.'
@@ -34,9 +41,20 @@ source /etc/os-release
 SOURCE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
 APP=/opt/pustakasetia
 [[ -f $SOURCE/package.json && -f $SOURCE/prisma/schema.prisma ]] || die 'Source proyek tidak lengkap.'
-for target in "$APP" /etc/systemd/system/pustakasetia.service /etc/nginx/sites-available/pustakasetia; do
-  [[ ! -e $target && ! -L $target ]] || die "Target sudah ada: $target. Skrip hanya untuk instalasi baru."
-done
+if (( RESUME_BUILD )); then
+  [[ -d $APP && ! -L $APP ]] || die 'Direktori instalasi sebelumnya tidak ditemukan atau berupa symlink.'
+  for target in .env.production prisma-postgresql.config.ts scripts/server-command.sh node_modules/next/dist/bin/next; do
+    [[ -f $APP/$target && ! -L $APP/$target ]] || die "Artefak instalasi sebelumnya tidak lengkap: $target"
+  done
+  for target in /etc/systemd/system/pustakasetia.service /etc/nginx/sites-available/pustakasetia /etc/nginx/sites-enabled/pustakasetia; do
+    [[ ! -e $target && ! -L $target ]] || die "Target sudah ada: $target. Mode resume hanya untuk kegagalan build awal."
+  done
+  id pustakasetia-app &>/dev/null || die 'User layanan instalasi sebelumnya tidak ditemukan.'
+else
+  for target in "$APP" /etc/systemd/system/pustakasetia.service /etc/nginx/sites-available/pustakasetia; do
+    [[ ! -e $target && ! -L $target ]] || die "Target sudah ada: $target. Skrip hanya untuk instalasi baru."
+  done
+fi
 if id pustakasetia-app &>/dev/null; then
   validate_service_user
   printf '%s\n' 'Memakai akun layanan pustakasetia-app yang sudah ada; konfigurasi akun dipertahankan.'
@@ -67,6 +85,7 @@ if ! grep -qx "port $SSH_PORT" <<< "$SSHD_CONFIG"; then
   printf '%s\n' "Port $SSH_PORT aktif tetapi berbeda dari konfigurasi sshd; mungkin memakai socket activation. Port aktif tetap dibuka di firewall."
 fi
 unset SSHD_CONFIG SSH_LISTENERS
+if (( ! RESUME_BUILD )); then
 read -r -p 'Username admin [admin]: ' ADMIN_USER
 ADMIN_USER=${ADMIN_USER:-admin}
 [[ $ADMIN_USER =~ ^[a-zA-Z0-9_-]{3,32}$ ]] || die 'Username harus 3-32 huruf, angka, _ atau -.'
@@ -198,6 +217,19 @@ ADMIN
 chown pustakasetia-app:pustakasetia-app scripts/server-admin.cjs
 printf %s "$ADMIN_PASSWORD" | app node scripts/server-admin.cjs "$ADMIN_USER"
 unset ADMIN_PASSWORD
+else
+  printf '%s\n' 'Melanjutkan build; database, admin, dan kredensial sebelumnya dipertahankan.'
+  PREVIOUS_SITE=$(runuser -u pustakasetia-app -- bash "$APP/scripts/server-command.sh" \
+    node -e 'process.stdout.write(process.env.NEXT_PUBLIC_SITE_URL || "")')
+  [[ $PREVIOUS_SITE == "https://$DOMAIN" ]] || die 'Domain harus sama dengan domain pada setup sebelumnya.'
+  # Copy only the repaired seed source; never copy .env or replace migration history.
+  [[ -f $SOURCE/prisma/seed.ts ]] || die 'Source seed yang diperbaiki tidak ditemukan.'
+  if [[ $SOURCE != "$APP" ]]; then
+    install -o pustakasetia-app -g pustakasetia-app -m 0640 "$SOURCE/prisma/seed.ts" "$APP/prisma/seed.ts"
+  fi
+fi
+app() { runuser -u pustakasetia-app -- bash "$APP/scripts/server-command.sh" "$@"; }
+cd "$APP"
 app npm run build
 chmod -R u=rwX,g=rX,o= "$APP"
 chown -R root:pustakasetia-app "$APP"
@@ -288,7 +320,12 @@ certbot --nginx --non-interactive --agree-tos --email "$EMAIL" -d "$DOMAIN" --re
 systemctl enable --now certbot.timer
 nginx -t
 curl --fail --silent --show-error --output /dev/null "https://$DOMAIN/api/books"
-printf '\nSelesai: https://%s\nAdmin: %s (password yang Anda masukkan).\n' "$DOMAIN" "$ADMIN_USER"
+printf '\nSelesai: https://%s\n' "$DOMAIN"
+if (( RESUME_BUILD )); then
+  printf '%s\n' 'Gunakan akun admin web yang dibuat pada percobaan setup sebelumnya.'
+else
+  printf 'Admin: %s (password yang Anda masukkan).\n' "$ADMIN_USER"
+fi
 printf '%s\n' 'Log: sudo journalctl -u pustakasetia -n 100 --no-pager' \
   'Status: sudo systemctl status pustakasetia nginx postgresql fail2ban' \
   'Uji renewal: sudo certbot renew --dry-run' \

@@ -70,6 +70,22 @@ Skrip menolak target aplikasi, role, atau database yang sudah ada. Ini bukan
 skrip update maupun migrasi data. Jika gagal di tengah proses, jangan menghapus
 database atau menjalankan ulang secara buta: periksa pesan terakhir, layanan, dan
 artefak yang sudah dibuat, lalu lanjutkan langkah yang belum selesai secara terarah.
+Jika kegagalan terjadi pada `npm run build` awal (misalnya error tipe pada
+`prisma/seed.ts`), perbarui source lalu jalankan:
+
+```bash
+cd ~/Pustakasetia
+git pull --ff-only
+sudo bash scripts/resume-server.sh
+```
+
+Mode ini meminta kembali domain, email SSL, dan port SSH. Domain harus sama dengan
+setup sebelumnya. Skrip menyalin perbaikan `prisma/seed.ts` ke instalasi yang sudah
+ada, mengulang build, lalu melanjutkan pemasangan systemd, Nginx, firewall, dan HTTPS.
+Database, migrasi, akun admin, password, dan JWT tidak dibuat ulang; demo seed tidak
+dijalankan. ISBN tetap opsional dan tidak unik. Mode ini hanya untuk kegagalan build
+awal sebelum service dan konfigurasi Nginx aplikasi dibuat, bukan resume semua tahap.
+
 Pemasangan paket dan perubahan konfigurasi tidak otomatis dibatalkan saat gagal.
 UFW yang sudah memiliki aturan akan mempertahankan aturan tersebut.
 

@@ -1,8 +1,26 @@
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+// Demo seeding only: ISBN is optional and is not a unique identifier.
+async function ensureSampleBook({ create }: { create: Prisma.BookUncheckedCreateInput }) {
+    const matches = await prisma.book.findMany({
+        where: {
+            isbn: create.isbn,
+            title: create.title,
+            author: create.author,
+            edition: create.edition,
+        },
+        orderBy: { id: 'asc' },
+        take: 2,
+    });
+    if (matches.length > 1) {
+        throw new Error(`Sample book is ambiguous: ${create.title}`);
+    }
+    return matches[0] ?? prisma.book.create({ data: create });
+}
 
 async function main() {
     console.log('🌱 Starting database seed...');
@@ -96,9 +114,7 @@ async function main() {
     const hukumCategory = categories.find(c => c.name === 'Hukum Islam');
 
     const books = await Promise.all([
-        prisma.book.upsert({
-            where: { isbn: '978-979-076-799-1' },
-            update: {},
+        ensureSampleBook({
             create: {
                 title: 'Sistem Informasi Manajemen Pendidikan',
                 author: 'Dr. Dadang Suhairi, S.E., M.M',
@@ -113,9 +129,7 @@ async function main() {
                 categoryId: teknoCategory!.id,
             },
         }),
-        prisma.book.upsert({
-            where: { isbn: '978-979-076-800-4' },
-            update: {},
+        ensureSampleBook({
             create: {
                 title: 'Komunikasi Organisasi',
                 author: 'Dr. H. Yana Sutiana, M.Ag.',
@@ -130,9 +144,7 @@ async function main() {
                 categoryId: komCategory!.id,
             },
         }),
-        prisma.book.upsert({
-            where: { isbn: '978-979-076-801-1' },
-            update: {},
+        ensureSampleBook({
             create: {
                 title: 'Hukum Perkawinan Islam',
                 author: 'Dr. Beni Ahmad Saebani, M.Si.',
