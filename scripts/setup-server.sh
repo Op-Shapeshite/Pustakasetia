@@ -6,6 +6,21 @@ umask 077
 trap 'printf "Setup berhenti pada baris %s. Periksa kondisi server sebelum melanjutkan; jangan hapus database.\n" "$LINENO" >&2' ERR
 
 die() { printf '%s\n' "$*" >&2; exit 1; }
+validate_service_user() {
+  local account name password_field uid gid gecos home login_shell group_record group_name group_password group_gid members groups
+  account=$(getent passwd pustakasetia) || die 'Gagal membaca metadata user pustakasetia.'
+  IFS=: read -r name password_field uid gid gecos home login_shell <<< "$account"
+  [[ $uid =~ ^[0-9]+$ && $uid != 0 && $home == /var/lib/pustakasetia ]] \
+    || die 'User pustakasetia bukan akun layanan yang sesuai (UID/home). Akun tidak diubah.'
+  [[ $login_shell == /usr/sbin/nologin || $login_shell == /sbin/nologin || $login_shell == /bin/false ]] \
+    || die 'User pustakasetia memiliki shell login. Gunakan akun layanan terpisah; akun tidak diubah.'
+  group_record=$(getent group pustakasetia) || die 'Group pustakasetia tidak ditemukan.'
+  IFS=: read -r group_name group_password group_gid members <<< "$group_record"
+  [[ $group_gid == "$gid" && ( -z $members || $members == pustakasetia ) ]] \
+    || die 'Group pustakasetia bukan group layanan eksklusif. Akun tidak diubah.'
+  groups=$(id -G pustakasetia) || die 'Gagal memeriksa group user pustakasetia.'
+  [[ $groups == "$gid" ]] || die 'User pustakasetia memiliki group tambahan. Akun tidak diubah.'
+}
 if [[ ${1:-} == --help ]]; then
   printf '%s\n' 'sudo bash scripts/setup-server.sh' \
     'Interaktif: domain, email SSL, port SSH, username dan password admin.' \
@@ -22,7 +37,10 @@ APP=/opt/pustakasetia
 for target in "$APP" /etc/systemd/system/pustakasetia.service /etc/nginx/sites-available/pustakasetia; do
   [[ ! -e $target && ! -L $target ]] || die "Target sudah ada: $target. Skrip hanya untuk instalasi baru."
 done
-! id pustakasetia &>/dev/null || die 'User pustakasetia sudah ada; periksa instalasi sebelumnya.'
+if id pustakasetia &>/dev/null; then
+  validate_service_user
+  printf '%s\n' 'Memakai akun layanan pustakasetia yang sudah ada; konfigurasi akun dipertahankan.'
+fi
 read -r -p 'Domain utama (contoh pustakasetia.id, tanpa https://): ' DOMAIN
 DOMAIN=${DOMAIN,,}
 [[ ${#DOMAIN} -le 253 && $DOMAIN == *.* && $DOMAIN =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]] || die 'Domain tidak valid.'
@@ -94,7 +112,11 @@ CREATE ROLE pustakasetia LOGIN PASSWORD '$DB_PASSWORD' NOSUPERUSER NOCREATEDB NO
 CREATE DATABASE pustakasetia OWNER pustakasetia;
 REVOKE ALL ON DATABASE pustakasetia FROM PUBLIC;
 SQL
-useradd --system --create-home --home-dir /var/lib/pustakasetia --shell /usr/sbin/nologin pustakasetia
+if id pustakasetia &>/dev/null; then
+  validate_service_user
+else
+  useradd --system --user-group --create-home --home-dir /var/lib/pustakasetia --shell /usr/sbin/nologin pustakasetia
+fi
 install -d -o pustakasetia -g pustakasetia -m 0750 "$APP"
 rsync -a --no-owner --no-group --exclude='.git' --exclude='node_modules' \
   --exclude='.next' --exclude='.env*' --exclude='*.db*' --exclude='uploads' \
