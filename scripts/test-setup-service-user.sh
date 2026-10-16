@@ -5,13 +5,14 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 eval "$(sed -n '/^validate_service_user() {$/,/^}$/p' scripts/setup-server.sh)"
 die() { printf '%s\n' "$*" >&2; exit 1; }
 getent() {
+  [[ $2 == pustakasetia-app ]] || { printf 'Akun login tidak boleh diperiksa\n' >&2; return 1; }
   case "$1" in
-    passwd) printf 'pustakasetia:x:%s:991::%s:%s\n' "$FIX_UID" "$FIX_HOME" "$FIX_SHELL" ;;
-    group) printf 'pustakasetia:x:%s:%s\n' "$FIX_GID" "$FIX_MEMBERS" ;;
+    passwd) printf 'pustakasetia-app:x:%s:991::%s:%s\n' "$FIX_UID" "$FIX_HOME" "$FIX_SHELL" ;;
+    group) printf 'pustakasetia-app:x:%s:%s\n' "$FIX_GID" "$FIX_MEMBERS" ;;
     *) return 1 ;;
   esac
 }
-id() { [[ $1 == -G ]] && printf '%s\n' "$FIX_GROUPS"; }
+id() { [[ $1 == -G && $2 == pustakasetia-app ]] && printf '%s\n' "$FIX_GROUPS"; }
 check() {
   local expected=$1 label=$2 actual=0
   # A separate shell preserves real errexit semantics for the rejection paths.
@@ -22,7 +23,7 @@ check() {
   printf 'PASS: %s\n' "$label"
 }
 export -f validate_service_user die getent id
-export FIX_UID=991 FIX_HOME=/var/lib/pustakasetia FIX_SHELL=/usr/sbin/nologin
+export FIX_UID=991 FIX_HOME=/var/lib/pustakasetia-app FIX_SHELL=/usr/sbin/nologin
 export FIX_GID=991 FIX_MEMBERS='' FIX_GROUPS=991
 check pass 'existing service account'
 FIX_SHELL=/bin/false check pass 'disabled shell'

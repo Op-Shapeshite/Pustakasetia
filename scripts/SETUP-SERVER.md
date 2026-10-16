@@ -57,9 +57,11 @@ Renewal sertifikat dijadwalkan melalui `certbot.timer`. Jadwalkan backup Postgre
 dan `/opt/pustakasetia/uploads` ke penyimpanan terpisah dan uji restore sebelum
 operasional. Google Analytics bersifat opsional dan belum dikonfigurasi.
 
-User layanan `pustakasetia` yang sudah ada dapat dipakai kembali jika UID bukan root,
-home `/var/lib/pustakasetia`, shell `nologin` atau `/bin/false`, dan hanya memiliki
-group utama `pustakasetia` tanpa anggota lain. Akun login atau akun dengan group
+Skrip memakai akun layanan terpisah `pustakasetia-app`. Akun login `pustakasetia`
+tidak diperiksa atau diubah. Nama database tetap `pustakasetia`.
+User layanan `pustakasetia-app` yang sudah ada dapat dipakai kembali jika UID bukan root,
+home `/var/lib/pustakasetia-app`, shell `nologin` atau `/bin/false`, dan hanya memiliki
+group utama `pustakasetia-app` tanpa anggota lain. Akun login atau akun dengan group
 tambahan ditolak; skrip tidak mengubah akun tersebut.
 
 Skrip menolak target aplikasi, role, atau database yang sudah ada. Ini bukan

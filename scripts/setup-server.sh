@@ -8,18 +8,18 @@ trap 'printf "Setup berhenti pada baris %s. Periksa kondisi server sebelum melan
 die() { printf '%s\n' "$*" >&2; exit 1; }
 validate_service_user() {
   local account name password_field uid gid gecos home login_shell group_record group_name group_password group_gid members groups
-  account=$(getent passwd pustakasetia) || die 'Gagal membaca metadata user pustakasetia.'
+  account=$(getent passwd pustakasetia-app) || die 'Gagal membaca metadata user pustakasetia-app.'
   IFS=: read -r name password_field uid gid gecos home login_shell <<< "$account"
-  [[ $uid =~ ^[0-9]+$ && $uid != 0 && $home == /var/lib/pustakasetia ]] \
-    || die 'User pustakasetia bukan akun layanan yang sesuai (UID/home). Akun tidak diubah.'
+  [[ $uid =~ ^[0-9]+$ && $uid != 0 && $home == /var/lib/pustakasetia-app ]] \
+    || die 'User pustakasetia-app bukan akun layanan yang sesuai (UID/home). Akun tidak diubah.'
   [[ $login_shell == /usr/sbin/nologin || $login_shell == /sbin/nologin || $login_shell == /bin/false ]] \
-    || die 'User pustakasetia memiliki shell login. Gunakan akun layanan terpisah; akun tidak diubah.'
-  group_record=$(getent group pustakasetia) || die 'Group pustakasetia tidak ditemukan.'
+    || die 'User pustakasetia-app memiliki shell login. Akun tidak diubah.'
+  group_record=$(getent group pustakasetia-app) || die 'Group pustakasetia-app tidak ditemukan.'
   IFS=: read -r group_name group_password group_gid members <<< "$group_record"
-  [[ $group_gid == "$gid" && ( -z $members || $members == pustakasetia ) ]] \
-    || die 'Group pustakasetia bukan group layanan eksklusif. Akun tidak diubah.'
-  groups=$(id -G pustakasetia) || die 'Gagal memeriksa group user pustakasetia.'
-  [[ $groups == "$gid" ]] || die 'User pustakasetia memiliki group tambahan. Akun tidak diubah.'
+  [[ $group_gid == "$gid" && ( -z $members || $members == pustakasetia-app ) ]] \
+    || die 'Group pustakasetia-app bukan group layanan eksklusif. Akun tidak diubah.'
+  groups=$(id -G pustakasetia-app) || die 'Gagal memeriksa group user pustakasetia-app.'
+  [[ $groups == "$gid" ]] || die 'User pustakasetia-app memiliki group tambahan. Akun tidak diubah.'
 }
 if [[ ${1:-} == --help ]]; then
   printf '%s\n' 'sudo bash scripts/setup-server.sh' \
@@ -37,9 +37,9 @@ APP=/opt/pustakasetia
 for target in "$APP" /etc/systemd/system/pustakasetia.service /etc/nginx/sites-available/pustakasetia; do
   [[ ! -e $target && ! -L $target ]] || die "Target sudah ada: $target. Skrip hanya untuk instalasi baru."
 done
-if id pustakasetia &>/dev/null; then
+if id pustakasetia-app &>/dev/null; then
   validate_service_user
-  printf '%s\n' 'Memakai akun layanan pustakasetia yang sudah ada; konfigurasi akun dipertahankan.'
+  printf '%s\n' 'Memakai akun layanan pustakasetia-app yang sudah ada; konfigurasi akun dipertahankan.'
 fi
 read -r -p 'Domain utama (contoh pustakasetia.id, tanpa https://): ' DOMAIN
 DOMAIN=${DOMAIN,,}
@@ -112,16 +112,16 @@ CREATE ROLE pustakasetia LOGIN PASSWORD '$DB_PASSWORD' NOSUPERUSER NOCREATEDB NO
 CREATE DATABASE pustakasetia OWNER pustakasetia;
 REVOKE ALL ON DATABASE pustakasetia FROM PUBLIC;
 SQL
-if id pustakasetia &>/dev/null; then
+if id pustakasetia-app &>/dev/null; then
   validate_service_user
 else
-  useradd --system --user-group --create-home --home-dir /var/lib/pustakasetia --shell /usr/sbin/nologin pustakasetia
+  useradd --system --user-group --create-home --home-dir /var/lib/pustakasetia-app --shell /usr/sbin/nologin pustakasetia-app
 fi
-install -d -o pustakasetia -g pustakasetia -m 0750 "$APP"
+install -d -o pustakasetia-app -g pustakasetia-app -m 0750 "$APP"
 rsync -a --no-owner --no-group --exclude='.git' --exclude='node_modules' \
   --exclude='.next' --exclude='.env*' --exclude='*.db*' --exclude='uploads' \
   --exclude='logs' --exclude='auth.json' "$SOURCE/" "$APP/"
-install -d -o pustakasetia -g pustakasetia -m 0750 "$APP/uploads" "$APP/logs"
+install -d -o pustakasetia-app -g pustakasetia-app -m 0750 "$APP/uploads" "$APP/logs"
 cat > "$APP/.env.production" <<ENV
 DATABASE_URL=postgresql://pustakasetia:$DB_PASSWORD@127.0.0.1:5432/pustakasetia?schema=public
 JWT_SECRET=$JWT_SECRET
@@ -155,16 +155,16 @@ source .env.production
 set +a
 exec "$@"
 COMMAND
-chown -R pustakasetia:pustakasetia "$APP"
+chown -R pustakasetia-app:pustakasetia-app "$APP"
 chmod 0600 "$APP/.env.production"
-app() { runuser -u pustakasetia -- bash "$APP/scripts/server-command.sh" "$@"; }
+app() { runuser -u pustakasetia-app -- bash "$APP/scripts/server-command.sh" "$@"; }
 cd "$APP"
 if [[ -f package-lock.json ]]; then app npm ci --include=dev; else app npm install --include=dev; fi
 app node node_modules/prisma/build/index.js validate --config prisma-postgresql.config.ts
 app node node_modules/prisma/build/index.js migrate diff --from-empty \
   --to-schema-datamodel prisma-postgresql/schema.prisma --script \
   --config prisma-postgresql.config.ts > prisma-postgresql/migrations/0001_init/migration.sql
-chown pustakasetia:pustakasetia prisma-postgresql/migrations/0001_init/migration.sql
+chown pustakasetia-app:pustakasetia-app prisma-postgresql/migrations/0001_init/migration.sql
 app node node_modules/prisma/build/index.js migrate deploy --config prisma-postgresql.config.ts
 app node node_modules/prisma/build/index.js generate --config prisma-postgresql.config.ts
 
@@ -188,14 +188,14 @@ async function main() {
 main().catch(() => { console.error('Pembuatan admin gagal.'); process.exitCode = 1; })
   .finally(() => prisma.$disconnect());
 ADMIN
-chown pustakasetia:pustakasetia scripts/server-admin.cjs
+chown pustakasetia-app:pustakasetia-app scripts/server-admin.cjs
 printf %s "$ADMIN_PASSWORD" | app node scripts/server-admin.cjs "$ADMIN_USER"
 unset ADMIN_PASSWORD
 app npm run build
 chmod -R u=rwX,g=rX,o= "$APP"
-chown -R root:pustakasetia "$APP"
+chown -R root:pustakasetia-app "$APP"
 chmod 0640 "$APP/.env.production"
-chown -R pustakasetia:pustakasetia "$APP/.next" "$APP/uploads" "$APP/logs"
+chown -R pustakasetia-app:pustakasetia-app "$APP/.next" "$APP/uploads" "$APP/logs"
 
 cat > /etc/systemd/system/pustakasetia.service <<'SERVICE'
 [Unit]
@@ -204,8 +204,8 @@ After=network.target postgresql.service
 Requires=postgresql.service
 [Service]
 Type=simple
-User=pustakasetia
-Group=pustakasetia
+User=pustakasetia-app
+Group=pustakasetia-app
 WorkingDirectory=/opt/pustakasetia
 Environment=NODE_ENV=production
 EnvironmentFile=/opt/pustakasetia/.env.production
