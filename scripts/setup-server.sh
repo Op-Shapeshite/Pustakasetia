@@ -145,7 +145,7 @@ else
 fi
 install -d -o pustakasetia-app -g pustakasetia-app -m 0750 "$APP"
 rsync -a --no-owner --no-group --exclude='.git' --exclude='node_modules' \
-  --exclude='.next' --exclude='.env*' --exclude='*.db*' --exclude='uploads' \
+  --exclude='.next' --exclude='.env*' --exclude='*.db*' --exclude='/uploads/' \
   --exclude='logs' --exclude='auth.json' "$SOURCE/" "$APP/"
 install -d -o pustakasetia-app -g pustakasetia-app -m 0750 "$APP/uploads" "$APP/logs"
 cat > "$APP/.env.production" <<ENV
