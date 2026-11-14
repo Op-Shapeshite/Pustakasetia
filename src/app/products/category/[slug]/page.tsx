@@ -18,6 +18,7 @@ interface APIBook {
     isbn: string;
     price: number;
     edition: string;
+    paper_type: string | null;
     synopsis: string | null;
     image: string | null;
     stock: number;
@@ -39,7 +40,7 @@ function mapAPIBookToBook(apiBook: APIBook): Book {
         size: apiBook.size,
         edition: apiBook.edition,
         isbn: apiBook.isbn,
-        paperType: 'HVS',
+        paperType: apiBook.paper_type || 'HVS',
         synopsis: apiBook.synopsis || '',
         category: apiBook.category.name as Book['category'],
         tags: [],
